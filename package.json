@@ -1,0 +1,86 @@
+{
+  "name": "masonix",
+  "version": "0.1.0",
+  "description": "The best React masonry layout library — lightweight, balanced, virtualized, SSR-ready, RTL-aware",
+  "keywords": [
+    "grid",
+    "layout",
+    "masonry",
+    "react",
+    "rtl",
+    "ssr",
+    "tailwind",
+    "virtualized"
+  ],
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./virtual": {
+      "import": {
+        "types": "./dist/virtual.d.mts",
+        "default": "./dist/virtual.mjs"
+      },
+      "require": {
+        "types": "./dist/virtual.d.cts",
+        "default": "./dist/virtual.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "dev": "vp pack --watch",
+    "build": "tsc -p tsconfig.build.json --noEmit && vp pack",
+    "test": "vp test",
+    "test:run": "vp test --run",
+    "test:coverage": "vp test --run --coverage",
+    "playground": "pnpm -F masonix-playground dev",
+    "lint": "vp lint",
+    "format": "vp fmt",
+    "format:check": "vp fmt --check",
+    "tc": "tsc --noEmit",
+    "size": "size-limit"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^11.0.0",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "jsdom": "^25.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "size-limit": "^11.0.0",
+    "typescript": "^5.7.0",
+    "vite-plus": "latest"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "size-limit": [
+    {
+      "path": "dist/index.mjs",
+      "limit": "5 kB"
+    },
+    {
+      "path": "dist/virtual.mjs",
+      "limit": "10 kB"
+    }
+  ]
+}

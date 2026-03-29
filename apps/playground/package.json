@@ -1,0 +1,18 @@
+{
+  "name": "masonix-playground",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vite-plus": "latest"
+  }
+}

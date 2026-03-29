@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+pnpm tc
+pnpm lint
+pnpm format
