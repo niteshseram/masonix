@@ -4,20 +4,7 @@ import type * as React from "react";
 // Breakpoints
 // ---------------------------------------------------------------------------
 
-export const BREAKPOINTS = {
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280,
-  "2xl": 1536,
-} as const;
-
-export type BreakpointKey = keyof typeof BREAKPOINTS;
-
-export type ResponsiveValue<T> =
-  | T
-  | { default?: T; sm?: T; md?: T; lg?: T; xl?: T; "2xl"?: T }
-  | Record<number, T>;
+export type ResponsiveValue<T> = T | Record<number, T>;
 
 // ---------------------------------------------------------------------------
 // Core layout types

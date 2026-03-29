@@ -1,4 +1,4 @@
-import { BREAKPOINTS, type ResponsiveValue } from "../types";
+import type { ResponsiveValue } from "../types";
 
 // ---------------------------------------------------------------------------
 // Breakpoint resolution
@@ -8,8 +8,8 @@ import { BREAKPOINTS, type ResponsiveValue } from "../types";
  * Resolve a ResponsiveValue<number> to a concrete number given a container
  * width in pixels.
  *
- * Named breakpoints match Tailwind defaults:
- *   sm=640, md=768, lg=1024, xl=1280, 2xl=1536
+ * Numeric keys are treated as min-width thresholds in pixels:
+ *   { 0: 1, 600: 2, 900: 3 } → 1 col below 600px, 2 col at 600px, 3 col at 900px
  */
 export function resolveResponsiveValue(
   value: ResponsiveValue<number>,
@@ -17,25 +17,12 @@ export function resolveResponsiveValue(
 ): number {
   if (typeof value === "number") return value;
 
-  // Normalise named breakpoints to numeric keys
-  const entries: Array<[number, number]> = [];
+  const entries: Array<[number, number]> = Object.entries(value)
+    .map(([k, v]): [number, number] => [Number(k), v as number])
+    .filter(([k]) => !isNaN(k));
 
-  for (const [key, val] of Object.entries(value)) {
-    if (val === undefined) continue;
-    if (key === "default") {
-      entries.push([0, val as number]);
-    } else if (key in BREAKPOINTS) {
-      entries.push([BREAKPOINTS[key as keyof typeof BREAKPOINTS], val as number]);
-    } else {
-      const numeric = Number(key);
-      if (!isNaN(numeric)) entries.push([numeric, val as number]);
-    }
-  }
-
-  // Sort ascending by breakpoint
   entries.sort((a, b) => a[0] - b[0]);
 
-  // Find the largest breakpoint that fits
   let result = entries[0]?.[1] ?? 1;
   for (const [bp, val] of entries) {
     if (containerWidth >= bp) result = val;

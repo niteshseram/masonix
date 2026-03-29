@@ -7,38 +7,23 @@ describe("resolveResponsiveValue", () => {
     expect(resolveResponsiveValue(0, 500)).toBe(0);
   });
 
-  it("returns default value when containerWidth is below all breakpoints", () => {
-    expect(resolveResponsiveValue({ default: 1, sm: 2, lg: 4 }, 0)).toBe(1);
-    expect(resolveResponsiveValue({ default: 1, sm: 2, lg: 4 }, 400)).toBe(1);
+  it("returns 0-key value when containerWidth is below all other breakpoints", () => {
+    expect(resolveResponsiveValue({ 0: 1, 600: 2, 1024: 4 }, 0)).toBe(1);
+    expect(resolveResponsiveValue({ 0: 1, 600: 2, 1024: 4 }, 400)).toBe(1);
   });
 
-  it("resolves sm breakpoint at exactly 640px", () => {
-    expect(resolveResponsiveValue({ default: 1, sm: 2, lg: 4 }, 640)).toBe(2);
-  });
-
-  it("resolves md breakpoint at exactly 768px", () => {
-    expect(resolveResponsiveValue({ default: 1, md: 3, lg: 4 }, 768)).toBe(3);
-  });
-
-  it("resolves lg breakpoint at exactly 1024px", () => {
-    expect(resolveResponsiveValue({ default: 1, sm: 2, lg: 4 }, 1024)).toBe(4);
-  });
-
-  it("resolves xl breakpoint at exactly 1280px", () => {
-    expect(resolveResponsiveValue({ default: 1, xl: 5 }, 1280)).toBe(5);
-  });
-
-  it("resolves 2xl breakpoint at exactly 1536px", () => {
-    expect(resolveResponsiveValue({ default: 1, "2xl": 6 }, 1536)).toBe(6);
+  it("activates at the exact breakpoint threshold", () => {
+    expect(resolveResponsiveValue({ 0: 1, 600: 2, 1024: 4 }, 600)).toBe(2);
+    expect(resolveResponsiveValue({ 0: 1, 600: 2, 1024: 4 }, 1024)).toBe(4);
   });
 
   it("uses largest matching breakpoint when multiple match", () => {
-    // width=900: matches default (0), sm (640), md (768) — NOT lg (1024)
-    expect(resolveResponsiveValue({ default: 1, sm: 2, md: 3, lg: 4 }, 900)).toBe(3);
+    // width=900: matches 0 and 600 — NOT 1024
+    expect(resolveResponsiveValue({ 0: 1, 600: 2, 768: 3, 1024: 4 }, 900)).toBe(3);
   });
 
   it("resolves numeric breakpoint keys", () => {
-    const val = { 0: 1, 500: 2, 900: 3 } as Record<number, number>;
+    const val: Record<number, number> = { 0: 1, 500: 2, 900: 3 };
     expect(resolveResponsiveValue(val, 400)).toBe(1);
     expect(resolveResponsiveValue(val, 500)).toBe(2);
     expect(resolveResponsiveValue(val, 1000)).toBe(3);
@@ -48,10 +33,10 @@ describe("resolveResponsiveValue", () => {
     expect(resolveResponsiveValue({}, 600)).toBe(1);
   });
 
-  it("uses the first breakpoint value as fallback when no default is set", () => {
-    // { sm: 2 } → entries = [[640, 2]], initial result = 2
-    // containerWidth=300 never triggers any bp → result stays 2
-    expect(resolveResponsiveValue({ sm: 2 }, 300)).toBe(2);
+  it("uses the first breakpoint value as fallback when width is below all thresholds", () => {
+    // { 600: 2 } → entries = [[600, 2]], initial result = 2
+    // containerWidth=300 never satisfies >= 600 → result stays 2
+    expect(resolveResponsiveValue({ 600: 2 }, 300)).toBe(2);
   });
 });
 
@@ -114,12 +99,12 @@ describe("computeColumns", () => {
   });
 
   it("resolves responsive column count at runtime", () => {
-    const result = computeColumns(1024, { columns: { default: 1, sm: 2, lg: 4 } });
+    const result = computeColumns(1024, { columns: { 0: 1, 640: 2, 1024: 4 } });
     expect(result.columnCount).toBe(4);
   });
 
   it("resolves responsive column count for small viewport", () => {
-    const result = computeColumns(400, { columns: { default: 1, sm: 2, lg: 4 } });
+    const result = computeColumns(400, { columns: { 0: 1, 640: 2, 1024: 4 } });
     expect(result.columnCount).toBe(1);
   });
 });

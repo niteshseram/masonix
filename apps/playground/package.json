@@ -6,13 +6,19 @@
     "dev": "vp dev",
     "build": "vp build"
   },
+  "dependencies": {
+    "@base-ui-components/react": "1.0.0-rc.0",
+    "masonix": "workspace:*"
+  },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
     "@types/node": "^25.5.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^5.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "tailwindcss": "^4.2.2",
     "vite-plus": "latest"
   }
 }

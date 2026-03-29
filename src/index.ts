@@ -1,3 +1,10 @@
+// Components
+export { Masonry } from "./components/masonry";
+
+// Hooks
+export { useContainerWidth } from "./hooks/use-container-width";
+export { useColumns } from "./hooks/use-columns";
+
 // Core positioners (advanced / low-level usage)
 export { createPositioner } from "./core/positioner";
 export { createRowPositioner } from "./core/row-positioner";
@@ -11,6 +18,7 @@ export { resolveResponsiveValue, computeColumns, effectiveColumnCount } from "./
 export type {
   MasonryProps,
   MasonryBalancedProps,
+  MasonryRenderProps,
   ResponsiveValue,
   PositionedItem,
   Positioner,
