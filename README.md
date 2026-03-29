@@ -37,7 +37,7 @@ import { Masonry } from "masonix";
 
 <Masonry
   items={photos}
-  columns={{ default: 1, sm: 2, lg: 3, xl: 4 }}
+  columns={{ 0: 1, 640: 2, 1024: 3, 1280: 4 }}
   className="gap-4"
   columnClassName="gap-4"
   render={({ data }) => <img src={data.src} alt={data.alt} className="w-full rounded-lg" />}
@@ -53,8 +53,8 @@ import { MasonryBalanced } from "masonix";
 
 <MasonryBalanced
   items={posts}
-  columns={{ default: 1, sm: 2, lg: 3, xl: 4 }}
-  gap={{ default: 12, sm: 16, lg: 24 }}
+  columns={{ 0: 1, 640: 2, 1024: 3, 1280: 4 }}
+  gap={{ 0: 12, 640: 16, 1024: 24 }}
   strategy="shortest-first"
   render={({ data, width }) => <PostCard post={data} width={width} />}
 />;
@@ -98,10 +98,10 @@ import { MasonryVirtual } from "masonix/virtual";
 | ----------------- | --------------------------------------- | ------------------------------------------------- |
 | `items`           | `T[]`                                   | Data array                                        |
 | `render`          | `ComponentType<{ index, data, width }>` | Item renderer                                     |
-| `columns`         | `number \| ResponsiveValue<number>`     | Column count or responsive config                 |
+| `columns`         | `number \| Record<number, number>`      | Fixed count or `{ minWidthPx: columns }` map      |
 | `columnWidth`     | `number`                                | Auto-calculate column count from min column width |
 | `maxColumns`      | `number`                                | Upper bound on column count                       |
-| `gap`             | `number \| ResponsiveValue<number>`     | Column and row gap in px                          |
+| `gap`             | `number \| Record<number, number>`      | Fixed gap or `{ minWidthPx: gap }` map (px)       |
 | `dir`             | `'ltr' \| 'rtl' \| 'auto'`              | Layout direction                                  |
 | `defaultColumns`  | `number`                                | SSR fallback column count (default: 3)            |
 | `defaultWidth`    | `number`                                | SSR fallback container width                      |
@@ -136,17 +136,19 @@ import { MasonryVirtual } from "masonix/virtual";
 
 ## Responsive columns
 
-Column count accepts the same breakpoint keys as Tailwind:
+Column count and gap both accept a plain number or a `Record<number, number>` where each key is a min-width threshold in pixels:
 
 ```tsx
-// Named breakpoints (sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px)
-columns={{ default: 1, sm: 2, md: 3, lg: 4 }}
-
-// Custom numeric breakpoints
+// Numeric breakpoints — activates at each min-width threshold
 columns={{ 0: 1, 600: 2, 900: 3, 1200: 4 }}
+gap={{ 0: 8, 600: 12, 900: 16 }}
 
 // Fixed
 columns={3}
+gap={16}
+
+// Auto-calculate count from a minimum column width
+columnWidth={240}
 ```
 
 ## Tailwind usage
@@ -157,7 +159,7 @@ masonix is styling-agnostic. Internal styles are layout-only; all visual styles 
 // CSS mode: Tailwind-driven gaps
 <Masonry
   items={items}
-  columns={{ default: 1, sm: 2, lg: 3 }}
+  columns={{ 0: 1, 640: 2, 1024: 3 }}
   className="gap-4 sm:gap-6"
   columnClassName="gap-4 sm:gap-6"
   render={({ data }) => <Card data={data} />}
