@@ -30,7 +30,7 @@ Requires React 18 or 19.
 
 ### `Masonry` — CSS mode (~3 kB)
 
-Zero JS layout. Uses CSS flexbox with round-robin column distribution, preserving source order left-to-right, top-to-bottom.
+CSS-positioned layout — no item height measurement, no absolute positioning. Uses a `ResizeObserver` to track container width and compute column count, then distributes items into CSS flexbox columns round-robin. Item placement is handled entirely by the browser, preserving source order left-to-right, top-to-bottom.
 
 ```tsx
 import { Masonry } from "masonix";
@@ -46,7 +46,7 @@ import { Masonry } from "masonix";
 
 ### `MasonryBalanced` — JS-measured mode
 
-Measures rendered item heights and places each item in the shortest column (or row-wise). Handles lazy images, variable content, and resize.
+Measures rendered item heights via `ResizeObserver` and places each item in the shortest column. Items are absolutely positioned — no CSS columns. Handles lazy images, variable content, and resize.
 
 ```tsx
 import { MasonryBalanced } from "masonix";
@@ -55,7 +55,6 @@ import { MasonryBalanced } from "masonix";
   items={posts}
   columns={{ 0: 1, 640: 2, 1024: 3, 1280: 4 }}
   gap={{ 0: 12, 640: 16, 1024: 24 }}
-  strategy="shortest-first"
   render={({ data, width }) => <PostCard post={data} width={width} />}
 />;
 ```
@@ -116,7 +115,6 @@ import { MasonryVirtual } from "masonix/virtual";
 
 | Prop                  | Type                                   | Description                                                |
 | --------------------- | -------------------------------------- | ---------------------------------------------------------- |
-| `strategy`            | `'shortest-first' \| 'row-wise'`       | Placement algorithm (default: `'shortest-first'`)          |
 | `getItemHeight`       | `(data, index, columnWidth) => number` | Pre-known height — skips measurement, enables zero-CLS SSR |
 | `estimatedItemHeight` | `number`                               | Placeholder height before measurement                      |
 | `getColumnSpan`       | `(data, index) => number`              | Multi-column item spanning                                 |
