@@ -3,6 +3,7 @@ import { ScrollArea } from "@base-ui-components/react/scroll-area";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+export type ComponentMode = "masonry" | "masonry-balanced";
 export type ColumnMode = "fixed" | "custom" | "columnWidth";
 export type GapMode = "fixed" | "custom";
 
@@ -12,6 +13,9 @@ export interface BpEntry {
 }
 
 export interface Config {
+  // Component
+  component: ComponentMode;
+
   // Items
   itemCount: number;
   showEmpty: boolean;
@@ -38,9 +42,15 @@ export interface Config {
   as: "div" | "ul" | "section" | "main";
   itemAs: "div" | "li" | "article";
   ariaLabel: string;
+
+  // MasonryBalanced
+  useKnownHeights: boolean;
+  estimatedItemHeight: number;
 }
 
 export const DEFAULT_CONFIG: Config = {
+  component: "masonry",
+
   itemCount: 20,
   showEmpty: false,
 
@@ -70,6 +80,9 @@ export const DEFAULT_CONFIG: Config = {
   as: "div",
   itemAs: "div",
   ariaLabel: "",
+
+  useKnownHeights: false,
+  estimatedItemHeight: 150,
 };
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
@@ -289,6 +302,20 @@ export function ConfigPanel({
     <ScrollArea.Root className="h-full overflow-hidden">
       <ScrollArea.Viewport className="h-full">
         <div className="px-4 pb-8 pt-4">
+          {/* Component */}
+          <Section title="Component">
+            <Row label="Mode">
+              <Sel
+                value={config.component}
+                options={[
+                  { label: "Masonry", value: "masonry" },
+                  { label: "MasonryBalanced", value: "masonry-balanced" },
+                ]}
+                onChange={(v) => set("component", v)}
+              />
+            </Row>
+          </Section>
+
           {/* Items */}
           <Section title="Items">
             <Row label="Count">
@@ -400,6 +427,28 @@ export function ConfigPanel({
             )}
           </Section>
 
+          {/* MasonryBalanced options */}
+          {config.component === "masonry-balanced" && (
+            <Section title="Balanced">
+              <Row label="Known heights">
+                <Toggle
+                  value={config.useKnownHeights}
+                  onChange={(v) => set("useKnownHeights", v)}
+                />
+              </Row>
+              {!config.useKnownHeights && (
+                <Row label="Est. height">
+                  <NumInput
+                    value={config.estimatedItemHeight}
+                    min={10}
+                    max={800}
+                    onChange={(v) => set("estimatedItemHeight", v)}
+                  />
+                </Row>
+              )}
+            </Section>
+          )}
+
           {/* Layout */}
           <Section title="Layout">
             <Row label="Dir">
@@ -424,9 +473,11 @@ export function ConfigPanel({
                 onChange={(v) => set("role", v)}
               />
             </Row>
-            <Row label="Native CSS">
-              <Toggle value={config.enableNative} onChange={(v) => set("enableNative", v)} />
-            </Row>
+            {config.component === "masonry" && (
+              <Row label="Native CSS">
+                <Toggle value={config.enableNative} onChange={(v) => set("enableNative", v)} />
+              </Row>
+            )}
           </Section>
 
           {/* Elements */}

@@ -115,7 +115,6 @@ export interface MasonryProps<T = unknown> {
 }
 
 export interface MasonryBalancedProps<T = unknown> extends MasonryProps<T> {
-  strategy?: "shortest-first" | "row-wise";
   getColumnSpan?: (data: T, index: number) => number;
   /** Pre-known height — skips two-phase measurement, enables zero-CLS SSR */
   getItemHeight?: (data: T, index: number, columnWidth: number) => number;

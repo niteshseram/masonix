@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Masonry } from "masonix";
+import { Masonry, MasonryBalanced } from "masonix";
 import type { MasonryRenderProps } from "masonix";
 import { ConfigPanel, DEFAULT_CONFIG } from "./config-panel";
 import type { BpEntry, Config } from "./config-panel";
@@ -226,27 +226,59 @@ export default function App() {
       <div className="min-w-0 flex-1 overflow-auto p-6">
         <h1 className="mb-1 text-xl font-bold text-white">masonix playground</h1>
         <p className="mb-6 text-xs text-zinc-600">
-          {"<Masonry>"} — CSS flexbox masonry, pixel-based responsive columns &amp; gap
+          {config.component === "masonry" ? (
+            <>
+              <span className="text-zinc-400">{"<Masonry>"}</span> — CSS flexbox masonry,
+              round-robin column distribution
+            </>
+          ) : (
+            <>
+              <span className="text-zinc-400">{"<MasonryBalanced>"}</span> — JS-measured masonry,
+              shortest-column-first placement
+            </>
+          )}
         </p>
 
-        <Masonry
-          items={items}
-          render={PhotoCard}
-          columns={columns}
-          columnWidth={columnWidth}
-          maxColumns={maxColumns}
-          gap={gap}
-          dir={config.dir}
-          role={config.role as "list" | "grid" | "none"}
-          enableNative={config.enableNative}
-          as={config.as}
-          itemAs={config.itemAs}
-          aria-label={config.ariaLabel || undefined}
-          itemKey={(p) => (p as Photo).id}
-          empty={
-            <p className="w-full py-20 text-center text-sm text-zinc-600">No items to display.</p>
-          }
-        />
+        {config.component === "masonry" ? (
+          <Masonry
+            items={items}
+            render={PhotoCard}
+            columns={columns}
+            columnWidth={columnWidth}
+            maxColumns={maxColumns}
+            gap={gap}
+            dir={config.dir}
+            role={config.role as "list" | "grid" | "none"}
+            enableNative={config.enableNative}
+            as={config.as}
+            itemAs={config.itemAs}
+            aria-label={config.ariaLabel || undefined}
+            itemKey={(p) => (p as Photo).id}
+            empty={
+              <p className="w-full py-20 text-center text-sm text-zinc-600">No items to display.</p>
+            }
+          />
+        ) : (
+          <MasonryBalanced
+            items={items}
+            render={PhotoCard}
+            columns={columns}
+            columnWidth={columnWidth}
+            maxColumns={maxColumns}
+            gap={gap}
+            dir={config.dir}
+            role={config.role as "list" | "grid" | "none"}
+            as={config.as}
+            itemAs={config.itemAs}
+            aria-label={config.ariaLabel || undefined}
+            itemKey={(p) => (p as Photo).id}
+            getItemHeight={config.useKnownHeights ? (p) => (p as Photo).height : undefined}
+            estimatedItemHeight={config.estimatedItemHeight}
+            empty={
+              <p className="w-full py-20 text-center text-sm text-zinc-600">No items to display.</p>
+            }
+          />
+        )}
       </div>
     </div>
   );
