@@ -1,4 +1,5 @@
 import type React from "react";
+import { useState, useEffect } from "react";
 import { ScrollArea } from "@base-ui-components/react/scroll-area";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -6,6 +7,8 @@ import { ScrollArea } from "@base-ui-components/react/scroll-area";
 export type ComponentMode = "masonry" | "masonry-balanced";
 export type ColumnMode = "fixed" | "custom" | "columnWidth";
 export type GapMode = "fixed" | "custom";
+export type HeightMode = "stepped" | "random" | "uniform";
+export type CardStyle = "color-block" | "text-card";
 
 export interface BpEntry {
   minWidth: number;
@@ -19,6 +22,11 @@ export interface Config {
   // Items
   itemCount: number;
   showEmpty: boolean;
+  cardStyle: CardStyle;
+  heightMode: HeightMode;
+  minItemH: number;
+  maxItemH: number;
+  uniformHeight: number;
 
   // Columns
   columnMode: ColumnMode;
@@ -46,6 +54,8 @@ export interface Config {
   // MasonryBalanced
   useKnownHeights: boolean;
   estimatedItemHeight: number;
+  useMinItemHeight: boolean;
+  minItemHeight: number;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -53,6 +63,11 @@ export const DEFAULT_CONFIG: Config = {
 
   itemCount: 20,
   showEmpty: false,
+  cardStyle: "color-block",
+  heightMode: "stepped",
+  minItemH: 80,
+  maxItemH: 480,
+  uniformHeight: 200,
 
   columnMode: "custom",
   fixedColumns: 3,
@@ -83,6 +98,8 @@ export const DEFAULT_CONFIG: Config = {
 
   useKnownHeights: false,
   estimatedItemHeight: 150,
+  useMinItemHeight: false,
+  minItemHeight: 80,
 };
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
@@ -123,17 +140,32 @@ function NumInput({
   style?: React.CSSProperties;
   onChange: (v: number) => void;
 }) {
+  const [draft, setDraft] = useState(String(value));
+
+  // Sync when external value changes (e.g. config reset)
+  useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
+  function commit(raw: string) {
+    const parsed = parseInt(raw, 10);
+    const clamped = isNaN(parsed) ? value : Math.min(max, Math.max(min, parsed));
+    onChange(clamped);
+    setDraft(String(clamped));
+  }
+
   return (
     <input
       type="number"
       className={`${baseInputCls} w-16 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
       style={style}
-      value={value}
+      value={draft}
       min={min}
       max={max}
-      onChange={(e) => {
-        const v = parseInt(e.target.value, 10);
-        if (!isNaN(v)) onChange(Math.min(max, Math.max(min, v)));
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={(e) => commit(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") commit((e.target as HTMLInputElement).value);
       }}
     />
   );
@@ -163,16 +195,25 @@ function Sel<T extends string>({
   );
 }
 
-function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+function Toggle({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: boolean;
+  disabled?: boolean;
+  onChange: (v: boolean) => void;
+}) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={value}
-      onClick={() => onChange(!value)}
+      disabled={disabled}
+      onClick={() => !disabled && onChange(!value)}
       className={`relative h-5 w-8 rounded-full transition-colors duration-150 ${
-        value ? "bg-blue-500" : "bg-zinc-700"
-      }`}
+        disabled ? "cursor-not-allowed opacity-40" : ""
+      } ${value && !disabled ? "bg-blue-500" : "bg-zinc-700"}`}
     >
       <span
         className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-[left] duration-150 ${
@@ -290,13 +331,18 @@ function BpEditor({
 export function ConfigPanel({
   config,
   setConfig,
+  onShuffle,
 }: {
   config: Config;
   setConfig: React.Dispatch<React.SetStateAction<Config>>;
+  onShuffle: () => void;
 }) {
   function set<K extends keyof Config>(key: K, value: Config[K]) {
     setConfig((c) => ({ ...c, [key]: value }));
   }
+
+  // Text cards have content-driven heights — "Known heights" doesn't apply
+  const knownHeightsDisabled = config.cardStyle === "text-card";
 
   return (
     <ScrollArea.Root className="h-full overflow-hidden">
@@ -326,6 +372,69 @@ export function ConfigPanel({
                 onChange={(v) => set("itemCount", v)}
               />
             </Row>
+            <Row label="Card style">
+              <Sel
+                value={config.cardStyle}
+                options={[
+                  { label: "Color block", value: "color-block" },
+                  { label: "Text card", value: "text-card" },
+                ]}
+                onChange={(v) => set("cardStyle", v)}
+              />
+            </Row>
+            <Row label="Heights">
+              <Sel
+                value={config.heightMode}
+                options={[
+                  { label: "Stepped", value: "stepped" },
+                  { label: "Random", value: "random" },
+                  { label: "Uniform", value: "uniform" },
+                ]}
+                onChange={(v) => set("heightMode", v)}
+              />
+            </Row>
+
+            {config.heightMode === "random" && (
+              <>
+                <Row label="Min h (px)">
+                  <NumInput
+                    value={config.minItemH}
+                    min={20}
+                    max={config.maxItemH - 20}
+                    onChange={(v) => set("minItemH", v)}
+                  />
+                </Row>
+                <Row label="Max h (px)">
+                  <NumInput
+                    value={config.maxItemH}
+                    min={config.minItemH + 20}
+                    max={800}
+                    onChange={(v) => set("maxItemH", v)}
+                  />
+                </Row>
+                <Row label="">
+                  <button
+                    type="button"
+                    onClick={onShuffle}
+                    className="rounded border border-zinc-700 px-2 py-0.5 text-xs text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-200"
+                  >
+                    Shuffle
+                  </button>
+                </Row>
+              </>
+            )}
+
+            {config.heightMode === "uniform" && (
+              <Row label="Height (px)">
+                <NumInput
+                  value={config.uniformHeight}
+                  min={20}
+                  max={800}
+                  onChange={(v) => set("uniformHeight", v)}
+                />
+              </Row>
+            )}
+
             <Row label="Empty state">
               <Toggle value={config.showEmpty} onChange={(v) => set("showEmpty", v)} />
             </Row>
@@ -433,10 +542,16 @@ export function ConfigPanel({
               <Row label="Known heights">
                 <Toggle
                   value={config.useKnownHeights}
+                  disabled={knownHeightsDisabled}
                   onChange={(v) => set("useKnownHeights", v)}
                 />
               </Row>
-              {!config.useKnownHeights && (
+              {knownHeightsDisabled && (
+                <p className="text-[10px] text-zinc-600">
+                  Not available for text cards — heights are content-driven.
+                </p>
+              )}
+              {!config.useKnownHeights && !knownHeightsDisabled && (
                 <Row label="Est. height">
                   <NumInput
                     value={config.estimatedItemHeight}
@@ -446,6 +561,22 @@ export function ConfigPanel({
                   />
                 </Row>
               )}
+              <Row label="Min height">
+                <div className="flex items-center gap-2">
+                  <Toggle
+                    value={config.useMinItemHeight}
+                    onChange={(v) => set("useMinItemHeight", v)}
+                  />
+                  {config.useMinItemHeight && (
+                    <NumInput
+                      value={config.minItemHeight}
+                      min={0}
+                      max={400}
+                      onChange={(v) => set("minItemHeight", v)}
+                    />
+                  )}
+                </div>
+              </Row>
             </Section>
           )}
 
