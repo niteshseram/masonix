@@ -1,12 +1,15 @@
-# masonix
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./brand/logo-dark.svg" />
+    <img src="./brand/logo.svg" alt="masonix" height="52" />
+  </picture>
+</p>
 
-**The React masonry layout library that gets the fundamentals right.**
+<h1 align="center">masonix</h1>
+
+<p align="center"><strong>The React masonry layout library that gets the fundamentals right.</strong></p>
 
 Correct reading order. Balanced columns. Optional virtualization. SSR-ready. Tailwind-compatible.
-
-[![npm](https://img.shields.io/npm/v/masonix)](https://www.npmjs.com/package/masonix)
-[![license](https://img.shields.io/npm/l/masonix)](./LICENSE)
-[![react peer dep](https://img.shields.io/npm/dependency-version/masonix/peer/react)](https://www.npmjs.com/package/masonix)
 
 ---
 

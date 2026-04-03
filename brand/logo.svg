@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 36" fill="none">
+  <!-- Masonry icon mark -->
+  <rect x="0"  y="2"  width="10" height="19" rx="2.5" fill="#2563eb"/>
+  <rect x="0"  y="23" width="10" height="11" rx="2.5" fill="#60a5fa"/>
+
+  <rect x="14" y="2"  width="10" height="10" rx="2.5" fill="#93c5fd"/>
+  <rect x="14" y="14" width="10" height="20" rx="2.5" fill="#3b82f6"/>
+
+  <rect x="28" y="2"  width="10" height="14" rx="2.5" fill="#60a5fa"/>
+  <rect x="28" y="18" width="10" height="16" rx="2.5" fill="#bfdbfe"/>
+
+  <!-- Wordmark -->
+  <text
+    x="48"
+    y="25"
+    font-family="ui-monospace, 'Cascadia Code', 'Fira Code', 'Courier New', monospace"
+    font-size="20"
+    font-weight="700"
+    letter-spacing="-0.4"
+    fill="#0f172a"
+  >masonix</text>
+</svg>
