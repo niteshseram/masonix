@@ -100,7 +100,6 @@ import { MasonryVirtual } from "masonix/virtual";
 | `columnWidth`     | `number`                                | Auto-calculate column count from min column width |
 | `maxColumns`      | `number`                                | Upper bound on column count                       |
 | `gap`             | `number \| Record<number, number>`      | Fixed gap or `{ minWidthPx: gap }` map (px)       |
-| `dir`             | `'ltr' \| 'rtl' \| 'auto'`              | Layout direction                                  |
 | `defaultColumns`  | `number`                                | SSR fallback column count (default: 3)            |
 | `defaultWidth`    | `number`                                | SSR fallback container width                      |
 | `empty`           | `ReactNode`                             | Rendered when `items` is empty                    |
@@ -120,12 +119,12 @@ import { MasonryVirtual } from "masonix/virtual";
 
 ### `MasonryVirtual` additional props
 
-| Prop              | Type                        | Description                                        |
-| ----------------- | --------------------------- | -------------------------------------------------- |
-| `overscanBy`      | `number`                    | Extra rows to render outside viewport (default: 2) |
-| `scrollContainer` | `RefObject<HTMLElement>`    | Custom scroll container (default: window)          |
-| `totalItems`      | `number`                    | Total item count for `aria-setsize`                |
-| `scrollRef`       | `Ref<MasonryVirtualHandle>` | Imperative scroll control                          |
+| Prop              | Type                        | Description                                                |
+| ----------------- | --------------------------- | ---------------------------------------------------------- |
+| `overscanBy`      | `number`                    | Extra rows to render outside viewport (default: 2)         |
+| `scrollContainer` | `RefObject<HTMLElement>`    | Custom scroll container (default: window)                  |
+| `totalItems`      | `number`                    | Total item count for `aria-setsize`                        |
+| `scrollRef`       | `Ref<MasonryVirtualHandle>` | Imperative scroll control                                  |
 | `onRangeChange`   | `(start, stop) => void`     | Fires when visible range changes (use for infinite scroll) |
 
 ## Responsive columns

@@ -333,7 +333,6 @@ describe("MasonryVirtual", () => {
           gap={0}
           defaultWidth={300}
           getItemHeight={() => 100}
-          dir="rtl"
         />,
       );
       const listItems = container.querySelectorAll("[role='listitem']");

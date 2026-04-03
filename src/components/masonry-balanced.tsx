@@ -59,7 +59,6 @@ function MasonryBalancedInner<T = unknown>(
     gap,
     defaultColumns = 3,
     defaultWidth,
-    dir,
     getItemHeight,
     getColumnSpan,
     estimatedItemHeight = DEFAULT_ESTIMATED_HEIGHT,
@@ -157,7 +156,6 @@ function MasonryBalancedInner<T = unknown>(
   const ItemWrapper: any = itemAs ?? "div";
 
   const containerRole = role === "none" ? undefined : (role ?? "list");
-  const dirAttr = dir === "auto" ? undefined : dir;
 
   if (items.length === 0) {
     return (
@@ -167,7 +165,6 @@ function MasonryBalancedInner<T = unknown>(
         style={style}
         role={containerRole}
         aria-label={ariaLabel}
-        dir={dirAttr}
       >
         {empty ?? null}
       </Container>
@@ -187,7 +184,6 @@ function MasonryBalancedInner<T = unknown>(
       style={containerStyle}
       role={containerRole}
       aria-label={ariaLabel}
-      dir={dirAttr}
     >
       {positionedItems.map(({ index, top, left, width, measured }) => {
         const data = items[index];

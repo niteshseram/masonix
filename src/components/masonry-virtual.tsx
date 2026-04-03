@@ -89,7 +89,6 @@ function MasonryVirtualInner<T = unknown>(
     gap,
     defaultColumns = 3,
     defaultWidth,
-    dir,
     getItemHeight,
     getColumnSpan,
     estimatedItemHeight = DEFAULT_ESTIMATED_HEIGHT,
@@ -311,7 +310,6 @@ function MasonryVirtualInner<T = unknown>(
   const ItemWrapper: any = itemAs ?? "div";
 
   const containerRole = role === "none" ? undefined : (role ?? "list");
-  const dirAttr = dir === "auto" ? undefined : dir;
   const ariaSetSize = totalItems ?? items.length;
 
   if (items.length === 0) {
@@ -322,7 +320,6 @@ function MasonryVirtualInner<T = unknown>(
         style={style}
         role={containerRole}
         aria-label={ariaLabel}
-        dir={dirAttr}
       >
         {empty ?? null}
       </Container>
@@ -342,7 +339,6 @@ function MasonryVirtualInner<T = unknown>(
       style={containerStyle}
       role={containerRole}
       aria-label={ariaLabel}
-      dir={dirAttr}
     >
       {positionedItems.map(({ index, top, left, width, measured }) => {
         // Only render items in the visible range (virtualization)

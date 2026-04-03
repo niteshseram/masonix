@@ -7,7 +7,6 @@ export interface ColumnBalancerOptions {
   columnWidth: number;
   columnGap?: number;
   rowGap?: number;
-  rtl?: boolean;
   strategy?: "shortest-first" | "row-wise";
 }
 

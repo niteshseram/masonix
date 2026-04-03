@@ -15,7 +15,7 @@ export interface PositionedItem {
   index: number;
   /** Distance from container top in px */
   top: number;
-  /** Distance from container left (LTR) or right (RTL) in px */
+  /** Distance from container left in px */
   left: number;
   /** Column width in px */
   width: number;
@@ -79,9 +79,6 @@ export interface MasonryProps<T = unknown> {
   defaultColumns?: number;
   defaultWidth?: number;
 
-  // --- Direction ---
-  dir?: "ltr" | "rtl" | "auto";
-
   // --- Native CSS masonry ---
   enableNative?: boolean;
 
@@ -105,7 +102,6 @@ export interface MasonryProps<T = unknown> {
   // --- Item element ---
   itemAs?: React.ElementType;
   itemKey?: (data: T, index: number) => string | number;
-
 }
 
 export interface MasonryBalancedProps<T = unknown> extends MasonryProps<T> {

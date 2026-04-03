@@ -120,22 +120,6 @@ describe("createPositioner", () => {
     });
   });
 
-  describe("RTL", () => {
-    it("computes the same left values in RTL (logical positions)", () => {
-      const ltr = createPositioner({ columnCount: 3, columnWidth: 100, columnGap: 10 });
-      const rtl = createPositioner({ columnCount: 3, columnWidth: 100, columnGap: 10, rtl: true });
-
-      for (let i = 0; i < 3; i++) {
-        ltr.set(i, 100);
-        rtl.set(i, 100);
-      }
-      // left is a logical distance (from inline-start) so values match
-      expect(rtl.get(0)!.left).toBe(ltr.get(0)!.left);
-      expect(rtl.get(1)!.left).toBe(ltr.get(1)!.left);
-      expect(rtl.get(2)!.left).toBe(ltr.get(2)!.left);
-    });
-  });
-
   describe("update", () => {
     it("recomputes subsequent item tops when a height changes", () => {
       const p = createPositioner({ columnCount: 1, columnWidth: 100 });

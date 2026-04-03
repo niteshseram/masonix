@@ -106,29 +106,6 @@ describe("Masonry", () => {
     });
   });
 
-  describe("dir prop", () => {
-    it('sets dir="rtl" on the container', () => {
-      const { container } = render(
-        <Masonry items={["a"]} render={Card} defaultWidth={900} dir="rtl" />,
-      );
-      expect(attr(container.firstElementChild, "dir")).toBe("rtl");
-    });
-
-    it('sets dir="ltr" on the container', () => {
-      const { container } = render(
-        <Masonry items={["a"]} render={Card} defaultWidth={900} dir="ltr" />,
-      );
-      expect(attr(container.firstElementChild, "dir")).toBe("ltr");
-    });
-
-    it('does not set dir when dir="auto"', () => {
-      const { container } = render(
-        <Masonry items={["a"]} render={Card} defaultWidth={900} dir="auto" />,
-      );
-      expect(container.firstElementChild?.hasAttribute("dir")).toBe(false);
-    });
-  });
-
   describe("gap inline style", () => {
     it("applies columnGap to container when gap > 0", () => {
       const { container } = render(

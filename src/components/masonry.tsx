@@ -53,7 +53,6 @@ function MasonryInner<T = unknown>(
     gap,
     defaultColumns = 3,
     defaultWidth,
-    dir,
     enableNative,
     empty,
     role,
@@ -114,8 +113,6 @@ function MasonryInner<T = unknown>(
   const ItemWrapper: any = itemAs ?? "div";
 
   const containerRole = role === "none" ? undefined : (role ?? "list");
-  // 'auto' means inherit from DOM — don't set the attribute
-  const dirAttr = dir === "auto" ? undefined : dir;
 
   // Empty state: still render the container so ResizeObserver stays attached
   if (items.length === 0) {
@@ -126,7 +123,6 @@ function MasonryInner<T = unknown>(
         style={style}
         role={containerRole}
         aria-label={ariaLabel}
-        dir={dirAttr}
       >
         {empty ?? null}
       </Container>
@@ -150,7 +146,6 @@ function MasonryInner<T = unknown>(
         style={nativeStyle}
         role={containerRole}
         aria-label={ariaLabel}
-        dir={dirAttr}
       >
         {items.map((data, index) => {
           const key = itemKey ? itemKey(data, index) : index;
@@ -186,7 +181,6 @@ function MasonryInner<T = unknown>(
       style={containerStyle}
       role={containerRole}
       aria-label={ariaLabel}
-      dir={dirAttr}
     >
       {columnIndices.map((indices, colIndex) => (
         <div

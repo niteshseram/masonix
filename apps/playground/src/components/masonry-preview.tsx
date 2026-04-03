@@ -59,7 +59,6 @@ export function MasonryPreview({
     columnWidth,
     maxColumns,
     gap,
-    dir: config.dir as "ltr" | "rtl" | "auto",
     role: config.role as "list" | "grid" | "none",
     as: config.as as "div" | "ul" | "section" | "main",
     itemAs: config.itemAs as "div" | "li" | "article",

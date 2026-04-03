@@ -38,7 +38,6 @@ export interface Config {
   fixedGap: number;
   customGapBps: BpEntry[];
 
-  dir: "ltr" | "rtl" | "auto";
   role: "list" | "grid" | "none";
   enableNative: boolean;
 
@@ -84,7 +83,6 @@ export const DEFAULT_CONFIG: Config = {
     { minWidth: 900, value: 16 },
   ],
 
-  dir: "ltr",
   role: "list",
   enableNative: false,
 
@@ -650,17 +648,6 @@ export function ConfigPanel({
 
           {/* Advanced */}
           <Collapsible title="Advanced">
-            <Field label="Direction">
-              <Seg
-                value={config.dir}
-                options={[
-                  { label: "LTR", value: "ltr" },
-                  { label: "RTL", value: "rtl" },
-                  { label: "Auto", value: "auto" },
-                ]}
-                onChange={(v) => set("dir", v)}
-              />
-            </Field>
             <Field label="Role">
               <Seg
                 value={config.role}

@@ -43,20 +43,6 @@ describe("createBalancedPositioner", () => {
     // With rowGap=20: item 1 top = 100 + 20 = 120
     expect(item.top).toBe(120);
   });
-
-  it("forwards RTL option", () => {
-    // Both RTL and LTR should produce valid (non-negative) positions
-    const p = createBalancedPositioner({
-      columnCount: 3,
-      columnWidth: 100,
-      columnGap: 10,
-      rtl: true,
-    });
-    for (let i = 0; i < 3; i++) p.set(i, 100);
-    for (let i = 0; i < 3; i++) {
-      expect(p.get(i)!.left).toBeGreaterThanOrEqual(0);
-    }
-  });
 });
 
 describe("measureBalance", () => {

@@ -5,8 +5,6 @@ export interface RowPositionerOptions {
   columnWidth: number;
   columnGap?: number;
   rowGap?: number;
-  /** When true, positions are mirrored for RTL layouts */
-  rtl?: boolean;
 }
 
 /**
