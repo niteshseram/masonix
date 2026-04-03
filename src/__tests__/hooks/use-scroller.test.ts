@@ -8,10 +8,9 @@ afterEach(() => {
 });
 
 describe("useScroller", () => {
-  it("returns initial state with scrollTop 0 and isScrolling false", () => {
+  it("returns initial state with scrollTop 0", () => {
     const { result } = renderHook(() => useScroller());
     expect(result.current.scrollTop).toBe(0);
-    expect(result.current.isScrolling).toBe(false);
     expect(typeof result.current.viewportHeight).toBe("number");
   });
 
@@ -27,24 +26,6 @@ describe("useScroller", () => {
     });
 
     expect(result.current.scrollTop).toBe(200);
-    expect(result.current.isScrolling).toBe(true);
-  });
-
-  it("sets isScrolling to false after scroll stops", async () => {
-    const { result } = renderHook(() => useScroller());
-
-    act(() => {
-      window.dispatchEvent(new Event("scroll"));
-    });
-
-    expect(result.current.isScrolling).toBe(true);
-
-    // Wait for the isScrolling timeout to fire (interval + 50ms, ~133ms for fps=12)
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 250));
-    });
-
-    expect(result.current.isScrolling).toBe(false);
   });
 
   it("tracks viewport height changes on resize", () => {
@@ -69,19 +50,17 @@ describe("useScroller", () => {
     expect(() => window.dispatchEvent(new Event("scroll"))).not.toThrow();
   });
 
-  it("reports correct state after single scroll event", () => {
+  it("reports correct scrollTop after single scroll event", () => {
     let scrollY = 0;
     Object.defineProperty(window, "scrollY", { get: () => scrollY, configurable: true });
 
     const { result } = renderHook(() => useScroller());
 
-    // First scroll event always passes throttle (lastTick starts at 0)
     act(() => {
       scrollY = 350;
       window.dispatchEvent(new Event("scroll"));
     });
 
     expect(result.current.scrollTop).toBe(350);
-    expect(result.current.isScrolling).toBe(true);
   });
 });

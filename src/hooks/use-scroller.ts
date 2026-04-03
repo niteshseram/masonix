@@ -4,7 +4,6 @@ import { isServer } from "../utils/ssr";
 
 export interface ScrollerState {
   scrollTop: number;
-  isScrolling: boolean;
   viewportHeight: number;
 }
 
@@ -16,7 +15,6 @@ interface ScrollStore {
 
 const SERVER_SNAPSHOT: ScrollerState = {
   scrollTop: 0,
-  isScrolling: false,
   viewportHeight: 0,
 };
 
@@ -25,7 +23,6 @@ const SERVER_SNAPSHOT: ScrollerState = {
  *
  * Uses a passive scroll listener throttled to `fps` frames per second
  * (default 12 — ~83ms between reads, sufficient for windowing decisions).
- * The `isScrolling` flag resets after the throttle window elapses.
  */
 export function useScroller(
   scrollContainer?: React.RefObject<HTMLElement | null>,
@@ -35,7 +32,6 @@ export function useScroller(
   const stateRef = useRef<ScrollerState>(SERVER_SNAPSHOT);
   const listenersRef = useRef<Set<() => void>>(new Set());
   const rafIdRef = useRef<number | null>(null);
-  const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTickRef = useRef(0);
 
   const getContainer = useCallback((): HTMLElement | Window => {
@@ -71,12 +67,9 @@ export function useScroller(
     const interval = 1000 / fps;
 
     // Read initial state
-    const initialTop = getScrollTop(container);
-    const initialVH = getViewportHeight(container);
     stateRef.current = {
-      scrollTop: initialTop,
-      isScrolling: false,
-      viewportHeight: initialVH,
+      scrollTop: getScrollTop(container),
+      viewportHeight: getViewportHeight(container),
     };
     notify();
 
@@ -94,24 +87,11 @@ export function useScroller(
       }
       lastTickRef.current = now;
 
-      const scrollTop = getScrollTop(container);
-      const viewportHeight = getViewportHeight(container);
-
-      stateRef.current = { scrollTop, isScrolling: true, viewportHeight };
+      stateRef.current = {
+        scrollTop: getScrollTop(container),
+        viewportHeight: getViewportHeight(container),
+      };
       notify();
-
-      // Reset isScrolling after the throttle window
-      if (timeoutIdRef.current !== null) {
-        clearTimeout(timeoutIdRef.current);
-      }
-      timeoutIdRef.current = setTimeout(() => {
-        timeoutIdRef.current = null;
-        stateRef.current = {
-          ...stateRef.current,
-          isScrolling: false,
-        };
-        notify();
-      }, interval + 50);
     };
 
     // Also track viewport resize (e.g. browser resize changes viewport height)
@@ -133,10 +113,6 @@ export function useScroller(
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
-      }
-      if (timeoutIdRef.current !== null) {
-        clearTimeout(timeoutIdRef.current);
-        timeoutIdRef.current = null;
       }
     };
   }, [getContainer, fps, notify]);

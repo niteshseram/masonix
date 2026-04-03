@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { useScrollToIndex } from "../../hooks/use-scroll-to-index";
-import { createBalancedPositioner } from "../../core/column-balancer";
+import { createPositioner } from "../../core/positioner";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -53,7 +53,7 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 function makePositionerWithItems() {
-  const p = createBalancedPositioner({
+  const p = createPositioner({
     columnCount: 3,
     columnWidth: 200,
     columnGap: 16,

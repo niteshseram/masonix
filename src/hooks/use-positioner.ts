@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { createBalancedPositioner } from "../core/column-balancer";
+import { createPositioner } from "../core/positioner";
 import type { Positioner } from "../types";
 
 export interface UsePositionerOptions {
@@ -16,7 +16,7 @@ export interface UsePositionerOptions {
 export function usePositioner({ columnCount, columnWidth, gap }: UsePositionerOptions): Positioner {
   return useMemo(
     () =>
-      createBalancedPositioner({
+      createPositioner({
         columnCount,
         columnWidth,
         columnGap: gap,

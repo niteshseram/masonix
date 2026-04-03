@@ -19,7 +19,7 @@ import { useContainerWidth } from "../hooks/use-container-width";
 import { useItemHeights } from "../hooks/use-item-heights";
 import { useScroller } from "../hooks/use-scroller";
 import { useScrollToIndex } from "../hooks/use-scroll-to-index";
-import { createBalancedPositioner } from "../core/column-balancer";
+import { createPositioner } from "../core/positioner";
 import { createIntervalTree } from "../core/interval-tree";
 import { getScrollOffset } from "../core/scroll";
 
@@ -150,7 +150,7 @@ function MasonryVirtualInner<T = unknown>(
     if (columnCount === 0) {
       return {
         positionedItems: [] as Array<PositionedItem & { measured: boolean }>,
-        positioner: createBalancedPositioner({
+        positioner: createPositioner({
           columnCount: 1,
           columnWidth: 0,
           columnGap: 0,
@@ -161,7 +161,7 @@ function MasonryVirtualInner<T = unknown>(
       };
     }
 
-    const pos = createBalancedPositioner({
+    const pos = createPositioner({
       columnCount,
       columnWidth,
       columnGap: resolvedGap,

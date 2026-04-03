@@ -3,7 +3,7 @@ import type { MasonryBalancedProps, MasonryRenderProps } from "../types";
 import { useColumns } from "../hooks/use-columns";
 import { useContainerWidth } from "../hooks/use-container-width";
 import { useItemHeights } from "../hooks/use-item-heights";
-import { createBalancedPositioner } from "../core/column-balancer";
+import { createPositioner } from "../core/positioner";
 
 const DEFAULT_ESTIMATED_HEIGHT = 150;
 
@@ -110,7 +110,7 @@ function MasonryBalancedInner<T = unknown>(
   const positionedItems = useMemo(() => {
     if (columnCount === 0) return [];
 
-    const positioner = createBalancedPositioner({
+    const positioner = createPositioner({
       columnCount,
       columnWidth,
       columnGap: resolvedGap,
