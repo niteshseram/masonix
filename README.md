@@ -1,11 +1,9 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./brand/logo-dark.svg" />
-    <img src="./brand/logo.svg" alt="masonix" height="52" />
+    <img src="./brand/logo.svg" alt="masonix" height="52" alt="masonix" />
   </picture>
 </p>
-
-<h1 align="center">masonix</h1>
 
 <p align="center"><strong>The React masonry layout library that gets the fundamentals right.</strong></p>
 
