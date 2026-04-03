@@ -11,7 +11,16 @@
     "tailwind",
     "virtualized"
   ],
+  "homepage": "https://github.com/niteshseram/masonix#readme",
+  "bugs": {
+    "url": "https://github.com/niteshseram/masonix/issues"
+  },
   "license": "MIT",
+  "author": "Nitesh Seram",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/niteshseram/masonix.git"
+  },
   "files": [
     "dist"
   ],
@@ -53,9 +62,12 @@
     "format": "vp fmt",
     "format:check": "vp fmt --check",
     "tc": "tsc --noEmit",
-    "size": "size-limit"
+    "size": "size-limit",
+    "release": "pnpm build && changeset publish",
+    "gh-release": "gh release create \"v$(node -p \"require('./package.json').version\")\" --generate-notes"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.30.0",
     "@size-limit/preset-small-lib": "^11.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -83,5 +95,6 @@
       "path": "dist/virtual.mjs",
       "limit": "10 kB"
     }
-  ]
+  ],
+  "packageManager": "pnpm@10.18.3"
 }
