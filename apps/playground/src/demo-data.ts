@@ -35,7 +35,7 @@ function resolveHeight(index: number, shuffleKey: number, config: Config): numbe
       return Math.round(config.minItemH + r * (config.maxItemH - config.minItemH));
     }
     default: // stepped
-      return 120 + (index % 7) * 40;
+      return 120 + (((index + shuffleKey * 3) % 7) + 7) % 7 * 40;
   }
 }
 
@@ -44,6 +44,6 @@ export function makePhotos(count: number, shuffleKey: number, config: Config): P
     id: i,
     alt: `Item ${i + 1}`,
     height: resolveHeight(i, shuffleKey, config),
-    color: COLORS[i % COLORS.length],
+    color: COLORS[(i + shuffleKey * 3) % COLORS.length],
   }));
 }
