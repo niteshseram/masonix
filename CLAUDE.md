@@ -54,16 +54,14 @@ src/
 Three components, one package, increasing complexity:
 
 1. **`Masonry`** — CSS flexbox, ~3 kB, zero JS layout (Phase 2)
-2. **`MasonryBalanced`** — JS-measured, shortest-column-first or row-wise ordering (Phase 2)
+2. **`MasonryBalanced`** — JS-measured, shortest-column-first (Phase 2)
 3. **`MasonryVirtual`** — virtualized for 10K+ items, interval tree for O(log n) range queries (Phase 3)
 
 ### Core Engines (Phase 1 — complete)
 
 **`src/core/positioner.ts`** — `createPositioner`: shortest-column-first placement. Each `set(index, height, span?)` places an item in the shortest available column. Maintains `columnItems[][]` for incremental `update()` without full re-layout.
 
-**`src/core/row-positioner.ts`** — `createRowPositioner`: row-wise ordering. `column = index % columnCount`, guaranteeing source-array order matches reading order. Key differentiator vs CSS-based libs.
-
-**`src/core/column-balancer.ts`** — `createBalancedPositioner`: factory that selects the right positioner based on `strategy: 'shortest-first' | 'row-wise'`. Components import only this, not the positioner modules directly.
+**`src/core/column-balancer.ts`** — `createBalancedPositioner`: thin factory wrapping `createPositioner`. Components import only this, not the positioner directly.
 
 **`src/core/interval-tree.ts`** — augmented red-black tree. Stores items as `[top, top+height]` intervals for `search(low, high)` — O(log n + k) viewport intersection queries used by `MasonryVirtual`.
 

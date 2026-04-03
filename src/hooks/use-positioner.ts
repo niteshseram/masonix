@@ -6,7 +6,6 @@ export interface UsePositionerOptions {
   columnCount: number;
   columnWidth: number;
   gap: number;
-  strategy?: "shortest-first" | "row-wise";
 }
 
 /**
@@ -14,12 +13,7 @@ export interface UsePositionerOptions {
  * The positioner has no items placed on creation — callers are responsible
  * for populating it (e.g. via `set()` during render or layout effects).
  */
-export function usePositioner({
-  columnCount,
-  columnWidth,
-  gap,
-  strategy,
-}: UsePositionerOptions): Positioner {
+export function usePositioner({ columnCount, columnWidth, gap }: UsePositionerOptions): Positioner {
   return useMemo(
     () =>
       createBalancedPositioner({
@@ -27,8 +21,7 @@ export function usePositioner({
         columnWidth,
         columnGap: gap,
         rowGap: gap,
-        strategy,
       }),
-    [columnCount, columnWidth, gap, strategy],
+    [columnCount, columnWidth, gap],
   );
 }

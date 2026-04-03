@@ -11,7 +11,7 @@ describe("usePositioner", () => {
     expect(result.current.columnWidth).toBe(200);
   });
 
-  it("places items using the shortest-first strategy by default", () => {
+  it("places items using shortest-first", () => {
     const { result } = renderHook(() =>
       usePositioner({ columnCount: 3, columnWidth: 100, gap: 0 }),
     );
@@ -22,17 +22,6 @@ describe("usePositioner", () => {
     const item = p.set(3, 50);
     // col 1 is shortest (100)
     expect(item.column).toBe(1);
-  });
-
-  it("places items in row-wise order with strategy='row-wise'", () => {
-    const { result } = renderHook(() =>
-      usePositioner({ columnCount: 3, columnWidth: 100, gap: 0, strategy: "row-wise" }),
-    );
-    const p = result.current;
-    expect(p.set(0, 100).column).toBe(0);
-    expect(p.set(1, 100).column).toBe(1);
-    expect(p.set(2, 100).column).toBe(2);
-    expect(p.set(3, 100).column).toBe(0);
   });
 
   it("returns a new positioner when columnCount changes", () => {
