@@ -15,7 +15,9 @@ export default defineConfig({
     format: ["esm", "cjs"],
     dts: { tsconfig: "./tsconfig.build.json" },
     sourcemap: true,
-    external: ["react", "react-dom", "react/jsx-runtime", /^react-dom\//],
+    deps: {
+      neverBundle: ["react", "react-dom", "react/jsx-runtime", /^react-dom\//],
+    },
     banner: { js: '"use client";' },
     outDir: "dist",
     clean: true,
