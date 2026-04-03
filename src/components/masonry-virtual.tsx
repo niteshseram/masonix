@@ -179,9 +179,9 @@ function MasonryVirtualInner<T = unknown>(
         height = Math.max(0, getItemHeight(data, index, columnWidth));
         measured = true;
       } else {
-        const h = measuredHeights.get(index);
-        measured = h !== undefined;
-        height = h ?? estimatedItemHeight;
+        const measuredHeight = measuredHeights.get(index);
+        measured = measuredHeight !== undefined;
+        height = measuredHeight ?? estimatedItemHeight;
       }
 
       const span = getColumnSpan ? getColumnSpan(data, index) : undefined;

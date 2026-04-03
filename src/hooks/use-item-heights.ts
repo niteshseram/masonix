@@ -52,23 +52,23 @@ export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
         const updates: Array<[number, number]> = [];
 
         for (const entry of entries) {
-          const idx = elementToIndex.current.get(entry.target);
-          if (idx === undefined) continue;
+          const itemIndex = elementToIndex.current.get(entry.target);
+          if (itemIndex === undefined) continue;
 
-          const h = entry.contentBoxSize
+          const rawHeight = entry.contentBoxSize
             ? entry.contentBoxSize[0].blockSize
             : entry.contentRect.height;
 
-          const min = minItemHeightRef.current;
-          const clamped = min !== undefined ? Math.max(min, h) : h;
-          if (clamped > 0) updates.push([idx, clamped]);
+          const minHeight = minItemHeightRef.current;
+          const clamped = minHeight !== undefined ? Math.max(minHeight, rawHeight) : rawHeight;
+          if (clamped > 0) updates.push([itemIndex, clamped]);
         }
 
         if (updates.length === 0) return;
 
         setMeasuredHeights((prev) => {
           const next = new Map(prev);
-          for (const [i, h] of updates) next.set(i, h);
+          for (const [itemIndex, height] of updates) next.set(itemIndex, height);
           return next;
         });
       });

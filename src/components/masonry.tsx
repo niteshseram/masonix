@@ -97,11 +97,11 @@ function MasonryInner<T = unknown>(
 
   const isNative = useNativeMasonry(enableNative);
 
-  // Round-robin distribution: item i → column i % columnCount
+  // Round-robin distribution: item itemIndex → column itemIndex % columnCount
   const columnIndices = useMemo(() => {
     const cols: number[][] = Array.from({ length: columnCount }, () => []);
-    for (let i = 0; i < items.length; i++) {
-      cols[i % columnCount].push(i);
+    for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+      cols[itemIndex % columnCount].push(itemIndex);
     }
     return cols;
   }, [items.length, columnCount]);

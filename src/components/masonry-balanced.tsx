@@ -125,9 +125,9 @@ function MasonryBalancedInner<T = unknown>(
         height = Math.max(0, getItemHeight(data, index, columnWidth));
         measured = true;
       } else {
-        const h = measuredHeights.get(index);
-        measured = h !== undefined;
-        height = h ?? estimatedItemHeight;
+        const measuredHeight = measuredHeights.get(index);
+        measured = measuredHeight !== undefined;
+        height = measuredHeight ?? estimatedItemHeight;
       }
 
       const span = getColumnSpan ? getColumnSpan(data, index) : undefined;
@@ -147,7 +147,9 @@ function MasonryBalancedInner<T = unknown>(
 
   // Container height = bottom edge of the tallest item (no trailing gap)
   const containerHeight =
-    positionedItems.length > 0 ? Math.max(...positionedItems.map((p) => p.top + p.height)) : 0;
+    positionedItems.length > 0
+      ? Math.max(...positionedItems.map((item) => item.top + item.height))
+      : 0;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Container: any = as ?? "div";

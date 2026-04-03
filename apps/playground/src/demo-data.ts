@@ -22,8 +22,8 @@ export const COLORS = [
 
 // Deterministic pseudo-random in [0, 1) for a given seed.
 function seededRand(seed: number): number {
-  const s = Math.sin(seed * 9301 + 49297) * 0.5 + 0.5;
-  return s - Math.floor(s);
+  const sinValue = Math.sin(seed * 9301 + 49297) * 0.5 + 0.5;
+  return sinValue - Math.floor(sinValue);
 }
 
 function resolveHeight(index: number, shuffleKey: number, config: Config): number {
@@ -31,19 +31,19 @@ function resolveHeight(index: number, shuffleKey: number, config: Config): numbe
     case "uniform":
       return config.uniformHeight;
     case "random": {
-      const r = seededRand(index * 31 + shuffleKey * 1000);
-      return Math.round(config.minItemH + r * (config.maxItemH - config.minItemH));
+      const randomValue = seededRand(index * 31 + shuffleKey * 1000);
+      return Math.round(config.minItemH + randomValue * (config.maxItemH - config.minItemH));
     }
     default: // stepped
-      return 120 + (((index + shuffleKey * 3) % 7) + 7) % 7 * 40;
+      return 120 + ((((index + shuffleKey * 3) % 7) + 7) % 7) * 40;
   }
 }
 
 export function makePhotos(count: number, shuffleKey: number, config: Config): Photo[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    alt: `Item ${i + 1}`,
-    height: resolveHeight(i, shuffleKey, config),
-    color: COLORS[(i + shuffleKey * 3) % COLORS.length],
+  return Array.from({ length: count }, (_, itemIndex) => ({
+    id: itemIndex,
+    alt: `Item ${itemIndex + 1}`,
+    height: resolveHeight(itemIndex, shuffleKey, config),
+    color: COLORS[(itemIndex + shuffleKey * 3) % COLORS.length],
   }));
 }

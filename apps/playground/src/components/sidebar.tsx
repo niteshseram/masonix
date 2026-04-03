@@ -46,9 +46,9 @@ export function Sidebar({ config, setConfig }: SidebarProps) {
   const [isResizing, setIsResizing] = useState(false);
 
   const handleResizeStart = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      const startX = e.clientX;
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      const startX = event.clientX;
       const startWidth = width;
       setIsResizing(true);
       document.body.style.cursor = "col-resize";
@@ -85,7 +85,7 @@ export function Sidebar({ config, setConfig }: SidebarProps) {
       <div className="flex h-10 shrink-0 items-center border-b border-zinc-800 px-2">
         <button
           type="button"
-          onClick={() => setIsOpen((v) => !v)}
+          onClick={() => setIsOpen((prevOpen) => !prevOpen)}
           title={isOpen ? "Collapse" : "Expand config"}
           className={clsx(
             "flex h-7 w-7 shrink-0 items-center justify-center rounded",

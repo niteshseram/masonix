@@ -196,21 +196,21 @@ function Seg<T extends string>({
 }) {
   return (
     <div className="flex w-full rounded-md bg-zinc-950 p-0.5">
-      {options.map((o) => (
+      {options.map((option) => (
         <button
-          key={o.value}
+          key={option.value}
           type="button"
-          onClick={() => onChange(o.value)}
+          onClick={() => onChange(option.value)}
           className={clsx(
             "flex-1 rounded px-2 py-1.5",
             "text-xs font-medium",
             "transition-colors",
-            value === o.value
+            value === option.value
               ? "bg-zinc-700 text-zinc-100 shadow-sm"
               : "text-zinc-400 hover:text-zinc-200",
           )}
         >
-          {o.label}
+          {option.label}
         </button>
       ))}
     </div>
@@ -237,8 +237,8 @@ function NumInput({
   }, [value]);
 
   function commit(raw: string) {
-    const n = parseInt(raw, 10);
-    const clamped = isNaN(n) ? value : Math.min(max, Math.max(min, n));
+    const parsedValue = parseInt(raw, 10);
+    const clamped = isNaN(parsedValue) ? value : Math.min(max, Math.max(min, parsedValue));
     onChange(clamped);
     setDraft(String(clamped));
   }
@@ -258,9 +258,9 @@ function NumInput({
       min={min}
       max={max}
       onChange={(e) => setDraft(e.target.value)}
-      onBlur={(e) => commit(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") commit((e.target as HTMLInputElement).value);
+      onBlur={(event) => commit(event.target.value)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") commit((event.target as HTMLInputElement).value);
       }}
     />
   );
@@ -344,8 +344,10 @@ function BpEditor({
   valueMax: number;
   onChange: (entries: BpEntry[]) => void;
 }) {
-  function update(i: number, field: keyof BpEntry, val: number) {
-    onChange(entries.map((e, idx) => (idx === i ? { ...e, [field]: val } : e)));
+  function update(entryIndex: number, field: keyof BpEntry, value: number) {
+    onChange(
+      entries.map((entry, idx) => (idx === entryIndex ? { ...entry, [field]: value } : entry)),
+    );
   }
 
   return (
@@ -355,25 +357,25 @@ function BpEditor({
         <span className="text-center text-[10px] text-zinc-500">{valueLabel}</span>
       </div>
 
-      {entries.map((entry, i) => (
-        <div key={i} className="grid grid-cols-[1fr_1fr_20px] items-center gap-x-1.5">
+      {entries.map((entry, entryIndex) => (
+        <div key={entryIndex} className="grid grid-cols-[1fr_1fr_20px] items-center gap-x-1.5">
           <NumInput
             value={entry.minWidth}
             min={0}
             max={9999}
             style={{ width: "100%" }}
-            onChange={(v) => update(i, "minWidth", v)}
+            onChange={(newValue) => update(entryIndex, "minWidth", newValue)}
           />
           <NumInput
             value={entry.value}
             min={valueMin}
             max={valueMax}
             style={{ width: "100%" }}
-            onChange={(v) => update(i, "value", v)}
+            onChange={(newValue) => update(entryIndex, "value", newValue)}
           />
           <button
             type="button"
-            onClick={() => onChange(entries.filter((_, idx) => idx !== i))}
+            onClick={() => onChange(entries.filter((_, idx) => idx !== entryIndex))}
             title="Remove"
             className={clsx(
               "flex h-5 w-5 items-center justify-center rounded",

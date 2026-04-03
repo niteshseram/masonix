@@ -27,11 +27,11 @@ export function createPositioner(options: PositionerOptions): Positioner {
 
   function shortestColumnIndex(span = 1): number {
     if (span === 1) {
-      let minCol = 0;
-      for (let i = 1; i < columnCount; i++) {
-        if (columnHeights[i] < columnHeights[minCol]) minCol = i;
+      let minColIndex = 0;
+      for (let colIndex = 1; colIndex < columnCount; colIndex++) {
+        if (columnHeights[colIndex] < columnHeights[minColIndex]) minColIndex = colIndex;
       }
-      return minCol;
+      return minColIndex;
     }
 
     // For spanning items: find the group of `span` consecutive columns whose
@@ -42,8 +42,8 @@ export function createPositioner(options: PositionerOptions): Positioner {
 
     for (let start = 0; start <= maxStart; start++) {
       let groupMax = 0;
-      for (let c = start; c < start + span; c++) {
-        groupMax = Math.max(groupMax, columnHeights[c]);
+      for (let spanColIndex = start; spanColIndex < start + span; spanColIndex++) {
+        groupMax = Math.max(groupMax, columnHeights[spanColIndex]);
       }
       if (bestMaxHeight === -Infinity || groupMax < bestMaxHeight) {
         bestMaxHeight = groupMax;
@@ -63,8 +63,8 @@ export function createPositioner(options: PositionerOptions): Positioner {
 
     // Top = max height among all spanned columns
     let top = 0;
-    for (let c = startCol; c < startCol + clampedSpan; c++) {
-      top = Math.max(top, columnHeights[c]);
+    for (let spanColIndex = startCol; spanColIndex < startCol + clampedSpan; spanColIndex++) {
+      top = Math.max(top, columnHeights[spanColIndex]);
     }
 
     const left = computeLeft(startCol);
@@ -73,9 +73,9 @@ export function createPositioner(options: PositionerOptions): Positioner {
 
     // Update all spanned columns
     const newHeight = top + height + rowGap;
-    for (let c = startCol; c < startCol + clampedSpan; c++) {
-      columnHeights[c] = newHeight;
-      columnItems[c].push(index);
+    for (let spanColIndex = startCol; spanColIndex < startCol + clampedSpan; spanColIndex++) {
+      columnHeights[spanColIndex] = newHeight;
+      columnItems[spanColIndex].push(index);
     }
 
     const item: PositionedItem = {
@@ -101,8 +101,12 @@ export function createPositioner(options: PositionerOptions): Positioner {
       const item = items[index];
       if (item && item.height !== newHeight) {
         item.height = newHeight;
-        for (let c = item.column; c < item.column + item.span; c++) {
-          affectedColumns.add(c);
+        for (
+          let spanColIndex = item.column;
+          spanColIndex < item.column + item.span;
+          spanColIndex++
+        ) {
+          affectedColumns.add(spanColIndex);
         }
       }
     }
@@ -113,16 +117,16 @@ export function createPositioner(options: PositionerOptions): Positioner {
       const colItems = columnItems[col];
       let currentTop = 0;
 
-      for (let i = 0; i < colItems.length; i++) {
-        const item = items[colItems[i]];
+      for (let colItemIndex = 0; colItemIndex < colItems.length; colItemIndex++) {
+        const item = items[colItems[colItemIndex]];
         if (!item) continue;
 
         // Only recompute top for items whose primary column is `col`
         if (item.column === col) {
           // Top is max height of all spanned columns just before this item
           let top = 0;
-          if (i > 0) {
-            const prevItem = items[colItems[i - 1]];
+          if (colItemIndex > 0) {
+            const prevItem = items[colItems[colItemIndex - 1]];
             top = prevItem ? prevItem.top + prevItem.height + rowGap : 0;
           }
           item.top = top;
@@ -132,8 +136,12 @@ export function createPositioner(options: PositionerOptions): Positioner {
 
         // Propagate column height
         currentTop = item.top + item.height + rowGap;
-        for (let c = item.column; c < item.column + item.span; c++) {
-          columnHeights[c] = currentTop;
+        for (
+          let spanColIndex = item.column;
+          spanColIndex < item.column + item.span;
+          spanColIndex++
+        ) {
+          columnHeights[spanColIndex] = currentTop;
         }
       }
     }
@@ -146,17 +154,17 @@ export function createPositioner(options: PositionerOptions): Positioner {
   }
 
   function shortestColumn(): number {
-    let min = 0;
-    for (let i = 1; i < columnCount; i++) {
-      if (columnHeights[i] < columnHeights[min]) min = i;
+    let minColIndex = 0;
+    for (let colIndex = 1; colIndex < columnCount; colIndex++) {
+      if (columnHeights[colIndex] < columnHeights[minColIndex]) minColIndex = colIndex;
     }
-    return min;
+    return minColIndex;
   }
 
   function tallestColumnHeight(): number {
     let max = 0;
-    for (let i = 0; i < columnCount; i++) {
-      if (columnHeights[i] > max) max = columnHeights[i];
+    for (let colIndex = 0; colIndex < columnCount; colIndex++) {
+      if (columnHeights[colIndex] > max) max = columnHeights[colIndex];
     }
     return max;
   }
@@ -183,8 +191,8 @@ export function createPositioner(options: PositionerOptions): Positioner {
   function clear(): void {
     columnHeights.fill(0);
     items.length = 0;
-    for (let i = 0; i < columnCount; i++) {
-      columnItems[i] = [];
+    for (let colIndex = 0; colIndex < columnCount; colIndex++) {
+      columnItems[colIndex] = [];
     }
   }
 

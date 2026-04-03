@@ -51,7 +51,7 @@ export function MasonryPreview({
   // Known heights only meaningful for color-block cards with explicit heights
   const getItemHeight =
     config.useKnownHeights && config.cardStyle === "color-block"
-      ? (p: unknown) => (p as Photo).height
+      ? (photo: unknown) => (photo as Photo).height
       : undefined;
 
   const commonProps = {
@@ -63,7 +63,7 @@ export function MasonryPreview({
     as: config.as as "div" | "ul" | "section" | "main",
     itemAs: config.itemAs as "div" | "li" | "article",
     "aria-label": config.ariaLabel || undefined,
-    itemKey: (p: unknown) => (p as Photo).id,
+    itemKey: (photo: unknown) => (photo as Photo).id,
   };
 
   if (config.component === "masonry-virtual") {

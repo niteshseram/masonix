@@ -77,6 +77,10 @@ All positioners implement `Positioner`. The key method is `set(index, height, sp
 
 `ResponsiveValue<T>` accepts a plain value, named breakpoints (`{ sm: 2, lg: 4 }`), or numeric keys (`{ 600: 2, 900: 3 }`). All match Tailwind's default breakpoint scale.
 
+## Code Style
+
+- **No single-letter variable names.** Use descriptive names everywhere — `columnIndex` not `c`, `measuredHeight` not `h`, `option` not `o`, `event` not `e`, etc. The only exception is generic type parameters (`T`, `K`, `V`).
+
 ## Key Constraints
 
 - **RTL is a render-layer concern.** Positioners always compute LTR `left` values. Components apply `inset-inline-start` or flip via CSS `direction`. The `rtl` option exists in positioner options interfaces but has no effect on math.

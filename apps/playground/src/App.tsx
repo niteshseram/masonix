@@ -94,7 +94,7 @@ function PresetsDropdown({ onApply }: { onApply: (config: Partial<Config>) => vo
       {open && <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen((prevOpen) => !prevOpen)}
         className={clsx(
           "flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1",
           "text-xs text-zinc-400",
@@ -165,7 +165,7 @@ export default function App() {
     function onKey(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement).tagName;
       if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
-      if (e.key === "s" || e.key === "S") setShuffleKey((k) => k + 1);
+      if (e.key === "s" || e.key === "S") setShuffleKey((prevKey) => prevKey + 1);
       if (e.key === "r" || e.key === "R") {
         setConfig(DEFAULT_CONFIG);
         setShuffleKey(0);
@@ -197,12 +197,12 @@ export default function App() {
 
         {/* Component tabs */}
         <div className="flex rounded-lg bg-zinc-950 p-0.5">
-          {TABS.map((tab, i) => (
+          {TABS.map((tab, tabIndex) => (
             <button
               key={tab.value}
               type="button"
               title={tab.desc}
-              onClick={() => setConfig((c) => ({ ...c, component: tab.value }))}
+              onClick={() => setConfig((prevConfig) => ({ ...prevConfig, component: tab.value }))}
               className={clsx(
                 "rounded-md px-3 py-1.5",
                 "text-xs font-medium",
@@ -212,7 +212,7 @@ export default function App() {
                   : "text-zinc-400 hover:text-zinc-200",
               )}
             >
-              <span className="mr-1.5 font-mono text-[9px] opacity-50">{i + 1}</span>
+              <span className="mr-1.5 font-mono text-[9px] opacity-50">{tabIndex + 1}</span>
               {tab.label}
             </button>
           ))}
@@ -225,7 +225,7 @@ export default function App() {
           <PresetsDropdown onApply={applyPreset} />
           <button
             type="button"
-            onClick={() => setShuffleKey((k) => k + 1)}
+            onClick={() => setShuffleKey((prevKey) => prevKey + 1)}
             className={clsx(
               "flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1",
               "text-xs text-zinc-400",

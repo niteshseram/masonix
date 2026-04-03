@@ -58,49 +58,49 @@ export function createIntervalTree(): IntervalTree {
     if (node.right) node.max = Math.max(node.max, node.right.max);
   }
 
-  function rotateLeft(x: Node): void {
-    const y = x.right!;
-    x.right = y.left;
-    if (y.left) y.left.parent = x;
-    y.parent = x.parent;
-    if (!x.parent) {
-      root = y;
-    } else if (x === x.parent.left) {
-      x.parent.left = y;
+  function rotateLeft(pivot: Node): void {
+    const rightChild = pivot.right!;
+    pivot.right = rightChild.left;
+    if (rightChild.left) rightChild.left.parent = pivot;
+    rightChild.parent = pivot.parent;
+    if (!pivot.parent) {
+      root = rightChild;
+    } else if (pivot === pivot.parent.left) {
+      pivot.parent.left = rightChild;
     } else {
-      x.parent.right = y;
+      pivot.parent.right = rightChild;
     }
-    y.left = x;
-    x.parent = y;
-    updateMax(x);
-    updateMax(y);
+    rightChild.left = pivot;
+    pivot.parent = rightChild;
+    updateMax(pivot);
+    updateMax(rightChild);
   }
 
-  function rotateRight(y: Node): void {
-    const x = y.left!;
-    y.left = x.right;
-    if (x.right) x.right.parent = y;
-    x.parent = y.parent;
-    if (!y.parent) {
-      root = x;
-    } else if (y === y.parent.left) {
-      y.parent.left = x;
+  function rotateRight(pivot: Node): void {
+    const leftChild = pivot.left!;
+    pivot.left = leftChild.right;
+    if (leftChild.right) leftChild.right.parent = pivot;
+    leftChild.parent = pivot.parent;
+    if (!pivot.parent) {
+      root = leftChild;
+    } else if (pivot === pivot.parent.left) {
+      pivot.parent.left = leftChild;
     } else {
-      y.parent.right = x;
+      pivot.parent.right = leftChild;
     }
-    x.right = y;
-    y.parent = x;
-    updateMax(y);
-    updateMax(x);
+    leftChild.right = pivot;
+    pivot.parent = leftChild;
+    updateMax(pivot);
+    updateMax(leftChild);
   }
 
   // ---------------------------------------------------------------------------
   // Insert
   // ---------------------------------------------------------------------------
 
-  function insertFixup(z: Node): void {
-    while (z.parent && z.parent.color === RED) {
-      const parent = z.parent;
+  function insertFixup(fixNode: Node): void {
+    while (fixNode.parent && fixNode.parent.color === RED) {
+      const parent = fixNode.parent;
       const grandparent = parent.parent!;
 
       if (parent === grandparent.left) {
@@ -109,15 +109,15 @@ export function createIntervalTree(): IntervalTree {
           parent.color = BLACK;
           uncle.color = BLACK;
           grandparent.color = RED;
-          z = grandparent;
+          fixNode = grandparent;
         } else {
-          if (z === parent.right) {
-            z = parent;
-            rotateLeft(z);
+          if (fixNode === parent.right) {
+            fixNode = parent;
+            rotateLeft(fixNode);
           }
-          z.parent!.color = BLACK;
-          z.parent!.parent!.color = RED;
-          rotateRight(z.parent!.parent!);
+          fixNode.parent!.color = BLACK;
+          fixNode.parent!.parent!.color = RED;
+          rotateRight(fixNode.parent!.parent!);
         }
       } else {
         const uncle = grandparent.left;
@@ -125,15 +125,15 @@ export function createIntervalTree(): IntervalTree {
           parent.color = BLACK;
           uncle.color = BLACK;
           grandparent.color = RED;
-          z = grandparent;
+          fixNode = grandparent;
         } else {
-          if (z === parent.left) {
-            z = parent;
-            rotateRight(z);
+          if (fixNode === parent.left) {
+            fixNode = parent;
+            rotateRight(fixNode);
           }
-          z.parent!.color = BLACK;
-          z.parent!.parent!.color = RED;
-          rotateLeft(z.parent!.parent!);
+          fixNode.parent!.color = BLACK;
+          fixNode.parent!.parent!.color = RED;
+          rotateLeft(fixNode.parent!.parent!);
         }
       }
     }
@@ -141,29 +141,29 @@ export function createIntervalTree(): IntervalTree {
   }
 
   function insert(index: number, low: number, high: number): void {
-    const z = createNode(index, low, high, RED);
-    nodeMap.set(index, z);
+    const newNode = createNode(index, low, high, RED);
+    nodeMap.set(index, newNode);
     count++;
 
-    let y: Node | null = null;
-    let x: Node | null = root;
+    let parentNode: Node | null = null;
+    let currentNode: Node | null = root;
 
-    while (x !== null) {
-      y = x;
-      x.max = Math.max(x.max, high);
-      x = low < x.low ? x.left : x.right;
+    while (currentNode !== null) {
+      parentNode = currentNode;
+      currentNode.max = Math.max(currentNode.max, high);
+      currentNode = low < currentNode.low ? currentNode.left : currentNode.right;
     }
 
-    z.parent = y;
-    if (!y) {
-      root = z;
-    } else if (low < y.low) {
-      y.left = z;
+    newNode.parent = parentNode;
+    if (!parentNode) {
+      root = newNode;
+    } else if (low < parentNode.low) {
+      parentNode.left = newNode;
     } else {
-      y.right = z;
+      parentNode.right = newNode;
     }
 
-    insertFixup(z);
+    insertFixup(newNode);
   }
 
   // ---------------------------------------------------------------------------
@@ -171,131 +171,137 @@ export function createIntervalTree(): IntervalTree {
   // ---------------------------------------------------------------------------
 
   function minimum(node: Node): Node {
-    let x = node;
-    while (x.left) x = x.left;
-    return x;
+    let current = node;
+    while (current.left) current = current.left;
+    return current;
   }
 
-  function transplant(u: Node, v: Node | null): void {
-    if (!u.parent) {
-      root = v;
-    } else if (u === u.parent.left) {
-      u.parent.left = v;
+  function transplant(target: Node, replacement: Node | null): void {
+    if (!target.parent) {
+      root = replacement;
+    } else if (target === target.parent.left) {
+      target.parent.left = replacement;
     } else {
-      u.parent.right = v;
+      target.parent.right = replacement;
     }
-    if (v) v.parent = u.parent;
+    if (replacement) replacement.parent = target.parent;
   }
 
   function propagateMax(node: Node | null): void {
-    let cur = node;
-    while (cur) {
-      updateMax(cur);
-      cur = cur.parent;
+    let current = node;
+    while (current) {
+      updateMax(current);
+      current = current.parent;
     }
   }
 
-  function deleteFixup(x: Node | null, xParent: Node | null): void {
-    while (x !== root && (!x || x.color === BLACK)) {
-      if (x === xParent?.left) {
-        let w = xParent!.right;
-        if (w && w.color === RED) {
-          w.color = BLACK;
-          xParent!.color = RED;
-          rotateLeft(xParent!);
-          w = xParent!.right;
+  function deleteFixup(fixNode: Node | null, fixNodeParent: Node | null): void {
+    while (fixNode !== root && (!fixNode || fixNode.color === BLACK)) {
+      if (fixNode === fixNodeParent?.left) {
+        let sibling = fixNodeParent!.right;
+        if (sibling && sibling.color === RED) {
+          sibling.color = BLACK;
+          fixNodeParent!.color = RED;
+          rotateLeft(fixNodeParent!);
+          sibling = fixNodeParent!.right;
         }
-        if ((!w?.left || w.left.color === BLACK) && (!w?.right || w.right.color === BLACK)) {
-          if (w) w.color = RED;
-          x = xParent;
-          xParent = x?.parent ?? null;
+        if (
+          (!sibling?.left || sibling.left.color === BLACK) &&
+          (!sibling?.right || sibling.right.color === BLACK)
+        ) {
+          if (sibling) sibling.color = RED;
+          fixNode = fixNodeParent;
+          fixNodeParent = fixNode?.parent ?? null;
         } else {
-          if (!w?.right || w.right.color === BLACK) {
-            if (w?.left) w.left.color = BLACK;
-            if (w) w.color = RED;
-            if (w) rotateRight(w);
-            w = xParent!.right;
+          if (!sibling?.right || sibling.right.color === BLACK) {
+            if (sibling?.left) sibling.left.color = BLACK;
+            if (sibling) sibling.color = RED;
+            if (sibling) rotateRight(sibling);
+            sibling = fixNodeParent!.right;
           }
-          if (w) w.color = xParent!.color;
-          xParent!.color = BLACK;
-          if (w?.right) w.right.color = BLACK;
-          rotateLeft(xParent!);
-          x = root;
-          xParent = null;
+          if (sibling) sibling.color = fixNodeParent!.color;
+          fixNodeParent!.color = BLACK;
+          if (sibling?.right) sibling.right.color = BLACK;
+          rotateLeft(fixNodeParent!);
+          fixNode = root;
+          fixNodeParent = null;
         }
       } else {
-        let w = xParent?.left ?? null;
-        if (w && w.color === RED) {
-          w.color = BLACK;
-          xParent!.color = RED;
-          rotateRight(xParent!);
-          w = xParent!.left ?? null;
+        let sibling = fixNodeParent?.left ?? null;
+        if (sibling && sibling.color === RED) {
+          sibling.color = BLACK;
+          fixNodeParent!.color = RED;
+          rotateRight(fixNodeParent!);
+          sibling = fixNodeParent!.left ?? null;
         }
-        if ((!w?.right || w.right.color === BLACK) && (!w?.left || w.left.color === BLACK)) {
-          if (w) w.color = RED;
-          x = xParent;
-          xParent = x?.parent ?? null;
+        if (
+          (!sibling?.right || sibling.right.color === BLACK) &&
+          (!sibling?.left || sibling.left.color === BLACK)
+        ) {
+          if (sibling) sibling.color = RED;
+          fixNode = fixNodeParent;
+          fixNodeParent = fixNode?.parent ?? null;
         } else {
-          if (!w?.left || w.left.color === BLACK) {
-            if (w?.right) w.right.color = BLACK;
-            if (w) w.color = RED;
-            if (w) rotateLeft(w);
-            w = xParent!.left ?? null;
+          if (!sibling?.left || sibling.left.color === BLACK) {
+            if (sibling?.right) sibling.right.color = BLACK;
+            if (sibling) sibling.color = RED;
+            if (sibling) rotateLeft(sibling);
+            sibling = fixNodeParent!.left ?? null;
           }
-          if (w) w.color = xParent!.color;
-          xParent!.color = BLACK;
-          if (w?.left) w.left.color = BLACK;
-          rotateRight(xParent!);
-          x = root;
-          xParent = null;
+          if (sibling) sibling.color = fixNodeParent!.color;
+          fixNodeParent!.color = BLACK;
+          if (sibling?.left) sibling.left.color = BLACK;
+          rotateRight(fixNodeParent!);
+          fixNode = root;
+          fixNodeParent = null;
         }
       }
     }
-    if (x) x.color = BLACK;
+    if (fixNode) fixNode.color = BLACK;
   }
 
   function remove(index: number): void {
-    const z = nodeMap.get(index);
-    if (!z) return;
+    const nodeToRemove = nodeMap.get(index);
+    if (!nodeToRemove) return;
     nodeMap.delete(index);
     count--;
 
-    let y = z;
-    let yOriginalColor = y.color;
-    let x: Node | null;
-    let xParent: Node | null;
+    let spliceTarget = nodeToRemove;
+    let spliceTargetOriginalColor = spliceTarget.color;
+    let replacementNode: Node | null;
+    let replacementNodeParent: Node | null;
 
-    if (!z.left) {
-      x = z.right;
-      xParent = z.parent;
-      transplant(z, z.right);
-    } else if (!z.right) {
-      x = z.left;
-      xParent = z.parent;
-      transplant(z, z.left);
+    if (!nodeToRemove.left) {
+      replacementNode = nodeToRemove.right;
+      replacementNodeParent = nodeToRemove.parent;
+      transplant(nodeToRemove, nodeToRemove.right);
+    } else if (!nodeToRemove.right) {
+      replacementNode = nodeToRemove.left;
+      replacementNodeParent = nodeToRemove.parent;
+      transplant(nodeToRemove, nodeToRemove.left);
     } else {
-      y = minimum(z.right);
-      yOriginalColor = y.color;
-      x = y.right;
-      if (y.parent === z) {
-        xParent = y;
+      spliceTarget = minimum(nodeToRemove.right);
+      spliceTargetOriginalColor = spliceTarget.color;
+      replacementNode = spliceTarget.right;
+      if (spliceTarget.parent === nodeToRemove) {
+        replacementNodeParent = spliceTarget;
       } else {
-        xParent = y.parent;
-        transplant(y, y.right);
-        y.right = z.right;
-        y.right.parent = y;
+        replacementNodeParent = spliceTarget.parent;
+        transplant(spliceTarget, spliceTarget.right);
+        spliceTarget.right = nodeToRemove.right;
+        spliceTarget.right.parent = spliceTarget;
       }
-      transplant(z, y);
-      y.left = z.left;
-      y.left.parent = y;
-      y.color = z.color;
-      updateMax(y);
+      transplant(nodeToRemove, spliceTarget);
+      spliceTarget.left = nodeToRemove.left;
+      spliceTarget.left.parent = spliceTarget;
+      spliceTarget.color = nodeToRemove.color;
+      updateMax(spliceTarget);
     }
 
-    propagateMax(xParent);
+    propagateMax(replacementNodeParent);
 
-    if (yOriginalColor === BLACK) {
-      deleteFixup(x, xParent);
+    if (spliceTargetOriginalColor === BLACK) {
+      deleteFixup(replacementNode, replacementNodeParent);
     }
   }
 

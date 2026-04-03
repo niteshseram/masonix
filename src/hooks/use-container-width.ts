@@ -31,11 +31,11 @@ export function useContainerWidth(defaultWidth?: number): {
       const ro = new ResizeObserver((entries) => {
         const entry = entries[0];
         if (!entry) return;
-        const w = entry.contentBoxSize
+        const measuredWidth = entry.contentBoxSize
           ? entry.contentBoxSize[0].inlineSize
           : entry.contentRect.width;
         // Ignore 0-width: element is hidden or detached
-        if (w > 0) setWidth(w);
+        if (measuredWidth > 0) setWidth(measuredWidth);
       });
 
       ro.observe(node);

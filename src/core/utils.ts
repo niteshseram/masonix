@@ -18,14 +18,14 @@ export function resolveResponsiveValue(
   if (typeof value === "number") return value;
 
   const entries: Array<[number, number]> = Object.entries(value)
-    .map(([k, v]): [number, number] => [Number(k), v as number])
-    .filter(([k]) => !isNaN(k));
+    .map(([keyStr, rawValue]): [number, number] => [Number(keyStr), rawValue as number])
+    .filter(([keyStr]) => !isNaN(keyStr));
 
-  entries.sort((a, b) => a[0] - b[0]);
+  entries.sort((entryA, entryB) => entryA[0] - entryB[0]);
 
   let result = entries[0]?.[1] ?? 1;
-  for (const [bp, val] of entries) {
-    if (containerWidth >= bp) result = val;
+  for (const [breakpoint, breakpointValue] of entries) {
+    if (containerWidth >= breakpoint) result = breakpointValue;
   }
 
   return result;

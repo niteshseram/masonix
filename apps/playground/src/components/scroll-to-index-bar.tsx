@@ -45,27 +45,29 @@ export function ScrollToIndexBar({ maxIndex, scrollHandleRef }: ScrollToIndexBar
         value={index}
         min={0}
         max={maxIndex}
-        onChange={(e) => {
-          const v = parseInt(e.target.value, 10);
-          if (!isNaN(v)) setIndex(Math.min(maxIndex, Math.max(0, v)));
+        onChange={(event) => {
+          const parsedIndex = parseInt(event.target.value, 10);
+          if (!isNaN(parsedIndex)) setIndex(Math.min(maxIndex, Math.max(0, parsedIndex)));
         }}
-        onKeyDown={(e) => e.key === "Enter" && go()}
+        onKeyDown={(event) => event.key === "Enter" && go()}
       />
 
       <div className="flex rounded bg-zinc-950 p-0.5">
-        {ALIGN_OPTIONS.map((a) => (
+        {ALIGN_OPTIONS.map((alignOption) => (
           <button
-            key={a}
+            key={alignOption}
             type="button"
-            onClick={() => setAlign(a)}
+            onClick={() => setAlign(alignOption)}
             className={clsx(
               "rounded px-2 py-1",
               "text-xs font-medium",
               "transition-colors",
-              align === a ? "bg-zinc-700 text-zinc-100" : "text-zinc-400 hover:text-zinc-200",
+              align === alignOption
+                ? "bg-zinc-700 text-zinc-100"
+                : "text-zinc-400 hover:text-zinc-200",
             )}
           >
-            {a}
+            {alignOption}
           </button>
         ))}
       </div>
