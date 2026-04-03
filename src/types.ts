@@ -122,6 +122,4 @@ export interface MasonryVirtualHandle {
     index: number,
     options?: { align?: "start" | "center" | "end"; smooth?: boolean },
   ): void;
-  scrollToOffset(offset: number, options?: { smooth?: boolean }): void;
-  getVisibleRange(): [startIndex: number, stopIndex: number];
 }

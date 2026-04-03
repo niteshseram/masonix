@@ -192,23 +192,6 @@ describe("useScrollToIndex", () => {
     expect(lastScrollToArgs!.behavior).toBe("instant");
   });
 
-  it("scrollToOffset scrolls to an absolute offset", () => {
-    const positioner = makePositionerWithItems();
-    const containerRef = createContainerRef();
-
-    const { result } = renderHook(() =>
-      useScrollToIndex({
-        positioner,
-        containerRef,
-        scrollContainer: window,
-        viewportHeight: 800,
-      }),
-    );
-
-    result.current.scrollToOffset(500);
-    expect(lastScrollToArgs!.top).toBe(500);
-  });
-
   it("does nothing if item index not found", () => {
     const positioner = makePositionerWithItems();
     const containerRef = createContainerRef();
@@ -224,23 +207,5 @@ describe("useScrollToIndex", () => {
 
     result.current.scrollToIndex(999);
     expect(lastScrollToArgs).toBeNull();
-  });
-
-  it("getVisibleRange returns correct range", () => {
-    const positioner = makePositionerWithItems();
-    const containerRef = createContainerRef();
-
-    const { result } = renderHook(() =>
-      useScrollToIndex({
-        positioner,
-        containerRef,
-        scrollContainer: window,
-        viewportHeight: 800,
-      }),
-    );
-
-    const [start, stop] = result.current.getVisibleRange();
-    expect(start).toBe(0);
-    expect(stop).toBeGreaterThanOrEqual(0);
   });
 });
