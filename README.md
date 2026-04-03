@@ -7,7 +7,7 @@
 
 <p align="center"><strong>The React masonry layout library that gets the fundamentals right.</strong></p>
 
-Correct reading order. Balanced columns. Optional virtualization. SSR-ready. Tailwind-compatible.
+Correct reading order. Balanced columns. Optional virtualization. SSR-ready. Tailwind-compatible
 
 ---
 
