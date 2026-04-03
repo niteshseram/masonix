@@ -1,36 +1,4 @@
 // ---------------------------------------------------------------------------
-// RAF-throttled callback
-// ---------------------------------------------------------------------------
-
-/**
- * Returns a function that, when called, schedules `fn` on the next animation
- * frame — but only once per frame regardless of how many times it is called.
- */
-export function rafThrottle<T extends unknown[]>(fn: (...args: T) => void): (...args: T) => void {
-  let rafId: number | null = null;
-  let latestArgs: T;
-
-  return function throttled(...args: T) {
-    latestArgs = args;
-    if (rafId !== null) return;
-    rafId = requestAnimationFrame(() => {
-      rafId = null;
-      fn(...latestArgs);
-    });
-  };
-}
-
-/**
- * Returns a function that cancels the pending RAF and the original throttled
- * function.
- */
-export function cancelRafThrottle(throttled: () => void): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const id = (throttled as any).__rafId as number | undefined;
-  if (id !== undefined) cancelAnimationFrame(id);
-}
-
-// ---------------------------------------------------------------------------
 // Scroll offset helpers
 // ---------------------------------------------------------------------------
 
