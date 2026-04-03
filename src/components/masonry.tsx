@@ -54,7 +54,6 @@ function MasonryInner<T = unknown>(
     defaultColumns = 3,
     defaultWidth,
     enableNative,
-    empty,
     role,
     "aria-label": ariaLabel,
     className,
@@ -113,21 +112,6 @@ function MasonryInner<T = unknown>(
   const ItemWrapper: any = itemAs ?? "div";
 
   const containerRole = role === "none" ? undefined : (role ?? "list");
-
-  // Empty state: still render the container so ResizeObserver stays attached
-  if (items.length === 0) {
-    return (
-      <Container
-        ref={mergedRef}
-        className={className}
-        style={style}
-        role={containerRole}
-        aria-label={ariaLabel}
-      >
-        {empty ?? null}
-      </Container>
-    );
-  }
 
   // Native CSS masonry path
   if (isNative) {

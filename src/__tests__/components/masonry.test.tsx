@@ -55,20 +55,6 @@ describe("Masonry", () => {
     });
   });
 
-  describe("empty state", () => {
-    it("renders empty prop inside container when items is empty", () => {
-      const { getByText } = render(
-        <Masonry items={[]} render={Card} empty={<p>Nothing here</p>} defaultWidth={900} />,
-      );
-      expect(getByText("Nothing here")).not.toBeNull();
-    });
-
-    it("renders an empty container when items is empty and no empty prop", () => {
-      const { container } = render(<Masonry items={[]} render={Card} defaultWidth={900} />);
-      expect(container.firstElementChild!.children).toHaveLength(0);
-    });
-  });
-
   describe("effectiveColumnCount", () => {
     it("renders fewer columns when itemCount < columns", () => {
       const { container } = render(

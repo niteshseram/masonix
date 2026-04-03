@@ -152,7 +152,7 @@ export default function App() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollHandleRef = useRef<MasonryVirtualHandle>(null);
 
-  const items = config.showEmpty ? [] : makePhotos(config.itemCount, shuffleKey, config);
+  const items = makePhotos(config.itemCount, shuffleKey, config);
   const activeTab = TABS.find((t) => t.value === config.component)!;
 
   function applyPreset(preset: Partial<Config>) {

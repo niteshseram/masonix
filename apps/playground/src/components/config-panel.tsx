@@ -20,7 +20,6 @@ export interface Config {
   component: ComponentMode;
 
   itemCount: number;
-  showEmpty: boolean;
   cardStyle: CardStyle;
   heightMode: HeightMode;
   minItemH: number;
@@ -57,7 +56,6 @@ export const DEFAULT_CONFIG: Config = {
   component: "masonry",
 
   itemCount: 20,
-  showEmpty: false,
   cardStyle: "color-block",
   heightMode: "stepped",
   minItemH: 80,
@@ -498,9 +496,6 @@ export function ConfigPanel({
                 />
               </Row>
             )}
-            <Row label="Empty">
-              <Toggle value={config.showEmpty} onChange={(v) => set("showEmpty", v)} />
-            </Row>
           </Section>
 
           {/* Columns */}

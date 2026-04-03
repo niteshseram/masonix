@@ -93,7 +93,6 @@ function MasonryVirtualInner<T = unknown>(
     getColumnSpan,
     estimatedItemHeight = DEFAULT_ESTIMATED_HEIGHT,
     minItemHeight,
-    empty,
     role,
     "aria-label": ariaLabel,
     className,
@@ -311,20 +310,6 @@ function MasonryVirtualInner<T = unknown>(
 
   const containerRole = role === "none" ? undefined : (role ?? "list");
   const ariaSetSize = totalItems ?? items.length;
-
-  if (items.length === 0) {
-    return (
-      <Container
-        ref={mergedRef}
-        className={className}
-        style={style}
-        role={containerRole}
-        aria-label={ariaLabel}
-      >
-        {empty ?? null}
-      </Container>
-    );
-  }
 
   const containerStyle: CSSProperties = {
     position: "relative",

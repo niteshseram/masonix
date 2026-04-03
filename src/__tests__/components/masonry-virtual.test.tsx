@@ -95,19 +95,6 @@ describe("MasonryVirtual", () => {
       expect(screen.getByTestId("item-0")).toBeTruthy();
     });
 
-    it("renders empty state when items is empty", () => {
-      render(
-        <MasonryVirtual
-          items={[]}
-          render={ItemRender}
-          columns={3}
-          gap={0}
-          empty={<span data-testid="empty">No items</span>}
-        />,
-      );
-      expect(screen.getByTestId("empty")).toBeTruthy();
-    });
-
     it("uses custom container element via 'as' prop", () => {
       const { container } = render(
         <MasonryVirtual

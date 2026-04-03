@@ -102,7 +102,6 @@ import { MasonryVirtual } from "masonix/virtual";
 | `gap`             | `number \| Record<number, number>`      | Fixed gap or `{ minWidthPx: gap }` map (px)       |
 | `defaultColumns`  | `number`                                | SSR fallback column count (default: 3)            |
 | `defaultWidth`    | `number`                                | SSR fallback container width                      |
-| `empty`           | `ReactNode`                             | Rendered when `items` is empty                    |
 | `className`       | `string`                                | Container class                                   |
 | `columnClassName` | `string`                                | Per-column class (CSS mode)                       |
 | `itemClassName`   | `string`                                | Per-item wrapper class                            |

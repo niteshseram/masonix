@@ -9,7 +9,6 @@ const TEXT_BODIES = [
   "Fixed.",
   "What if we added a dark mode toggle? Users have been requesting it and it would improve accessibility across the board.",
   "Completed the first pass. Still need to write tests and update docs before merging.",
-  "Remember to handle empty states — the layout breaks when the items array is empty without a fallback.",
   "Add nested grid support.",
   "Performance is noticeably better after the optimization pass. Load times down ~40ms on average across devices.",
   "The button padding is inconsistent on mobile. Font size could also be larger for readability on smaller screens.",

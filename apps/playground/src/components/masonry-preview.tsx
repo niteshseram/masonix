@@ -64,17 +64,6 @@ export function MasonryPreview({
     itemAs: config.itemAs as "div" | "li" | "article",
     "aria-label": config.ariaLabel || undefined,
     itemKey: (p: unknown) => (p as Photo).id,
-    empty: (
-      <div className="flex w-full flex-col items-center justify-center gap-3 py-28">
-        <div className="flex items-center justify-center gap-1">
-          {[40, 64, 32, 56, 48].map((h, i) => (
-            <div key={i} className="w-6 rounded-md bg-zinc-800" style={{ height: h }} />
-          ))}
-        </div>
-        <p className="text-sm font-medium text-zinc-600">No items</p>
-        <p className="text-xs text-zinc-700">Drag the count slider up to add some</p>
-      </div>
-    ),
   };
 
   if (config.component === "masonry-virtual") {

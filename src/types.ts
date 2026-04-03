@@ -82,9 +82,6 @@ export interface MasonryProps<T = unknown> {
   // --- Native CSS masonry ---
   enableNative?: boolean;
 
-  // --- Empty state ---
-  empty?: React.ReactNode;
-
   // --- Accessibility ---
   role?: "grid" | "list" | "none";
   "aria-label"?: string;
