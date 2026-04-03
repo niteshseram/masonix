@@ -52,8 +52,6 @@ export interface Config {
   minItemHeight: number;
 
   overscanBy: number;
-  useInfiniteScroll: boolean;
-  virtualTotalItems: number;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -100,8 +98,6 @@ export const DEFAULT_CONFIG: Config = {
   minItemHeight: 80,
 
   overscanBy: 2,
-  useInfiniteScroll: false,
-  virtualTotalItems: 500,
 };
 
 // ─── Layout primitives ────────────────────────────────────────────────────────
@@ -649,22 +645,6 @@ export function ConfigPanel({
                   onChange={(v) => set("overscanBy", v)}
                 />
               </Row>
-              <Row label="Infinite">
-                <Toggle
-                  value={config.useInfiniteScroll}
-                  onChange={(v) => set("useInfiniteScroll", v)}
-                />
-              </Row>
-              {config.useInfiniteScroll && (
-                <Row label="Total">
-                  <NumInput
-                    value={config.virtualTotalItems}
-                    min={10}
-                    max={10000}
-                    onChange={(v) => set("virtualTotalItems", v)}
-                  />
-                </Row>
-              )}
             </Section>
           )}
 

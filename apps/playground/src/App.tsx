@@ -64,7 +64,7 @@ const PRESETS: { name: string; description: string; config: Partial<Config> }[] 
   },
   {
     name: "10k items",
-    description: "Virtual · infinite scroll",
+    description: "Virtual · 10,000 items",
     config: {
       component: "masonry-virtual",
       columnMode: "custom",
@@ -78,10 +78,8 @@ const PRESETS: { name: string; description: string; config: Partial<Config> }[] 
       heightMode: "random",
       minItemH: 100,
       maxItemH: 400,
-      itemCount: 100,
+      itemCount: 10000,
       cardStyle: "color-block",
-      useInfiniteScroll: true,
-      virtualTotalItems: 10000,
     },
   },
 ];
@@ -160,13 +158,6 @@ export default function App() {
   function applyPreset(preset: Partial<Config>) {
     setConfig({ ...DEFAULT_CONFIG, ...preset });
     setShuffleKey(0);
-  }
-
-  function handleLoadMore(_start: number, stop: number) {
-    setConfig((c) => ({
-      ...c,
-      itemCount: Math.min(stop + 20, c.virtualTotalItems),
-    }));
   }
 
   // Keyboard shortcuts
@@ -286,7 +277,6 @@ export default function App() {
             <MasonryPreview
               items={items}
               config={config}
-              onLoadMore={handleLoadMore}
               scrollContainerRef={scrollContainerRef}
               scrollHandleRef={config.component === "masonry-virtual" ? scrollHandleRef : undefined}
             />
@@ -302,12 +292,6 @@ export default function App() {
           <span>{activeTab.label}</span>
           <span className="text-zinc-700">·</span>
           <span>{gapInfo}</span>
-          {config.component === "masonry-virtual" && config.useInfiniteScroll && (
-            <>
-              <span className="text-zinc-700">·</span>
-              <span className="text-blue-400/60">infinite scroll</span>
-            </>
-          )}
         </div>
         <div className="ml-auto hidden items-center gap-3 text-[10px] text-zinc-600 lg:flex">
           <span>

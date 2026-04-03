@@ -18,7 +18,6 @@ import { useColumns } from "../hooks/use-columns";
 import { useContainerWidth } from "../hooks/use-container-width";
 import { useItemHeights } from "../hooks/use-item-heights";
 import { useScroller } from "../hooks/use-scroller";
-import { useInfiniteLoader } from "../hooks/use-infinite-loader";
 import { useScrollToIndex } from "../hooks/use-scroll-to-index";
 import { createBalancedPositioner } from "../core/column-balancer";
 import { createIntervalTree } from "../core/interval-tree";
@@ -107,10 +106,7 @@ function MasonryVirtualInner<T = unknown>(
     // Virtual-specific props
     overscanBy = DEFAULT_OVERSCAN,
     scrollContainer,
-    onLoadMore,
-    isItemLoaded,
     totalItems,
-    loadMoreThreshold,
     scrollRef,
     onRangeChange,
   } = props;
@@ -263,21 +259,6 @@ function MasonryVirtualInner<T = unknown>(
       onRangeChange(startIndex, stopIndex);
     }
   }, [onRangeChange, startIndex, stopIndex]);
-
-  // Infinite loading — use a no-op fallback so the hook is always called
-  const noopLoadMore = useCallback(() => {}, []);
-  const { checkLoad } = useInfiniteLoader({
-    onLoadMore: onLoadMore ?? noopLoadMore,
-    isItemLoaded,
-    totalItems,
-    threshold: loadMoreThreshold,
-  });
-
-  useEffect(() => {
-    if (onLoadMore && positioner) {
-      checkLoad(startIndex, stopIndex, positioner);
-    }
-  }, [onLoadMore, checkLoad, startIndex, stopIndex, positioner]);
 
   // Scroll-to-index imperative handle
   const scrollContainerResolved =

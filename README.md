@@ -84,7 +84,6 @@ import { MasonryVirtual } from "masonix/virtual";
   gap={16}
   estimatedItemHeight={300}
   overscanBy={3}
-  onLoadMore={(start, stop) => fetchMore(start, stop)}
   render={({ data }) => <Photo photo={data} />}
 />;
 ```
@@ -118,19 +117,16 @@ import { MasonryVirtual } from "masonix/virtual";
 | `getItemHeight`       | `(data, index, columnWidth) => number` | Pre-known height — skips measurement, enables zero-CLS SSR |
 | `estimatedItemHeight` | `number`                               | Placeholder height before measurement                      |
 | `getColumnSpan`       | `(data, index) => number`              | Multi-column item spanning                                 |
-| `resizeDebounce`      | `number`                               | Height re-measure debounce in ms                           |
 
 ### `MasonryVirtual` additional props
 
 | Prop              | Type                        | Description                                        |
 | ----------------- | --------------------------- | -------------------------------------------------- |
-| `overscanBy`      | `number`                    | Extra rows to render outside viewport (default: 3) |
+| `overscanBy`      | `number`                    | Extra rows to render outside viewport (default: 2) |
 | `scrollContainer` | `RefObject<HTMLElement>`    | Custom scroll container (default: window)          |
-| `onLoadMore`      | `(start, stop) => void`     | Infinite scroll callback                           |
-| `isItemLoaded`    | `(index) => boolean`        | Loaded state for infinite scroll                   |
-| `totalItems`      | `number`                    | Known total for infinite scroll                    |
+| `totalItems`      | `number`                    | Total item count for `aria-setsize`                |
 | `scrollRef`       | `Ref<MasonryVirtualHandle>` | Imperative scroll control                          |
-| `onRangeChange`   | `(start, stop) => void`     | Fires when visible range changes                   |
+| `onRangeChange`   | `(start, stop) => void`     | Fires when visible range changes (use for infinite scroll) |
 
 ## Responsive columns
 

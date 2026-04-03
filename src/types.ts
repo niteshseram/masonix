@@ -127,10 +127,7 @@ export interface MasonryVirtualProps<T = unknown> extends MasonryBalancedProps<T
   overscanBy?: number;
   scrollContainer?: React.RefObject<HTMLElement | null>;
   scrollFps?: number;
-  onLoadMore?: (startIndex: number, stopIndex: number) => void | Promise<void>;
-  isItemLoaded?: (index: number) => boolean;
   totalItems?: number;
-  loadMoreThreshold?: number;
   scrollRef?: React.Ref<MasonryVirtualHandle>;
   onRangeChange?: (startIndex: number, stopIndex: number) => void;
 }

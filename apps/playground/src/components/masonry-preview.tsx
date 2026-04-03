@@ -34,7 +34,6 @@ function deriveLayoutProps(config: Config) {
 interface MasonryPreviewProps {
   items: Photo[];
   config: Config;
-  onLoadMore?: (start: number, stop: number) => void;
   scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
   scrollHandleRef?: React.RefObject<MasonryVirtualHandle | null>;
 }
@@ -42,7 +41,6 @@ interface MasonryPreviewProps {
 export function MasonryPreview({
   items,
   config,
-  onLoadMore,
   scrollContainerRef,
   scrollHandleRef,
 }: MasonryPreviewProps) {
@@ -89,8 +87,6 @@ export function MasonryPreview({
         getItemHeight={getItemHeight}
         estimatedItemHeight={config.estimatedItemHeight}
         overscanBy={config.overscanBy}
-        onLoadMore={config.useInfiniteScroll ? onLoadMore : undefined}
-        totalItems={config.useInfiniteScroll ? config.virtualTotalItems : undefined}
         scrollContainer={scrollContainerRef}
         scrollRef={scrollHandleRef}
         defaultWidth={800}
