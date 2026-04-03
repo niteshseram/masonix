@@ -9,10 +9,7 @@ export { usePositioner } from "./hooks/use-positioner";
 export { useItemHeights } from "./hooks/use-item-heights";
 
 // Core positioners (advanced / low-level usage)
-export { createPositioner } from "./core/positioner";
-export { createRowPositioner } from "./core/row-positioner";
-export { createBalancedPositioner, measureBalance } from "./core/column-balancer";
-export { createIntervalTree } from "./core/interval-tree";
+export { createBalancedPositioner } from "./core/column-balancer";
 
 // Core utilities
 export { resolveResponsiveValue, computeColumns, effectiveColumnCount } from "./core/utils";
