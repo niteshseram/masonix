@@ -119,18 +119,15 @@ export function useScrollToIndex({
     return { scrollTop, positions };
   }, []);
 
-  const restoreScrollState: MasonryVirtualHandle["restoreScrollState"] = useCallback(
-    (state) => {
-      // Restore item positions into the positioner
-      for (const pos of state.positions) {
-        positionerRef.current.set(pos.index, pos.height);
-      }
+  const restoreScrollState: MasonryVirtualHandle["restoreScrollState"] = useCallback((state) => {
+    // Restore item positions into the positioner
+    for (const pos of state.positions) {
+      positionerRef.current.set(pos.index, pos.height);
+    }
 
-      // Restore scroll position
-      scrollTo(scrollContainerRef.current, state.scrollTop, false);
-    },
-    [],
-  );
+    // Restore scroll position
+    scrollTo(scrollContainerRef.current, state.scrollTop, false);
+  }, []);
 
   return {
     scrollToIndex,

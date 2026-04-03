@@ -25,11 +25,7 @@ export function useInfiniteLoader({
   totalItems = Number.POSITIVE_INFINITY,
   threshold = 16,
 }: UseInfiniteLoaderOptions): {
-  checkLoad: (
-    visibleStartIndex: number,
-    visibleStopIndex: number,
-    positioner: Positioner,
-  ) => void;
+  checkLoad: (visibleStartIndex: number, visibleStopIndex: number, positioner: Positioner) => void;
 } {
   const loadingRef = useRef(false);
   const onLoadMoreRef = useRef(onLoadMore);

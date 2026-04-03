@@ -223,7 +223,7 @@ function MasonryVirtualInner<T = unknown>(
     if (!el) return 0;
     const container = scrollContainer?.current ?? window;
     return getScrollOffset(el, container);
-  }, [scrollContainer, scrollTop]); // Re-read on scroll for accurate values
+  }, [scrollContainer]); // Re-read on scroll for accurate values
 
   // Determine visible range using interval tree
   const { visibleIndices, startIndex, stopIndex } = useMemo(() => {
@@ -280,7 +280,8 @@ function MasonryVirtualInner<T = unknown>(
   }, [onLoadMore, checkLoad, startIndex, stopIndex, positioner]);
 
   // Scroll-to-index imperative handle
-  const scrollContainerResolved = scrollContainer?.current ?? (typeof window !== "undefined" ? window : null);
+  const scrollContainerResolved =
+    scrollContainer?.current ?? (typeof window !== "undefined" ? window : null);
 
   const handle = useScrollToIndex({
     positioner,
