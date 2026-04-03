@@ -79,9 +79,6 @@ export interface MasonryProps<T = unknown> {
   defaultColumns?: number;
   defaultWidth?: number;
 
-  // --- Ordering ---
-  sequential?: boolean;
-
   // --- Direction ---
   dir?: "ltr" | "rtl" | "auto";
 
@@ -109,9 +106,6 @@ export interface MasonryProps<T = unknown> {
   itemAs?: React.ElementType;
   itemKey?: (data: T, index: number) => string | number;
 
-  // --- Transitions ---
-  animate?: boolean;
-  animationDuration?: number;
 }
 
 export interface MasonryBalancedProps<T = unknown> extends MasonryProps<T> {
@@ -120,7 +114,6 @@ export interface MasonryBalancedProps<T = unknown> extends MasonryProps<T> {
   getItemHeight?: (data: T, index: number, columnWidth: number) => number;
   estimatedItemHeight?: number;
   minItemHeight?: number;
-  resizeDebounce?: number;
 }
 
 export interface MasonryVirtualProps<T = unknown> extends MasonryBalancedProps<T> {
