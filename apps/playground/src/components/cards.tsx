@@ -1,8 +1,7 @@
+import { clsx } from "clsx";
 import type { MasonryRenderProps } from "masonix";
 import type { Photo } from "../demo-data";
 
-// Text bodies of intentionally varying length so TextCard heights differ
-// naturally — ideal for demonstrating MasonryBalanced's measurement path.
 const TEXT_BODIES = [
   "A quick note.",
   "Revised the color palette to better align with brand guidelines. Changes applied across primary views.",
@@ -16,28 +15,76 @@ const TEXT_BODIES = [
   "The button padding is inconsistent on mobile. Font size could also be larger for readability on smaller screens.",
 ];
 
-export function ColorBlock({ data }: MasonryRenderProps<Photo>) {
+export function ColorBlock({ data, index, width }: MasonryRenderProps<Photo>) {
   return (
     <div
-      className="flex items-center justify-center rounded-lg text-[13px] font-semibold text-white"
+      className="group relative overflow-hidden rounded-2xl"
       style={{ background: data.color, height: data.height }}
     >
-      <span className="opacity-70">{data.alt}</span>
+      {/* Light sheen */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.12] via-transparent to-black/[0.18]" />
+
+      {/* Top edge highlight */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/25" />
+
+      {/* Index — bottom left */}
+      <span
+        className={clsx(
+          "absolute bottom-2.5 left-3",
+          "font-mono text-[11px] font-semibold tabular-nums",
+          "text-white/50 transition-colors group-hover:text-white/70",
+        )}
+      >
+        {index + 1}
+      </span>
+
+      {/* Dimension badge — on hover */}
+      <div
+        className={clsx(
+          "absolute right-2.5 top-2.5",
+          "flex items-center gap-1 rounded-md px-1.5 py-0.5",
+          "font-mono text-[10px] text-white/70",
+          "bg-black/30 backdrop-blur-sm",
+          "opacity-0 transition-opacity duration-200 group-hover:opacity-100",
+        )}
+      >
+        {data.height}
+        <span className="text-white/40">×</span>
+        {width}
+      </div>
     </div>
   );
 }
 
 export function TextCard({ data, index }: MasonryRenderProps<Photo>) {
   return (
-    <div className="overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800/60">
+    <div
+      className={clsx(
+        "group overflow-hidden rounded-2xl",
+        "border border-zinc-800 bg-zinc-900",
+        "transition-colors duration-150 hover:border-zinc-700",
+      )}
+    >
+      {/* Color header */}
       <div
-        className="flex h-10 items-center px-3 text-xs font-semibold text-white/80"
+        className="relative flex items-center gap-2 px-3 py-2.5"
         style={{ background: data.color }}
       >
-        {data.alt}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/15 to-transparent" />
+        <span className="relative flex-1 truncate text-[11px] font-semibold text-white/90">
+          {data.alt}
+        </span>
+        <span className="relative shrink-0 font-mono text-[10px] text-white/50">#{index + 1}</span>
       </div>
-      <div className="p-3">
-        <p className="text-xs leading-relaxed text-zinc-300">
+
+      {/* Body */}
+      <div className="px-3 py-3">
+        <p
+          className={clsx(
+            "text-[12px] leading-relaxed",
+            "text-zinc-400 transition-colors group-hover:text-zinc-300",
+          )}
+        >
           {TEXT_BODIES[index % TEXT_BODIES.length]}
         </p>
       </div>

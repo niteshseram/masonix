@@ -1,4 +1,7 @@
+import React from "react";
 import { Masonry, MasonryBalanced } from "masonix";
+import { MasonryVirtual } from "masonix/virtual";
+import type { MasonryVirtualHandle } from "masonix/virtual";
 import { ColorBlock, TextCard } from "./cards";
 import type { Config, BpEntry } from "./config-panel";
 import type { Photo } from "../demo-data";
@@ -31,9 +34,18 @@ function deriveLayoutProps(config: Config) {
 interface MasonryPreviewProps {
   items: Photo[];
   config: Config;
+  onLoadMore?: (start: number, stop: number) => void;
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
+  scrollHandleRef?: React.RefObject<MasonryVirtualHandle | null>;
 }
 
-export function MasonryPreview({ items, config }: MasonryPreviewProps) {
+export function MasonryPreview({
+  items,
+  config,
+  onLoadMore,
+  scrollContainerRef,
+  scrollHandleRef,
+}: MasonryPreviewProps) {
   const { columns, columnWidth, maxColumns, gap } = deriveLayoutProps(config);
 
   const Render = config.cardStyle === "text-card" ? TextCard : ColorBlock;
@@ -55,8 +67,36 @@ export function MasonryPreview({ items, config }: MasonryPreviewProps) {
     itemAs: config.itemAs as "div" | "li" | "article",
     "aria-label": config.ariaLabel || undefined,
     itemKey: (p: unknown) => (p as Photo).id,
-    empty: <p className="w-full py-20 text-center text-sm text-zinc-600">No items to display.</p>,
+    empty: (
+      <div className="flex w-full flex-col items-center justify-center gap-3 py-28">
+        <div className="flex items-center justify-center gap-1">
+          {[40, 64, 32, 56, 48].map((h, i) => (
+            <div key={i} className="w-6 rounded-md bg-zinc-800" style={{ height: h }} />
+          ))}
+        </div>
+        <p className="text-sm font-medium text-zinc-600">No items</p>
+        <p className="text-xs text-zinc-700">Drag the count slider up to add some</p>
+      </div>
+    ),
   };
+
+  if (config.component === "masonry-virtual") {
+    return (
+      <MasonryVirtual
+        {...commonProps}
+        items={items}
+        render={Render}
+        getItemHeight={getItemHeight}
+        estimatedItemHeight={config.estimatedItemHeight}
+        overscanBy={config.overscanBy}
+        onLoadMore={config.useInfiniteScroll ? onLoadMore : undefined}
+        totalItems={config.useInfiniteScroll ? config.virtualTotalItems : undefined}
+        scrollContainer={scrollContainerRef}
+        scrollRef={scrollHandleRef}
+        defaultWidth={800}
+      />
+    );
+  }
 
   if (config.component === "masonry") {
     return (

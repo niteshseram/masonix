@@ -1,10 +1,11 @@
 import type React from "react";
 import { useState, useEffect } from "react";
+import { clsx } from "clsx";
 import { ScrollArea } from "@base-ui-components/react/scroll-area";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ComponentMode = "masonry" | "masonry-balanced";
+export type ComponentMode = "masonry" | "masonry-balanced" | "masonry-virtual";
 export type ColumnMode = "fixed" | "custom" | "columnWidth";
 export type GapMode = "fixed" | "custom";
 export type HeightMode = "stepped" | "random" | "uniform";
@@ -16,10 +17,8 @@ export interface BpEntry {
 }
 
 export interface Config {
-  // Component
   component: ComponentMode;
 
-  // Items
   itemCount: number;
   showEmpty: boolean;
   cardStyle: CardStyle;
@@ -28,7 +27,6 @@ export interface Config {
   maxItemH: number;
   uniformHeight: number;
 
-  // Columns
   columnMode: ColumnMode;
   fixedColumns: number;
   customColBps: BpEntry[];
@@ -36,26 +34,26 @@ export interface Config {
   maxColumns: number;
   useMaxColumns: boolean;
 
-  // Gap
   gapMode: GapMode;
   fixedGap: number;
   customGapBps: BpEntry[];
 
-  // Layout
   dir: "ltr" | "rtl" | "auto";
   role: "list" | "grid" | "none";
   enableNative: boolean;
 
-  // Elements
   as: "div" | "ul" | "section" | "main";
   itemAs: "div" | "li" | "article";
   ariaLabel: string;
 
-  // MasonryBalanced
   useKnownHeights: boolean;
   estimatedItemHeight: number;
   useMinItemHeight: boolean;
   minItemHeight: number;
+
+  overscanBy: number;
+  useInfiniteScroll: boolean;
+  virtualTotalItems: number;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -100,32 +98,132 @@ export const DEFAULT_CONFIG: Config = {
   estimatedItemHeight: 150,
   useMinItemHeight: false,
   minItemHeight: 80,
+
+  overscanBy: 2,
+  useInfiniteScroll: false,
+  virtualTotalItems: 500,
 };
 
-// ─── Primitives ───────────────────────────────────────────────────────────────
+// ─── Layout primitives ────────────────────────────────────────────────────────
+
+function SectionHeader({ title, chevron }: { title: string; chevron?: boolean }) {
+  return (
+    <div className="mb-3 flex items-center justify-between border-b border-zinc-800/70 pb-1.5">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{title}</span>
+      {chevron !== undefined && (
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 10 10"
+          fill="none"
+          aria-hidden
+          className={clsx(
+            "text-zinc-500 transition-transform duration-150",
+            chevron && "rotate-180",
+          )}
+        >
+          <path
+            d="M1.5 3.5L5 7L8.5 3.5"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+    </div>
+  );
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-5">
-      <p className="mb-2 border-b border-zinc-800 pb-1.5 text-[10px] font-bold tracking-widest text-zinc-600 uppercase">
-        {title}
-      </p>
-      <div className="flex flex-col gap-2">{children}</div>
+      <SectionHeader title={title} />
+      <div className="flex flex-col gap-2.5">{children}</div>
     </div>
   );
 }
 
+function Collapsible({ title, children }: { title: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mb-5">
+      <button type="button" onClick={() => setOpen((v) => !v)} className="w-full">
+        <SectionHeader title={title} chevron={open} />
+      </button>
+      {open && <div className="flex flex-col gap-2.5">{children}</div>}
+    </div>
+  );
+}
+
+/**
+ * Row — label left, single-value control right.
+ * Use for: Toggle, NumInput, Slider, composites.
+ * Never put a Seg in Row — use Field instead.
+ */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-2">
-      <label className="min-w-[76px] shrink-0 text-xs text-zinc-400">{label}</label>
-      <div className="shrink-0">{children}</div>
+    <div className="flex items-center gap-2">
+      <span className="w-20 shrink-0 text-xs text-zinc-400">{label}</span>
+      <div className="flex flex-1 items-center justify-end">{children}</div>
     </div>
   );
 }
 
-const baseInputCls =
-  "bg-zinc-900 border border-zinc-700 rounded text-xs text-zinc-100 px-1.5 py-1 outline-none focus:ring-1 focus:ring-blue-500";
+/**
+ * Field — label above, full-width control below.
+ * Always use for Seg so it fills available width.
+ */
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs text-zinc-400">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+// ─── Controls ─────────────────────────────────────────────────────────────────
+
+const inputCls = clsx(
+  "bg-zinc-900 border border-zinc-800 rounded",
+  "text-xs text-zinc-100",
+  "px-1.5 py-1",
+  "outline-none focus:ring-1 focus:ring-blue-500/60",
+);
+
+/** Segmented control — always full-width; use inside Field, never inside Row. */
+function Seg<T extends string>({
+  value,
+  options,
+  onChange,
+}: {
+  value: T;
+  options: { label: string; value: T }[];
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="flex w-full rounded-md bg-zinc-950 p-0.5">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          className={clsx(
+            "flex-1 rounded px-2 py-1.5",
+            "text-xs font-medium",
+            "transition-colors",
+            value === o.value
+              ? "bg-zinc-700 text-zinc-100 shadow-sm"
+              : "text-zinc-400 hover:text-zinc-200",
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function NumInput({
   value,
@@ -142,14 +240,13 @@ function NumInput({
 }) {
   const [draft, setDraft] = useState(String(value));
 
-  // Sync when external value changes (e.g. config reset)
   useEffect(() => {
     setDraft(String(value));
   }, [value]);
 
   function commit(raw: string) {
-    const parsed = parseInt(raw, 10);
-    const clamped = isNaN(parsed) ? value : Math.min(max, Math.max(min, parsed));
+    const n = parseInt(raw, 10);
+    const clamped = isNaN(n) ? value : Math.min(max, Math.max(min, n));
     onChange(clamped);
     setDraft(String(clamped));
   }
@@ -157,7 +254,13 @@ function NumInput({
   return (
     <input
       type="number"
-      className={`${baseInputCls} w-16 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+      className={clsx(
+        inputCls,
+        "w-16",
+        "[appearance:textfield]",
+        "[&::-webkit-inner-spin-button]:appearance-none",
+        "[&::-webkit-outer-spin-button]:appearance-none",
+      )}
       style={style}
       value={draft}
       min={min}
@@ -168,30 +271,6 @@ function NumInput({
         if (e.key === "Enter") commit((e.target as HTMLInputElement).value);
       }}
     />
-  );
-}
-
-function Sel<T extends string>({
-  value,
-  options,
-  onChange,
-}: {
-  value: T;
-  options: { label: string; value: T }[];
-  onChange: (v: T) => void;
-}) {
-  return (
-    <select
-      className={`${baseInputCls} cursor-pointer`}
-      value={value}
-      onChange={(e) => onChange(e.target.value as T)}
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
   );
 }
 
@@ -211,19 +290,25 @@ function Toggle({
       aria-checked={value}
       disabled={disabled}
       onClick={() => !disabled && onChange(!value)}
-      className={`relative h-5 w-8 rounded-full transition-colors duration-150 ${
-        disabled ? "cursor-not-allowed opacity-40" : ""
-      } ${value && !disabled ? "bg-blue-500" : "bg-zinc-700"}`}
+      className={clsx(
+        "relative h-5 w-8 rounded-full",
+        "transition-colors duration-150",
+        disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
+        value && !disabled ? "bg-blue-500" : "bg-zinc-700",
+      )}
     >
       <span
-        className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-[left] duration-150 ${
-          value ? "left-[18px]" : "left-0.5"
-        }`}
+        className={clsx(
+          "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow",
+          "transition-[left] duration-150",
+          value ? "left-[18px]" : "left-0.5",
+        )}
       />
     </button>
   );
 }
 
+/** Full-width slider — always use inside Row. */
 function Slider({
   value,
   min,
@@ -236,16 +321,18 @@ function Slider({
   onChange: (v: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center gap-2">
       <input
         type="range"
         min={min}
         max={max}
         value={value}
-        className="w-24 accent-blue-500"
+        className="flex-1 cursor-pointer accent-blue-500"
         onChange={(e) => onChange(Number(e.target.value))}
       />
-      <span className="w-6 text-right text-xs tabular-nums text-zinc-400">{value}</span>
+      <span className="w-7 shrink-0 text-right font-mono text-xs tabular-nums text-zinc-300">
+        {value}
+      </span>
     </div>
   );
 }
@@ -269,27 +356,15 @@ function BpEditor({
     onChange(entries.map((e, idx) => (idx === i ? { ...e, [field]: val } : e)));
   }
 
-  function remove(i: number) {
-    onChange(entries.filter((_, idx) => idx !== i));
-  }
-
-  function add() {
-    const last = entries[entries.length - 1];
-    onChange([
-      ...entries,
-      { minWidth: (last?.minWidth ?? 0) + 300, value: last?.value ?? valueMin },
-    ]);
-  }
-
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="mb-0.5 grid grid-cols-[1fr_1fr_16px] gap-x-1.5">
-        <span className="text-center text-[10px] text-zinc-600">min-width (px)</span>
-        <span className="text-center text-[10px] text-zinc-600">{valueLabel}</span>
+      <div className="grid grid-cols-[1fr_1fr_20px] gap-x-1.5">
+        <span className="text-center text-[10px] text-zinc-500">min-width</span>
+        <span className="text-center text-[10px] text-zinc-500">{valueLabel}</span>
       </div>
 
       {entries.map((entry, i) => (
-        <div key={i} className="grid grid-cols-[1fr_1fr_16px] items-center gap-x-1.5">
+        <div key={i} className="grid grid-cols-[1fr_1fr_20px] items-center gap-x-1.5">
           <NumInput
             value={entry.minWidth}
             min={0}
@@ -306,19 +381,40 @@ function BpEditor({
           />
           <button
             type="button"
-            onClick={() => remove(i)}
-            className="text-base leading-none text-zinc-600 transition-colors hover:text-zinc-300"
+            onClick={() => onChange(entries.filter((_, idx) => idx !== i))}
             title="Remove"
+            className={clsx(
+              "flex h-5 w-5 items-center justify-center rounded",
+              "text-zinc-500 transition-colors",
+              "hover:bg-zinc-800 hover:text-zinc-200",
+            )}
           >
-            ×
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden>
+              <path
+                d="M1 1l6 6M7 1L1 7"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
         </div>
       ))}
 
       <button
         type="button"
-        onClick={add}
-        className="mt-0.5 w-full rounded border border-dashed border-zinc-700 py-1 text-xs text-zinc-600 transition-colors hover:border-zinc-500 hover:text-zinc-400"
+        onClick={() => {
+          const last = entries[entries.length - 1];
+          onChange([
+            ...entries,
+            { minWidth: (last?.minWidth ?? 0) + 300, value: last?.value ?? valueMin },
+          ]);
+        }}
+        className={clsx(
+          "w-full rounded border border-dashed border-zinc-700 py-1",
+          "text-[11px] text-zinc-500",
+          "transition-colors hover:border-zinc-500 hover:text-zinc-300",
+        )}
       >
         + add breakpoint
       </button>
@@ -331,49 +427,35 @@ function BpEditor({
 export function ConfigPanel({
   config,
   setConfig,
-  onShuffle,
 }: {
   config: Config;
   setConfig: React.Dispatch<React.SetStateAction<Config>>;
-  onShuffle: () => void;
 }) {
   function set<K extends keyof Config>(key: K, value: Config[K]) {
     setConfig((c) => ({ ...c, [key]: value }));
   }
 
-  // Text cards have content-driven heights — "Known heights" doesn't apply
+  const isBalancedOrVirtual =
+    config.component === "masonry-balanced" || config.component === "masonry-virtual";
   const knownHeightsDisabled = config.cardStyle === "text-card";
+  const maxCount = config.component === "masonry-virtual" ? 500 : 100;
 
   return (
     <ScrollArea.Root className="h-full overflow-hidden">
       <ScrollArea.Viewport className="h-full">
         <div className="px-4 pb-8 pt-4">
-          {/* Component */}
-          <Section title="Component">
-            <Row label="Mode">
-              <Sel
-                value={config.component}
-                options={[
-                  { label: "Masonry", value: "masonry" },
-                  { label: "MasonryBalanced", value: "masonry-balanced" },
-                ]}
-                onChange={(v) => set("component", v)}
-              />
-            </Row>
-          </Section>
-
           {/* Items */}
           <Section title="Items">
             <Row label="Count">
               <Slider
                 value={config.itemCount}
                 min={0}
-                max={50}
+                max={maxCount}
                 onChange={(v) => set("itemCount", v)}
               />
             </Row>
-            <Row label="Card style">
-              <Sel
+            <Field label="Card">
+              <Seg
                 value={config.cardStyle}
                 options={[
                   { label: "Color block", value: "color-block" },
@@ -381,9 +463,9 @@ export function ConfigPanel({
                 ]}
                 onChange={(v) => set("cardStyle", v)}
               />
-            </Row>
-            <Row label="Heights">
-              <Sel
+            </Field>
+            <Field label="Heights">
+              <Seg
                 value={config.heightMode}
                 options={[
                   { label: "Stepped", value: "stepped" },
@@ -392,40 +474,28 @@ export function ConfigPanel({
                 ]}
                 onChange={(v) => set("heightMode", v)}
               />
-            </Row>
-
+            </Field>
             {config.heightMode === "random" && (
-              <>
-                <Row label="Min h (px)">
+              <Row label="Range">
+                <div className="flex items-center gap-1.5">
                   <NumInput
                     value={config.minItemH}
                     min={20}
                     max={config.maxItemH - 20}
                     onChange={(v) => set("minItemH", v)}
                   />
-                </Row>
-                <Row label="Max h (px)">
+                  <span className="text-xs text-zinc-600">–</span>
                   <NumInput
                     value={config.maxItemH}
                     min={config.minItemH + 20}
                     max={800}
                     onChange={(v) => set("maxItemH", v)}
                   />
-                </Row>
-                <Row label="">
-                  <button
-                    type="button"
-                    onClick={onShuffle}
-                    className="rounded border border-zinc-700 px-2 py-0.5 text-xs text-zinc-400 transition-colors hover:border-zinc-500 hover:text-zinc-200"
-                  >
-                    Shuffle
-                  </button>
-                </Row>
-              </>
+                </div>
+              </Row>
             )}
-
             {config.heightMode === "uniform" && (
-              <Row label="Height (px)">
+              <Row label="Height">
                 <NumInput
                   value={config.uniformHeight}
                   min={20}
@@ -434,28 +504,26 @@ export function ConfigPanel({
                 />
               </Row>
             )}
-
-            <Row label="Empty state">
+            <Row label="Empty">
               <Toggle value={config.showEmpty} onChange={(v) => set("showEmpty", v)} />
             </Row>
           </Section>
 
           {/* Columns */}
           <Section title="Columns">
-            <Row label="Mode">
-              <Sel
+            <Field label="Mode">
+              <Seg
                 value={config.columnMode}
                 options={[
                   { label: "Fixed", value: "fixed" },
-                  { label: "Custom bps", value: "custom" },
-                  { label: "Col width", value: "columnWidth" },
+                  { label: "Custom", value: "custom" },
+                  { label: "Auto", value: "columnWidth" },
                 ]}
                 onChange={(v) => set("columnMode", v)}
               />
-            </Row>
-
+            </Field>
             {config.columnMode === "fixed" && (
-              <Row label="Columns">
+              <Row label="Count">
                 <NumInput
                   value={config.fixedColumns}
                   min={1}
@@ -464,7 +532,6 @@ export function ConfigPanel({
                 />
               </Row>
             )}
-
             {config.columnMode === "custom" && (
               <BpEditor
                 entries={config.customColBps}
@@ -474,9 +541,8 @@ export function ConfigPanel({
                 onChange={(bps) => set("customColBps", bps)}
               />
             )}
-
             {config.columnMode === "columnWidth" && (
-              <Row label="Min width (px)">
+              <Row label="Min width">
                 <NumInput
                   value={config.autoColumnWidth}
                   min={50}
@@ -485,7 +551,6 @@ export function ConfigPanel({
                 />
               </Row>
             )}
-
             <Row label="Max cols">
               <div className="flex items-center gap-2">
                 <Toggle value={config.useMaxColumns} onChange={(v) => set("useMaxColumns", v)} />
@@ -503,20 +568,19 @@ export function ConfigPanel({
 
           {/* Gap */}
           <Section title="Gap">
-            <Row label="Mode">
-              <Sel
+            <Field label="Mode">
+              <Seg
                 value={config.gapMode}
                 options={[
                   { label: "Fixed", value: "fixed" },
-                  { label: "Custom bps", value: "custom" },
+                  { label: "Custom", value: "custom" },
                 ]}
                 onChange={(v) => set("gapMode", v)}
               />
-            </Row>
-
+            </Field>
             {config.gapMode === "fixed" && (
-              <Row label="Gap (px)">
-                <NumInput
+              <Row label="Size">
+                <Slider
                   value={config.fixedGap}
                   min={0}
                   max={64}
@@ -524,7 +588,6 @@ export function ConfigPanel({
                 />
               </Row>
             )}
-
             {config.gapMode === "custom" && (
               <BpEditor
                 entries={config.customGapBps}
@@ -536,21 +599,16 @@ export function ConfigPanel({
             )}
           </Section>
 
-          {/* MasonryBalanced options */}
-          {config.component === "masonry-balanced" && (
-            <Section title="Balanced">
-              <Row label="Known heights">
+          {/* Measurement — balanced + virtual only */}
+          {isBalancedOrVirtual && (
+            <Section title="Measurement">
+              <Row label="Known">
                 <Toggle
                   value={config.useKnownHeights}
                   disabled={knownHeightsDisabled}
                   onChange={(v) => set("useKnownHeights", v)}
                 />
               </Row>
-              {knownHeightsDisabled && (
-                <p className="text-[10px] text-zinc-600">
-                  Not available for text cards — heights are content-driven.
-                </p>
-              )}
               {!config.useKnownHeights && !knownHeightsDisabled && (
                 <Row label="Est. height">
                   <NumInput
@@ -580,41 +638,67 @@ export function ConfigPanel({
             </Section>
           )}
 
-          {/* Layout */}
-          <Section title="Layout">
-            <Row label="Dir">
-              <Sel
+          {/* Virtual — virtual only */}
+          {config.component === "masonry-virtual" && (
+            <Section title="Virtual">
+              <Row label="Overscan">
+                <Slider
+                  value={config.overscanBy}
+                  min={0}
+                  max={10}
+                  onChange={(v) => set("overscanBy", v)}
+                />
+              </Row>
+              <Row label="Infinite">
+                <Toggle
+                  value={config.useInfiniteScroll}
+                  onChange={(v) => set("useInfiniteScroll", v)}
+                />
+              </Row>
+              {config.useInfiniteScroll && (
+                <Row label="Total">
+                  <NumInput
+                    value={config.virtualTotalItems}
+                    min={10}
+                    max={10000}
+                    onChange={(v) => set("virtualTotalItems", v)}
+                  />
+                </Row>
+              )}
+            </Section>
+          )}
+
+          {/* Advanced */}
+          <Collapsible title="Advanced">
+            <Field label="Direction">
+              <Seg
                 value={config.dir}
                 options={[
-                  { label: "ltr", value: "ltr" },
-                  { label: "rtl", value: "rtl" },
-                  { label: "auto", value: "auto" },
+                  { label: "LTR", value: "ltr" },
+                  { label: "RTL", value: "rtl" },
+                  { label: "Auto", value: "auto" },
                 ]}
                 onChange={(v) => set("dir", v)}
               />
-            </Row>
-            <Row label="Role">
-              <Sel
+            </Field>
+            <Field label="Role">
+              <Seg
                 value={config.role}
                 options={[
-                  { label: "list", value: "list" },
-                  { label: "grid", value: "grid" },
-                  { label: "none", value: "none" },
+                  { label: "List", value: "list" },
+                  { label: "Grid", value: "grid" },
+                  { label: "None", value: "none" },
                 ]}
                 onChange={(v) => set("role", v)}
               />
-            </Row>
+            </Field>
             {config.component === "masonry" && (
               <Row label="Native CSS">
                 <Toggle value={config.enableNative} onChange={(v) => set("enableNative", v)} />
               </Row>
             )}
-          </Section>
-
-          {/* Elements */}
-          <Section title="Elements">
-            <Row label="Container">
-              <Sel
+            <Field label="Container">
+              <Seg
                 value={config.as}
                 options={[
                   { label: "div", value: "div" },
@@ -624,9 +708,9 @@ export function ConfigPanel({
                 ]}
                 onChange={(v) => set("as", v)}
               />
-            </Row>
-            <Row label="Item">
-              <Sel
+            </Field>
+            <Field label="Item">
+              <Seg
                 value={config.itemAs}
                 options={[
                   { label: "div", value: "div" },
@@ -635,22 +719,22 @@ export function ConfigPanel({
                 ]}
                 onChange={(v) => set("itemAs", v)}
               />
-            </Row>
+            </Field>
             <Row label="aria-label">
               <input
-                className={`${baseInputCls} w-28 placeholder:text-zinc-600`}
+                className={clsx(inputCls, "w-28 placeholder:text-zinc-600")}
                 value={config.ariaLabel}
                 placeholder="optional"
                 onChange={(e) => set("ariaLabel", e.target.value)}
               />
             </Row>
-          </Section>
+          </Collapsible>
         </div>
       </ScrollArea.Viewport>
 
       <ScrollArea.Scrollbar
         orientation="vertical"
-        className="flex w-1.5 touch-none select-none rounded-full p-px"
+        className="flex w-1 touch-none select-none rounded-full p-px"
       >
         <ScrollArea.Thumb className="flex-1 rounded-full bg-zinc-700 transition-colors hover:bg-zinc-500" />
       </ScrollArea.Scrollbar>
