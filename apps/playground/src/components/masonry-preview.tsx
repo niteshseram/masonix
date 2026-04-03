@@ -66,6 +66,8 @@ export function MasonryPreview({
     itemKey: (photo: unknown) => (photo as Photo).id,
   };
 
+  const minItemHeight = config.useMinItemHeight ? config.minItemHeight : undefined;
+
   if (config.component === "masonry-virtual") {
     return (
       <MasonryVirtual
@@ -74,6 +76,7 @@ export function MasonryPreview({
         render={Render}
         getItemHeight={getItemHeight}
         estimatedItemHeight={config.estimatedItemHeight}
+        minItemHeight={minItemHeight}
         overscanBy={config.overscanBy}
         scrollContainer={scrollContainerRef}
         scrollRef={scrollHandleRef}
@@ -95,6 +98,7 @@ export function MasonryPreview({
       render={Render}
       getItemHeight={getItemHeight}
       estimatedItemHeight={config.estimatedItemHeight}
+      minItemHeight={minItemHeight}
     />
   );
 }
