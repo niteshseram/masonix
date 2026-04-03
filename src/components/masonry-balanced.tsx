@@ -1,4 +1,13 @@
-import React, { type CSSProperties, type ReactElement, memo, useCallback, useMemo } from "react";
+import React, {
+  type CSSProperties,
+  type ReactElement,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { MasonryBalancedProps, MasonryRenderProps } from "../types";
 import { useColumns } from "../hooks/use-columns";
 import { useContainerWidth } from "../hooks/use-container-width";
@@ -6,6 +15,19 @@ import { useItemHeights } from "../hooks/use-item-heights";
 import { createPositioner } from "../core/positioner";
 
 const DEFAULT_ESTIMATED_HEIGHT = 150;
+
+// Visually hidden — present in DOM for screen readers but invisible to sighted users
+const VISUALLY_HIDDEN_STYLE: CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  margin: -1,
+  padding: 0,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
 
 // ---------------------------------------------------------------------------
 // Internal memoized item — prevents re-renders on unrelated layout updates
@@ -23,6 +45,9 @@ interface BalancedItemProps {
   Render: React.ComponentType<any>;
   style: CSSProperties;
   setItemRef?: (node: HTMLElement | null) => void;
+  itemRole: "listitem" | undefined;
+  ariaSetSize: number;
+  ariaPosInSet: number;
 }
 
 const BalancedItem = memo(function BalancedItem({
@@ -34,9 +59,19 @@ const BalancedItem = memo(function BalancedItem({
   Render,
   style,
   setItemRef,
+  itemRole,
+  ariaSetSize,
+  ariaPosInSet,
 }: BalancedItemProps): ReactElement {
   return (
-    <ItemWrapper ref={setItemRef} className={itemClassName} style={style}>
+    <ItemWrapper
+      ref={setItemRef}
+      className={itemClassName}
+      style={style}
+      role={itemRole}
+      aria-setsize={itemRole ? ariaSetSize : undefined}
+      aria-posinset={itemRole ? ariaPosInSet : undefined}
+    >
       <Render index={index} data={data} width={width} />
     </ItemWrapper>
   );
@@ -145,6 +180,16 @@ function MasonryBalancedInner<T = unknown>(
     estimatedItemHeight,
   ]);
 
+  // aria-live announcement on item count changes (filter/add/remove)
+  const [announcement, setAnnouncement] = useState("");
+  const prevItemCountRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevItemCountRef.current !== null && prevItemCountRef.current !== items.length) {
+      setAnnouncement(`${items.length} ${items.length === 1 ? "item" : "items"}`);
+    }
+    prevItemCountRef.current = items.length;
+  }, [items.length]);
+
   // Container height = bottom edge of the tallest item (no trailing gap)
   const containerHeight =
     positionedItems.length > 0
@@ -157,6 +202,8 @@ function MasonryBalancedInner<T = unknown>(
   const ItemWrapper: any = itemAs ?? "div";
 
   const containerRole = role === "none" ? undefined : (role ?? "list");
+  const itemRole: "listitem" | undefined = containerRole !== undefined ? "listitem" : undefined;
+  const ariaSetSize = items.length;
 
   const containerStyle: CSSProperties = {
     position: "relative",
@@ -165,44 +212,52 @@ function MasonryBalancedInner<T = unknown>(
   };
 
   return (
-    <Container
-      ref={mergedRef}
-      className={className}
-      style={containerStyle}
-      role={containerRole}
-      aria-label={ariaLabel}
-    >
-      {positionedItems.map(({ index, top, left, width, measured }) => {
-        const data = items[index];
-        const key = itemKey ? itemKey(data as T, index) : index;
+    <>
+      <Container
+        ref={mergedRef}
+        className={className}
+        style={containerStyle}
+        role={containerRole}
+        aria-label={ariaLabel}
+      >
+        {positionedItems.map(({ index, top, left, width, measured }) => {
+          const data = items[index];
+          const key = itemKey ? itemKey(data as T, index) : index;
 
-        const itemStyle: CSSProperties = {
-          position: "absolute",
-          top,
-          insetInlineStart: left,
-          width,
-          // Hide unmeasured items so they don't flash at the wrong size.
-          // Once measured, they snap to their final position.
-          ...(getItemHeight ? {} : { visibility: measured ? "visible" : ("hidden" as const) }),
-        };
+          const itemStyle: CSSProperties = {
+            position: "absolute",
+            top,
+            insetInlineStart: left,
+            width,
+            // Hide unmeasured items so they don't flash at the wrong size.
+            // Once measured, they snap to their final position.
+            ...(getItemHeight ? {} : { visibility: measured ? "visible" : ("hidden" as const) }),
+          };
 
-        return (
-          <BalancedItem
-            key={key}
-            ItemWrapper={ItemWrapper}
-            itemClassName={itemClassName}
-            data={data}
-            index={index}
-            width={width}
-            Render={Render as React.ComponentType<MasonryRenderProps<unknown>>}
-            style={itemStyle}
-            setItemRef={
-              getItemHeight ? undefined : (node: HTMLElement | null) => setItemRef(node, index)
-            }
-          />
-        );
-      })}
-    </Container>
+          return (
+            <BalancedItem
+              key={key}
+              ItemWrapper={ItemWrapper}
+              itemClassName={itemClassName}
+              data={data}
+              index={index}
+              width={width}
+              Render={Render as React.ComponentType<MasonryRenderProps<unknown>>}
+              style={itemStyle}
+              setItemRef={
+                getItemHeight ? undefined : (node: HTMLElement | null) => setItemRef(node, index)
+              }
+              itemRole={itemRole}
+              ariaSetSize={ariaSetSize}
+              ariaPosInSet={index + 1}
+            />
+          );
+        })}
+      </Container>
+      <div aria-live="polite" aria-atomic="true" style={VISUALLY_HIDDEN_STYLE}>
+        {announcement}
+      </div>
+    </>
   );
 }
 

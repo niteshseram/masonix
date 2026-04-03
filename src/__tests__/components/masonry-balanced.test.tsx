@@ -241,6 +241,39 @@ describe("MasonryBalanced", () => {
       );
       expect(screen.getByRole("list", { name: "Photo gallery" })).toBeTruthy();
     });
+
+    it("assigns role=listitem, aria-setsize, and aria-posinset to each item", () => {
+      const { container } = render(
+        <MasonryBalanced
+          items={makeItems(3)}
+          render={ItemRender}
+          columns={3}
+          gap={0}
+          defaultWidth={300}
+          getItemHeight={() => 100}
+        />,
+      );
+      const listItems = container.querySelectorAll('[role="listitem"]');
+      expect(listItems).toHaveLength(3);
+      expect(listItems[0].getAttribute("aria-setsize")).toBe("3");
+      expect(listItems[0].getAttribute("aria-posinset")).toBe("1");
+      expect(listItems[2].getAttribute("aria-posinset")).toBe("3");
+    });
+
+    it("includes an aria-live polite region", () => {
+      const { container } = render(
+        <MasonryBalanced
+          items={makeItems(2)}
+          render={ItemRender}
+          columns={2}
+          gap={0}
+          getItemHeight={() => 100}
+        />,
+      );
+      const liveRegion = container.querySelector('[aria-live="polite"]');
+      expect(liveRegion).toBeTruthy();
+      expect(liveRegion?.getAttribute("aria-atomic")).toBe("true");
+    });
   });
 
   describe("shortest-first placement", () => {

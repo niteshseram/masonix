@@ -90,6 +90,42 @@ describe("Masonry", () => {
       );
       expect(attr(container.firstElementChild, "aria-label")).toBe("Photo gallery");
     });
+
+    it("assigns role=listitem, aria-setsize, and aria-posinset to each item wrapper", () => {
+      const { container } = render(
+        <Masonry items={["a", "b", "c"]} render={Card} defaultWidth={900} columns={3} />,
+      );
+      const listItems = container.querySelectorAll('[role="listitem"]');
+      expect(listItems).toHaveLength(3);
+      expect(attr(listItems[0], "aria-setsize")).toBe("3");
+      expect(attr(listItems[0], "aria-posinset")).toBe("1");
+      expect(attr(listItems[2], "aria-posinset")).toBe("3");
+    });
+
+    it("omits listitem role and aria attrs when role=none", () => {
+      const { container } = render(
+        <Masonry items={["a", "b"]} render={Card} defaultWidth={900} role="none" />,
+      );
+      expect(container.querySelectorAll('[role="listitem"]')).toHaveLength(0);
+    });
+
+    it("assigns role=presentation to column wrappers", () => {
+      const { container } = render(
+        <Masonry items={["a", "b", "c"]} render={Card} defaultWidth={900} columns={3} />,
+      );
+      const masonry = container.firstElementChild!;
+      const colWrappers = Array.from(masonry.children);
+      for (const col of colWrappers) {
+        expect(attr(col, "role")).toBe("presentation");
+      }
+    });
+
+    it("includes an aria-live polite region for announcements", () => {
+      const { container } = render(<Masonry items={["a", "b"]} render={Card} defaultWidth={900} />);
+      const liveRegion = container.querySelector('[aria-live="polite"]');
+      expect(liveRegion).toBeTruthy();
+      expect(attr(liveRegion, "aria-atomic")).toBe("true");
+    });
   });
 
   describe("gap inline style", () => {

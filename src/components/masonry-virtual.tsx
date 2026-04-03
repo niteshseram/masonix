@@ -7,6 +7,7 @@ import React, {
   useImperativeHandle,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import type {
   MasonryRenderProps,
@@ -25,6 +26,19 @@ import { getScrollOffset } from "../core/scroll";
 
 const DEFAULT_ESTIMATED_HEIGHT = 150;
 const DEFAULT_OVERSCAN = 2;
+
+// Visually hidden — present in DOM for screen readers but invisible to sighted users
+const VISUALLY_HIDDEN_STYLE: CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  margin: -1,
+  padding: 0,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
 
 // ---------------------------------------------------------------------------
 // Internal memoized item
@@ -303,6 +317,16 @@ function MasonryVirtualInner<T = unknown>(
     [handle, positioner],
   );
 
+  // aria-live announcement on item count changes (filter/add/remove)
+  const [announcement, setAnnouncement] = useState("");
+  const prevItemCountRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (prevItemCountRef.current !== null && prevItemCountRef.current !== items.length) {
+      setAnnouncement(`${items.length} ${items.length === 1 ? "item" : "items"}`);
+    }
+    prevItemCountRef.current = items.length;
+  }, [items.length]);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Container: any = as ?? "div";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -318,47 +342,52 @@ function MasonryVirtualInner<T = unknown>(
   };
 
   return (
-    <Container
-      ref={mergedRef}
-      className={className}
-      style={containerStyle}
-      role={containerRole}
-      aria-label={ariaLabel}
-    >
-      {positionedItems.map(({ index, top, left, width, measured }) => {
-        // Only render items in the visible range (virtualization)
-        if (!visibleIndices.has(index)) return null;
+    <>
+      <Container
+        ref={mergedRef}
+        className={className}
+        style={containerStyle}
+        role={containerRole}
+        aria-label={ariaLabel}
+      >
+        {positionedItems.map(({ index, top, left, width, measured }) => {
+          // Only render items in the visible range (virtualization)
+          if (!visibleIndices.has(index)) return null;
 
-        const data = items[index];
-        const key = itemKey ? itemKey(data as T, index) : index;
+          const data = items[index];
+          const key = itemKey ? itemKey(data as T, index) : index;
 
-        const itemStyle: CSSProperties = {
-          position: "absolute",
-          top,
-          insetInlineStart: left,
-          width,
-          ...(getItemHeight ? {} : { visibility: measured ? "visible" : ("hidden" as const) }),
-        };
+          const itemStyle: CSSProperties = {
+            position: "absolute",
+            top,
+            insetInlineStart: left,
+            width,
+            ...(getItemHeight ? {} : { visibility: measured ? "visible" : ("hidden" as const) }),
+          };
 
-        return (
-          <VirtualItem
-            key={key}
-            ItemWrapper={ItemWrapper}
-            itemClassName={itemClassName}
-            data={data}
-            index={index}
-            width={width}
-            Render={Render as React.ComponentType<MasonryRenderProps<unknown>>}
-            style={itemStyle}
-            setItemRef={
-              getItemHeight ? undefined : (node: HTMLElement | null) => setItemRef(node, index)
-            }
-            ariaSetSize={ariaSetSize}
-            ariaPosInSet={index + 1}
-          />
-        );
-      })}
-    </Container>
+          return (
+            <VirtualItem
+              key={key}
+              ItemWrapper={ItemWrapper}
+              itemClassName={itemClassName}
+              data={data}
+              index={index}
+              width={width}
+              Render={Render as React.ComponentType<MasonryRenderProps<unknown>>}
+              style={itemStyle}
+              setItemRef={
+                getItemHeight ? undefined : (node: HTMLElement | null) => setItemRef(node, index)
+              }
+              ariaSetSize={ariaSetSize}
+              ariaPosInSet={index + 1}
+            />
+          );
+        })}
+      </Container>
+      <div aria-live="polite" aria-atomic="true" style={VISUALLY_HIDDEN_STYLE}>
+        {announcement}
+      </div>
+    </>
   );
 }
 
