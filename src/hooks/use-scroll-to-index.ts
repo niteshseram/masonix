@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { getScrollOffset, getScrollTop, scrollTo } from "../core/scroll";
-import type { MasonryScrollState, MasonryVirtualHandle, Positioner } from "../types";
+import type { MasonryVirtualHandle, Positioner } from "../types";
 
 interface UseScrollToIndexOptions {
   positioner: Positioner;
@@ -11,7 +11,7 @@ interface UseScrollToIndexOptions {
 
 /**
  * Provides the imperative `MasonryVirtualHandle` methods:
- * scrollToIndex, scrollToOffset, getVisibleRange, getScrollState, restoreScrollState.
+ * scrollToIndex, scrollToOffset, getVisibleRange.
  *
  * Respects `prefers-reduced-motion` — if the user prefers reduced motion,
  * smooth scrolling is disabled regardless of the `smooth` option.
@@ -105,35 +105,9 @@ export function useScrollToIndex({
     return startIndex <= stopIndex ? [startIndex, stopIndex] : [0, 0];
   }, [getContainerOffset]);
 
-  const getScrollState: MasonryVirtualHandle["getScrollState"] = useCallback(() => {
-    const scrollTop = getScrollTop(scrollContainerRef.current);
-
-    const items = positionerRef.current.all();
-    const positions: MasonryScrollState["positions"] = items.map((item) => ({
-      index: item.index,
-      top: item.top,
-      left: item.left,
-      height: item.height,
-    }));
-
-    return { scrollTop, positions };
-  }, []);
-
-  const restoreScrollState: MasonryVirtualHandle["restoreScrollState"] = useCallback((state) => {
-    // Restore item positions into the positioner
-    for (const pos of state.positions) {
-      positionerRef.current.set(pos.index, pos.height);
-    }
-
-    // Restore scroll position
-    scrollTo(scrollContainerRef.current, state.scrollTop, false);
-  }, []);
-
   return {
     scrollToIndex,
     scrollToOffset,
     getVisibleRange,
-    getScrollState,
-    restoreScrollState,
   };
 }

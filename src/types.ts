@@ -127,16 +127,4 @@ export interface MasonryVirtualHandle {
   ): void;
   scrollToOffset(offset: number, options?: { smooth?: boolean }): void;
   getVisibleRange(): [startIndex: number, stopIndex: number];
-  getScrollState(): MasonryScrollState;
-  restoreScrollState(state: MasonryScrollState): void;
-}
-
-export interface MasonryScrollState {
-  scrollTop: number;
-  positions: Array<{
-    index: number;
-    top: number;
-    left: number;
-    height: number;
-  }>;
 }

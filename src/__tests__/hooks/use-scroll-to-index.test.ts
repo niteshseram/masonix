@@ -243,46 +243,4 @@ describe("useScrollToIndex", () => {
     expect(start).toBe(0);
     expect(stop).toBeGreaterThanOrEqual(0);
   });
-
-  it("getScrollState returns serializable state", () => {
-    const positioner = makePositionerWithItems();
-    const containerRef = createContainerRef();
-
-    const { result } = renderHook(() =>
-      useScrollToIndex({
-        positioner,
-        containerRef,
-        scrollContainer: window,
-        viewportHeight: 800,
-      }),
-    );
-
-    const state = result.current.getScrollState();
-    expect(state.scrollTop).toBe(0);
-    expect(state.positions).toBeInstanceOf(Array);
-    expect(state.positions.length).toBe(5);
-    expect(state.positions[0]).toHaveProperty("index");
-    expect(state.positions[0]).toHaveProperty("top");
-    expect(state.positions[0]).toHaveProperty("left");
-    expect(state.positions[0]).toHaveProperty("height");
-  });
-
-  it("scroll state round-trip (save → restore)", () => {
-    const positioner = makePositionerWithItems();
-    const containerRef = createContainerRef();
-
-    const { result } = renderHook(() =>
-      useScrollToIndex({
-        positioner,
-        containerRef,
-        scrollContainer: window,
-        viewportHeight: 800,
-      }),
-    );
-
-    const state = result.current.getScrollState();
-    const restored = JSON.parse(JSON.stringify(state));
-    result.current.restoreScrollState(restored);
-    expect(lastScrollToArgs!.top).toBe(state.scrollTop);
-  });
 });
