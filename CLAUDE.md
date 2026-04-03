@@ -61,8 +61,6 @@ Three components, one package, increasing complexity:
 
 **`src/core/positioner.ts`** — `createPositioner`: shortest-column-first placement. Each `set(index, height, span?)` places an item in the shortest available column. Maintains `columnItems[][]` for incremental `update()` without full re-layout.
 
-**`src/core/column-balancer.ts`** — `createBalancedPositioner`: thin factory wrapping `createPositioner`. Components import only this, not the positioner directly.
-
 **`src/core/interval-tree.ts`** — augmented red-black tree. Stores items as `[top, top+height]` intervals for `search(low, high)` — O(log n + k) viewport intersection queries used by `MasonryVirtual`.
 
 **`src/core/utils.ts`** — `resolveResponsiveValue` (Tailwind-compatible breakpoints: sm/md/lg/xl/2xl), `computeColumns` (column count from fixed `columns`, auto from `columnWidth`, or `defaultColumns`), `effectiveColumnCount`.
@@ -83,7 +81,6 @@ All positioners implement `Positioner`. The key method is `set(index, height, sp
 
 ## Key Constraints
 
-- **RTL is a render-layer concern.** Positioners always compute LTR `left` values. Components apply `inset-inline-start` or flip via CSS `direction`. The `rtl` option exists in positioner options interfaces but has no effect on math.
 - **`src/index.ts` and `src/virtual.ts` are thin re-export barrels.** Never add logic there; never import Phase N+1 symbols until those files exist.
 - All filenames are lowercase with hyphens.
 - `react` and `react-dom` are peer dependencies — never bundle them. External pattern in `vite.config.ts`: `['react', 'react-dom', 'react/jsx-runtime', /^react-dom\//]`.
