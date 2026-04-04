@@ -43,9 +43,9 @@ masonix solves all of these with a **three-tier progressive enhancement model** 
 
 **Decision guide:**
 
-- Static or known-height images → **`Masonry`**
-- Variable-height cards (blog posts, user content) → **`MasonryBalanced`**
-- Large datasets, infinite feeds, 1000+ items → **`MasonryVirtual`**
+- Most use cases → **`Masonry`**
+- Need balanced columns → **`MasonryBalanced`**
+- Balanced columns + large datasets (1000+ items) → **`MasonryVirtual`**
 
 ---
 
@@ -355,7 +355,7 @@ Use `itemAs` and `as` to produce meaningful markup:
 
 ## Tailwind usage
 
-masonix applies only structural styles. All visual styles come from your class names and render function.
+**masonix** applies only structural styles. All visual styles come from your class names and render function.
 
 ```tsx
 // CSS mode — Tailwind gaps via className
