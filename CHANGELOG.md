@@ -1,5 +1,85 @@
 # masonix
 
+## 0.3.0
+
+### Minor Changes
+
+- 7ee3fd8: Stabilize `BalancedItem` ref callback to prevent recreation on index changes
+
+  The ref callback in `BalancedItem` depended on `[setItemRef, index]`. Since `setItemRef` is permanently stable (created with `useCallback([], [])` in `useItemHeights`), `index` was the only reason the callback was ever recreated — which caused React to detach and re-attach the ref on any render where index changed.
+
+  `index` is now kept in a ref updated on every render. The `useCallback` dep list is reduced to `[setItemRef]`, so the callback is created once on mount and never recreated. `indexRef.current` is always up-to-date when the callback fires during React's commit phase.
+
+- 153b939: Fix O(n) double-pass container height calculation in `MasonryBalanced`
+
+  Container height was previously computed with a second full scan over all positioned items after layout:
+
+  ```tsx
+  // Before — second O(n) pass + spread that can stack-overflow on large lists
+  const containerHeight =
+    positionedItems.length > 0
+      ? Math.max(...positionedItems.map((item) => item.top + item.height))
+      : 0;
+  ```
+
+  `maxBottom` is now tracked incrementally inside the existing placement loop, so no extra pass is needed. This matches the pattern already used by `MasonryVirtual` and avoids the `Math.max(...spread)` call that can throw `RangeError: Maximum call stack size exceeded` with very large item lists.
+
+  ```tsx
+  // After — single pass, maxBottom updated per item
+  let maxBottom = 0;
+  const positioned = items.map((data, index) => {
+    const item = positioner.set(index, height);
+    const bottom = item.top + item.height;
+    if (bottom > maxBottom) maxBottom = bottom;
+    return { ...item, measured };
+  });
+  return { positionedItems: positioned, containerHeight: maxBottom };
+  ```
+
+- 153b939: Fix O(n) full iteration in `MasonryVirtual` render for invisible items
+
+  Previously, the render path mapped over all positioned items and returned `null` for those outside the viewport — defeating the purpose of virtualization for large lists:
+
+  ```tsx
+  // Before — iterates all 10K+ items, most return null
+  {positionedItems.map(({ index, ... }) => {
+    if (!visibleIndices.has(index)) return null;
+    // ...
+  })}
+  ```
+
+  A `.filter()` now pre-selects only visible items before `.map()`, so the render callback only executes for the O(k) items actually in the viewport:
+
+  ```tsx
+  // After — only iterates visible items
+  {positionedItems
+    .filter(({ index }) => visibleIndices.has(index))
+    .map(({ index, ... }) => {
+      // ...
+    })}
+  ```
+
+- 153b939: Replace O(n) `filter(Boolean)` scans in positioner with O(1) `placedCount`
+
+  `size()`, `all()`, and `estimateHeight()` each called `items.filter(Boolean)` on every invocation, scanning the full items array each time. A `placedCount` variable is now incremented in `set()` and reset in `clear()`, making `size()` and `estimateHeight()` O(1). `all()` uses `items.slice(0, placedCount)` which avoids the per-element truthiness check.
+
+- 153b939: Remove duplicate `shortestColumnIndex` function in positioner
+
+  `shortestColumnIndex` was an internal private function with identical logic to the public `shortestColumn`. The internal `set` now calls `shortestColumn` directly, eliminating the dead duplicate.
+
+- 153b939: Avoid re-sorting breakpoints on every resize in `resolveResponsiveValue`
+
+  Previously, every call to `resolveResponsiveValue` with an object value re-parsed and re-sorted breakpoints — including on every container resize, which is the hot path.
+
+  `resolveResponsiveValue` is now split into two primitives:
+
+  - `parseBreakpoints(value)` — parses and sorts breakpoints once, O(n log n)
+  - `applyBreakpoints(breakpoints, containerWidth)` — linear scan against a pre-sorted array, O(n)
+
+  `resolveResponsiveValue` remains as a convenience wrapper for callers that don't need caching.
+
+  `useColumns` now pre-parses `gap` and `columns` responsive values in dedicated `useMemo` calls that only re-run when those props change. The main layout memo uses `applyBreakpoints` directly, so a container resize only triggers the O(n) scan — not the parse and sort.
+
 ## 0.2.0
 
 ### Minor Changes
