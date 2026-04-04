@@ -44,7 +44,7 @@ interface BalancedItemProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Render: React.ComponentType<any>;
   style: CSSProperties;
-  setItemRef?: (node: HTMLElement | null) => void;
+  setItemRef?: (node: HTMLElement | null, index: number) => void;
   itemRole: "listitem" | undefined;
   ariaSetSize: number;
   ariaPosInSet: number;
@@ -63,9 +63,16 @@ const BalancedItem = memo(function BalancedItem({
   ariaSetSize,
   ariaPosInSet,
 }: BalancedItemProps): ReactElement {
+  const refCallback = useCallback(
+    (node: HTMLElement | null) => {
+      setItemRef?.(node, index);
+    },
+    [setItemRef, index],
+  );
+
   return (
     <ItemWrapper
-      ref={setItemRef}
+      ref={setItemRef ? refCallback : undefined}
       className={itemClassName}
       style={style}
       role={itemRole}
@@ -244,9 +251,7 @@ function MasonryBalancedInner<T = unknown>(
               width={width}
               Render={Render as React.ComponentType<MasonryRenderProps<unknown>>}
               style={itemStyle}
-              setItemRef={
-                getItemHeight ? undefined : (node: HTMLElement | null) => setItemRef(node, index)
-              }
+              setItemRef={getItemHeight ? undefined : setItemRef}
               itemRole={itemRole}
               ariaSetSize={ariaSetSize}
               ariaPosInSet={index + 1}
