@@ -1,5 +1,5 @@
 ---
-"masonix": patch
+"masonix": minor
 ---
 
 Fix infinite re-render loop in `MasonryBalanced` caused by unstable ref callbacks
