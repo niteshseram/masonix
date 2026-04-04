@@ -20,24 +20,17 @@ export function createPositioner(options: PositionerOptions): Positioner {
   const items: PositionedItem[] = [];
   // columnItems[col] = ordered list of item indices placed in that column
   const columnItems: number[][] = Array.from({ length: columnCount }, () => []);
+  let placedCount = 0;
 
   function computeLeft(column: number): number {
     return column * (columnWidth + columnGap);
-  }
-
-  function shortestColumnIndex(): number {
-    let minColIndex = 0;
-    for (let colIndex = 1; colIndex < columnCount; colIndex++) {
-      if (columnHeights[colIndex] < columnHeights[minColIndex]) minColIndex = colIndex;
-    }
-    return minColIndex;
   }
 
   function set(index: number, height: number): PositionedItem {
     // Guard: treat 0-height items as needing estimation
     // Callers should pass estimatedItemHeight if height is 0
 
-    const column = shortestColumnIndex();
+    const column = shortestColumn();
     const top = columnHeights[column];
     const left = computeLeft(column);
 
@@ -53,6 +46,7 @@ export function createPositioner(options: PositionerOptions): Positioner {
       column,
     };
     items[index] = item;
+    placedCount++;
     return item;
   }
 
@@ -123,7 +117,7 @@ export function createPositioner(options: PositionerOptions): Positioner {
   }
 
   function estimateHeight(totalItems: number, defaultHeight: number): number {
-    const placed = items.filter(Boolean).length;
+    const placed = placedCount;
     if (placed === 0) {
       const rows = Math.ceil(totalItems / columnCount);
       return rows * (defaultHeight + rowGap);
@@ -134,16 +128,17 @@ export function createPositioner(options: PositionerOptions): Positioner {
   }
 
   function size(): number {
-    return items.filter(Boolean).length;
+    return placedCount;
   }
 
   function all(): PositionedItem[] {
-    return items.filter(Boolean);
+    return items.slice(0, placedCount);
   }
 
   function clear(): void {
     columnHeights.fill(0);
     items.length = 0;
+    placedCount = 0;
     for (let colIndex = 0; colIndex < columnCount; colIndex++) {
       columnItems[colIndex] = [];
     }

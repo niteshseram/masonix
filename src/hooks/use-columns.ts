@@ -1,5 +1,10 @@
 import { useMemo } from "react";
-import { computeColumns, effectiveColumnCount, resolveResponsiveValue } from "../core/utils";
+import {
+  applyBreakpoints,
+  computeColumns,
+  effectiveColumnCount,
+  parseBreakpoints,
+} from "../core/utils";
 import type { ResponsiveValue } from "../types";
 
 export interface UseColumnsOptions {
@@ -31,11 +36,39 @@ export function useColumns({
   gap: gapOption,
   itemCount,
 }: UseColumnsOptions): UseColumnsResult {
+  // Parse breakpoints once when the responsive value changes — sorting is O(n log n).
+  // The main memo then only does the O(n) scan on each containerWidth change.
+  const parsedGap = useMemo(
+    () =>
+      gapOption !== undefined && typeof gapOption !== "number"
+        ? parseBreakpoints(gapOption)
+        : null,
+    [gapOption],
+  );
+
+  const parsedColumns = useMemo(
+    () =>
+      columns !== undefined && typeof columns !== "number"
+        ? parseBreakpoints(columns)
+        : null,
+    [columns],
+  );
+
   return useMemo(() => {
-    const gap = gapOption !== undefined ? resolveResponsiveValue(gapOption, containerWidth) : 0;
+    const gap =
+      gapOption === undefined
+        ? 0
+        : typeof gapOption === "number"
+          ? gapOption
+          : applyBreakpoints(parsedGap!, containerWidth);
+
+    const resolvedColumns: number | undefined =
+      columns === undefined || typeof columns === "number"
+        ? columns
+        : applyBreakpoints(parsedColumns!, containerWidth);
 
     const { columnCount, columnWidth } = computeColumns(containerWidth, {
-      columns,
+      columns: resolvedColumns,
       columnWidth: columnWidthProp,
       maxColumns,
       defaultColumns,
@@ -47,5 +80,15 @@ export function useColumns({
     // Keep the per-column width from the full layout — the effective count only
     // removes empty column wrappers, it doesn't spread items across more space.
     return { columnCount: effective, columnWidth, gap };
-  }, [containerWidth, columns, columnWidthProp, maxColumns, defaultColumns, gapOption, itemCount]);
+  }, [
+    containerWidth,
+    parsedGap,
+    parsedColumns,
+    gapOption,
+    columns,
+    columnWidthProp,
+    maxColumns,
+    defaultColumns,
+    itemCount,
+  ]);
 }

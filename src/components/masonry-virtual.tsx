@@ -347,10 +347,9 @@ function MasonryVirtualInner<T = unknown>(
         role={containerRole}
         aria-label={ariaLabel}
       >
-        {positionedItems.map(({ index, top, left, width, measured }) => {
-          // Only render items in the visible range (virtualization)
-          if (!visibleIndices.has(index)) return null;
-
+        {positionedItems
+          .filter(({ index }) => visibleIndices.has(index))
+          .map(({ index, top, left, width, measured }) => {
           const data = items[index];
           const key = itemKey ? itemKey(data as T, index) : index;
 

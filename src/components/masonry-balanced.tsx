@@ -148,8 +148,8 @@ function MasonryBalancedInner<T = unknown>(
   // Build positioned items from a fresh positioner every time layout inputs change.
   // A fresh positioner is cheaper than incremental update because React's useMemo
   // already batches renders — we won't rebuild more often than truly necessary.
-  const positionedItems = useMemo(() => {
-    if (columnCount === 0) return [];
+  const { positionedItems, containerHeight } = useMemo(() => {
+    if (columnCount === 0) return { positionedItems: [], containerHeight: 0 };
 
     const positioner = createPositioner({
       columnCount,
@@ -158,7 +158,9 @@ function MasonryBalancedInner<T = unknown>(
       rowGap: resolvedGap,
     });
 
-    return items.map((data, index) => {
+    let maxBottom = 0;
+
+    const positioned = items.map((data, index) => {
       let height: number;
       let measured: boolean;
 
@@ -171,9 +173,14 @@ function MasonryBalancedInner<T = unknown>(
         height = measuredHeight ?? estimatedItemHeight;
       }
 
-      const positioned = positioner.set(index, height);
-      return { ...positioned, measured };
+      const item = positioner.set(index, height);
+      const bottom = item.top + item.height;
+      if (bottom > maxBottom) maxBottom = bottom;
+
+      return { ...item, measured };
     });
+
+    return { positionedItems: positioned, containerHeight: maxBottom };
   }, [
     items,
     columnCount,
@@ -193,12 +200,6 @@ function MasonryBalancedInner<T = unknown>(
     }
     prevItemCountRef.current = items.length;
   }, [items.length]);
-
-  // Container height = bottom edge of the tallest item (no trailing gap)
-  const containerHeight =
-    positionedItems.length > 0
-      ? Math.max(...positionedItems.map((item) => item.top + item.height))
-      : 0;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Container: any = as ?? "div";
