@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useRef,
   useState,
+  type RefCallback,
 } from "react";
 import type { MasonryBalancedProps, MasonryRenderProps } from "../types";
 import { useColumns } from "../hooks/use-columns";
@@ -63,11 +64,17 @@ const BalancedItem = memo(function BalancedItem({
   ariaSetSize,
   ariaPosInSet,
 }: BalancedItemProps): ReactElement {
-  const refCallback = useCallback(
-    (node: HTMLElement | null) => {
-      setItemRef?.(node, index);
+  // Keep index in a ref so the callback below never needs index as a dep.
+  // setItemRef is permanently stable (useCallback([]) in useItemHeights),
+  // so refCallback is created once on mount and never recreated.
+  const indexRef = useRef(index);
+  indexRef.current = index;
+
+  const refCallback = useCallback<RefCallback<HTMLElement>>(
+    (node) => {
+      setItemRef?.(node, indexRef.current);
     },
-    [setItemRef, index],
+    [setItemRef],
   );
 
   return (
