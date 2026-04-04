@@ -31,7 +31,7 @@ export function ColorBlock({ data, index, width }: MasonryRenderProps<Photo>) {
         className={clsx(
           "absolute bottom-2.5 left-3",
           "font-mono text-[11px] font-semibold tabular-nums",
-          "text-white/50 transition-colors group-hover:text-white/70",
+          "text-white/80 transition-colors group-hover:text-white",
         )}
       >
         {index + 1}
@@ -42,13 +42,13 @@ export function ColorBlock({ data, index, width }: MasonryRenderProps<Photo>) {
         className={clsx(
           "absolute right-2.5 top-2.5",
           "flex items-center gap-1 rounded-md px-1.5 py-0.5",
-          "font-mono text-[10px] text-white/70",
-          "bg-black/30 backdrop-blur-sm",
+          "font-mono text-[10px] text-white/90",
+          "bg-black/40 backdrop-blur-sm",
           "opacity-0 transition-opacity duration-200 group-hover:opacity-100",
         )}
       >
         {data.height}
-        <span className="text-white/40">×</span>
+        <span className="text-white/60">×</span>
         {width}
       </div>
     </div>

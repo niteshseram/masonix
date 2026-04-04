@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
+import { ScrollArea } from "@base-ui-components/react/scroll-area";
 import { DEFAULT_CONFIG } from "./components/config-panel";
 import type { Config, ComponentMode } from "./components/config-panel";
 import { makePhotos } from "./demo-data";
@@ -181,7 +182,7 @@ export default function App() {
   const gapInfo = config.gapMode === "fixed" ? `gap ${config.fixedGap}px` : "responsive gap";
 
   return (
-    <div className="flex h-full flex-col bg-[#0d0d0d] text-sm">
+    <div className="flex h-full flex-col text-sm">
       {/* ── Top bar ── */}
       <header className="flex h-11 shrink-0 items-center gap-3 border-b border-zinc-800 bg-[#111111] px-4">
         {/* Brand */}
@@ -271,48 +272,62 @@ export default function App() {
         <Sidebar config={config} setConfig={setConfig} />
 
         {/* Preview — dot grid scrolls with content */}
-        <div ref={scrollContainerRef} className="min-w-0 flex-1 overflow-auto">
-          <div
-            className="min-h-full p-6"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
+        <ScrollArea.Root className="min-w-0 flex-1">
+          <ScrollArea.Viewport
+            ref={scrollContainerRef}
+            className="h-full"
+            style={{ overflowX: "hidden" }}
           >
-            {config.component === "masonry-virtual" && (
-              <ScrollToIndexBar maxIndex={items.length - 1} scrollHandleRef={scrollHandleRef} />
-            )}
-            <MasonryPreview
-              items={items}
-              config={config}
-              scrollContainerRef={scrollContainerRef}
-              scrollHandleRef={config.component === "masonry-virtual" ? scrollHandleRef : undefined}
-            />
-          </div>
-        </div>
+            <div
+              className="min-h-full p-6"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)",
+                backgroundSize: "24px 24px",
+              }}
+            >
+              {config.component === "masonry-virtual" && (
+                <ScrollToIndexBar maxIndex={items.length - 1} scrollHandleRef={scrollHandleRef} />
+              )}
+              <MasonryPreview
+                items={items}
+                config={config}
+                scrollContainerRef={scrollContainerRef}
+                scrollHandleRef={
+                  config.component === "masonry-virtual" ? scrollHandleRef : undefined
+                }
+              />
+            </div>
+          </ScrollArea.Viewport>
+          <ScrollArea.Scrollbar
+            orientation="vertical"
+            className="flex w-1.5 touch-none select-none p-px transition-opacity duration-150 data-[hovering]:opacity-100"
+          >
+            <ScrollArea.Thumb className="flex-1 rounded-full bg-zinc-600 hover:bg-zinc-500" />
+          </ScrollArea.Scrollbar>
+        </ScrollArea.Root>
       </div>
 
       {/* ── Status bar ── */}
       <footer className="flex h-6 shrink-0 items-center gap-3 border-t border-zinc-800 bg-[#111111] px-4">
-        <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+        <div className="flex items-center gap-3 text-[10px] text-zinc-300">
           <span className="tabular-nums">{items.length} items</span>
-          <span className="text-zinc-700">·</span>
+          <span className="text-zinc-600">·</span>
           <span>{activeTab.label}</span>
-          <span className="text-zinc-700">·</span>
+          <span className="text-zinc-600">·</span>
           <span>{gapInfo}</span>
         </div>
-        <div className="ml-auto hidden items-center gap-3 text-[10px] text-zinc-600 lg:flex">
+        <div className="ml-auto hidden items-center gap-3 text-[10px] text-zinc-500 lg:flex">
           <span>
             <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">1</kbd>
             <kbd className="mx-0.5 rounded bg-zinc-900 px-1 font-mono text-[9px]">2</kbd>
             <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">3</kbd> component
           </span>
-          <span className="text-zinc-700">·</span>
+          <span className="text-zinc-600">·</span>
           <span>
             <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">S</kbd> shuffle
           </span>
-          <span className="text-zinc-700">·</span>
+          <span className="text-zinc-600">·</span>
           <span>
             <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">R</kbd> reset
           </span>
