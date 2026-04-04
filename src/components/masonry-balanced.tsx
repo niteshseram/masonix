@@ -102,7 +102,6 @@ function MasonryBalancedInner<T = unknown>(
     defaultColumns = 3,
     defaultWidth,
     getItemHeight,
-    getColumnSpan,
     estimatedItemHeight = DEFAULT_ESTIMATED_HEIGHT,
     minItemHeight,
     role,
@@ -172,8 +171,7 @@ function MasonryBalancedInner<T = unknown>(
         height = measuredHeight ?? estimatedItemHeight;
       }
 
-      const span = getColumnSpan ? getColumnSpan(data, index) : undefined;
-      const positioned = positioner.set(index, height, span);
+      const positioned = positioner.set(index, height);
       return { ...positioned, measured };
     });
   }, [
@@ -182,7 +180,6 @@ function MasonryBalancedInner<T = unknown>(
     columnWidth,
     resolvedGap,
     getItemHeight,
-    getColumnSpan,
     measuredHeights,
     estimatedItemHeight,
   ]);

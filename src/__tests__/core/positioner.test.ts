@@ -48,7 +48,7 @@ describe("createPositioner", () => {
       expect(item.top).toBe(116); // 100 + 16
     });
 
-    it("sets width to columnWidth for span=1 items", () => {
+    it("sets width to columnWidth", () => {
       const p = createPositioner({ columnCount: 3, columnWidth: 120 });
       const item = p.set(0, 100);
       expect(item.width).toBe(120);
@@ -84,39 +84,6 @@ describe("createPositioner", () => {
       const p = createPositioner({ columnCount: 3, columnWidth: 100 });
       expect(p.getColumnHeights()).toEqual([0, 0, 0]);
       expect(p.tallestColumnHeight()).toBe(0);
-    });
-  });
-
-  describe("spanning", () => {
-    it("computes width for a span-2 item", () => {
-      const p = createPositioner({ columnCount: 3, columnWidth: 100, columnGap: 10 });
-      const item = p.set(0, 200, 2);
-      expect(item.span).toBe(2);
-      expect(item.width).toBe(100 * 2 + 10); // 210
-    });
-
-    it("clamps span to columnCount", () => {
-      const p = createPositioner({ columnCount: 3, columnWidth: 100 });
-      const item = p.set(0, 100, 10);
-      expect(item.span).toBe(3);
-    });
-
-    it("places spanning item at max height of spanned columns", () => {
-      const p = createPositioner({ columnCount: 3, columnWidth: 100 });
-      p.set(0, 100); // col 0 height=100
-      p.set(1, 200); // col 1 height=200
-      // span-2 across cols [0,1]: top = max(100, 200) = 200
-      const item = p.set(2, 50, 2);
-      expect(item.top).toBe(200);
-      expect(item.column).toBe(0);
-    });
-
-    it("updates all spanned columns after placement", () => {
-      const p = createPositioner({ columnCount: 2, columnWidth: 100 });
-      p.set(0, 150, 2); // spans both cols, height=150
-      const heights = p.getColumnHeights();
-      expect(heights[0]).toBe(150);
-      expect(heights[1]).toBe(150);
     });
   });
 

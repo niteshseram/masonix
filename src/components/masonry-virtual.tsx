@@ -104,7 +104,6 @@ function MasonryVirtualInner<T = unknown>(
     defaultColumns = 3,
     defaultWidth,
     getItemHeight,
-    getColumnSpan,
     estimatedItemHeight = DEFAULT_ESTIMATED_HEIGHT,
     minItemHeight,
     role,
@@ -198,8 +197,7 @@ function MasonryVirtualInner<T = unknown>(
         height = measuredHeight ?? estimatedItemHeight;
       }
 
-      const span = getColumnSpan ? getColumnSpan(data, index) : undefined;
-      const item = pos.set(index, height, span);
+      const item = pos.set(index, height);
       tree.insert(index, item.top, item.top + item.height);
 
       const bottom = item.top + item.height;
@@ -220,7 +218,6 @@ function MasonryVirtualInner<T = unknown>(
     columnWidth,
     resolvedGap,
     getItemHeight,
-    getColumnSpan,
     measuredHeights,
     estimatedItemHeight,
   ]);

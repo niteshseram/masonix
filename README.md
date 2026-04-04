@@ -38,7 +38,7 @@ masonix solves all of these with a **three-tier progressive enhancement model** 
 | Correct reading order   |             Yes             |            Yes             |              Yes               |
 | SSR with zero CLS       | Yes (with `defaultColumns`) | Yes (with `getItemHeight`) |   Yes (with `getItemHeight`)   |
 | 10,000+ items           |             No              |             No             |            **Yes**             |
-| Bundle size             |            ~3 kB            |           ~5 kB            |             ~10 kB             |
+| Bundle size             |            ~6 kB            |           ~6 kB            |             ~9 kB              |
 | Import                  |          `masonix`          |         `masonix`          |       `masonix/virtual`        |
 
 **Decision guide:**
@@ -174,7 +174,6 @@ function Feed({ items }) {
 | `getItemHeight`       | `(data: T, index: number, columnWidth: number) => number` | —       | Pre-compute item height to skip ResizeObserver measurement. Enables zero-CLS SSR.        |
 | `estimatedItemHeight` | `number`                                                  | `150`   | Placeholder height (px) used before a item is measured. Items are hidden until measured. |
 | `minItemHeight`       | `number`                                                  | —       | Clamp all measured heights to at least this value.                                       |
-| `getColumnSpan`       | `(data: T, index: number) => number`                      | —       | Return a span count to have an item stretch across multiple columns.                     |
 
 ### `MasonryVirtual` additional props
 
@@ -239,26 +238,6 @@ For **zero CLS** on image-heavy pages, provide `getItemHeight`:
     Math.round(columnWidth * (photo.naturalHeight / photo.naturalWidth))
   }
   render={({ data }) => <Photo photo={data} />}
-/>
-```
-
----
-
-## Column spanning
-
-`MasonryBalanced` and `MasonryVirtual` support items that span multiple columns:
-
-```tsx
-<MasonryBalanced
-  items={items}
-  columns={4}
-  gap={16}
-  getColumnSpan={(data, index) => {
-    // Make every 5th item a full-width banner
-    if (index % 5 === 0) return 4;
-    return 1;
-  }}
-  render={({ data, width }) => <Card data={data} width={width} />}
 />
 ```
 
@@ -470,8 +449,8 @@ interface Photo {
 
 | Entry point       | Gzipped |
 | ----------------- | ------- |
-| `masonix`         | < 5 kB  |
-| `masonix/virtual` | < 10 kB |
+| `masonix`         | ~6 kB   |
+| `masonix/virtual` | ~9 kB   |
 
 Two separate entry points ensure the interval tree, scroll tracking, and virtualization code are never included in your bundle unless you import from `masonix/virtual`. `"sideEffects": false` enables full tree-shaking.
 

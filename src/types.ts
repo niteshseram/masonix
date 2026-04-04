@@ -23,15 +23,13 @@ export interface PositionedItem {
   height: number;
   /** Column index (0-based) */
   column: number;
-  /** Number of columns this item spans */
-  span: number;
 }
 
 export interface Positioner {
   readonly columnCount: number;
   readonly columnWidth: number;
-  /** Place an item, returns its computed PositionedItem. span is only used by positioners that support it. */
-  set(index: number, height: number, span?: number): PositionedItem;
+  /** Place an item, returns its computed PositionedItem. */
+  set(index: number, height: number): PositionedItem;
   /** Get a placed item by index */
   get(index: number): PositionedItem | undefined;
   /** Batch-update heights; recomputes only affected columns */
@@ -102,7 +100,6 @@ export interface MasonryProps<T = unknown> {
 }
 
 export interface MasonryBalancedProps<T = unknown> extends MasonryProps<T> {
-  getColumnSpan?: (data: T, index: number) => number;
   /** Pre-known height — skips two-phase measurement, enables zero-CLS SSR */
   getItemHeight?: (data: T, index: number, columnWidth: number) => number;
   estimatedItemHeight?: number;
