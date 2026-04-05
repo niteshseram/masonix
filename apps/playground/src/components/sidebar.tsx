@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { clsx } from "clsx";
 import { ConfigPanel } from "./config-panel";
 import type { Config } from "./config-panel";
@@ -41,9 +41,20 @@ interface SidebarProps {
 }
 
 export function Sidebar({ config, setConfig }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const [isOpen, setIsOpen] = useState(() => window.innerWidth >= 768);
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    function handler(event: MediaQueryListEvent) {
+      setIsMobile(event.matches);
+      if (event.matches) setIsOpen(false);
+    }
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const handleResizeStart = useCallback(
     (event: React.MouseEvent) => {
@@ -73,50 +84,79 @@ export function Sidebar({ config, setConfig }: SidebarProps) {
   );
 
   return (
-    <div
-      className={clsx(
-        "relative flex h-full shrink-0 flex-col",
-        "border-r border-zinc-800 bg-[#111111]",
-        !isResizing && "transition-[width] duration-150 ease-out",
-      )}
-      style={{ width: isOpen ? width : 40 }}
-    >
-      {/* Toggle button */}
-      <div className="flex h-10 shrink-0 items-center border-b border-zinc-800 px-2">
+    <>
+      {/* Floating open button — shown when collapsed on both mobile and desktop */}
+      {!isOpen && (
         <button
           type="button"
-          onClick={() => setIsOpen((prevOpen) => !prevOpen)}
-          title={isOpen ? "Collapse" : "Expand config"}
+          onClick={() => setIsOpen(true)}
+          title="Open config"
           className={clsx(
-            "flex h-7 w-7 shrink-0 items-center justify-center rounded",
-            "text-zinc-400 transition-colors",
-            "hover:bg-zinc-800 hover:text-zinc-200",
+            "absolute left-2 top-1.5 z-[1]",
+            "size-7",
+            "flex items-center justify-center rounded-lg",
+            "border border-zinc-700 bg-zinc-900 text-zinc-400 shadow-md",
+            "transition-colors hover:border-zinc-600 hover:text-zinc-200",
           )}
         >
-          {isOpen ? <IconChevronLeft /> : <IconChevronRight />}
+          <IconChevronRight />
         </button>
-      </div>
+      )}
 
-      {/* Config content */}
-      <div
-        className={clsx(
-          "min-h-0 flex-1 transition-opacity duration-100",
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-      >
-        {isOpen && <ConfigPanel config={config} setConfig={setConfig} />}
-      </div>
+      {/* Backdrop — mobile only, when sidebar is open */}
+      {isMobile && isOpen && (
+        <div className="absolute inset-0 z-[1] bg-black/60" onClick={() => setIsOpen(false)} />
+      )}
 
-      {/* Resize handle */}
+      {/* Sidebar panel — only rendered when open */}
       {isOpen && (
         <div
-          onMouseDown={handleResizeStart}
           className={clsx(
-            "absolute right-0 top-0 h-full w-1 cursor-col-resize",
-            "transition-colors hover:bg-blue-500/30 active:bg-blue-500/50",
+            "relative flex shrink-0 flex-col",
+            "border-r border-zinc-800 bg-[#111111]",
+            isMobile ? "absolute inset-y-0 left-0 z-[1]" : "h-full",
+            !isResizing && !isMobile && "transition-[width] duration-150 ease-out",
           )}
-        />
+          style={{ width: isMobile ? Math.min(300, window.innerWidth - 40) : width }}
+        >
+          {/* Toggle button */}
+          <div className="flex h-10 shrink-0 items-center border-b border-zinc-800 px-2">
+            <button
+              type="button"
+              onClick={() => setIsOpen((prevOpen) => !prevOpen)}
+              title={isOpen ? "Collapse" : "Expand config"}
+              className={clsx(
+                "flex h-7 w-7 shrink-0 items-center justify-center rounded",
+                "text-zinc-400 transition-colors",
+                "hover:bg-zinc-800 hover:text-zinc-200",
+              )}
+            >
+              {isOpen ? <IconChevronLeft /> : <IconChevronRight />}
+            </button>
+          </div>
+
+          {/* Config content */}
+          <div
+            className={clsx(
+              "min-h-0 flex-1 transition-opacity duration-100",
+              isOpen ? "opacity-100" : "pointer-events-none opacity-0",
+            )}
+          >
+            {isOpen && <ConfigPanel config={config} setConfig={setConfig} />}
+          </div>
+
+          {/* Resize handle — desktop only */}
+          {isOpen && !isMobile && (
+            <div
+              onMouseDown={handleResizeStart}
+              className={clsx(
+                "absolute right-0 top-0 h-full w-1 cursor-col-resize",
+                "transition-colors hover:bg-blue-500/30 active:bg-blue-500/50",
+              )}
+            />
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 }

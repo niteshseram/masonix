@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/niteshseram/masonix/main/brand/logo-dark.svg" />
-    <img src="https://raw.githubusercontent.com/niteshseram/masonix/main/brand/logo.svg" alt="masonix" height="52" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/niteshseram/masonix/main/public/logo-dark.svg" />
+    <img src="https://raw.githubusercontent.com/niteshseram/masonix/main/public/logo.svg" alt="masonix" height="52" />
   </picture>
 </p>
 

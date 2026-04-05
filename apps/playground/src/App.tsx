@@ -1,89 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
-import { ScrollArea } from "@base-ui-components/react/scroll-area";
+import { ScrollArea } from "./components/ui/scroll-area";
 import { DEFAULT_CONFIG } from "./components/config-panel";
-import type { Config, ComponentMode } from "./components/config-panel";
+import type { Config } from "./components/config-panel";
+import { TABS, PRESETS } from "./playground-config";
 import { makePhotos } from "./demo-data";
 import { Sidebar } from "./components/sidebar";
 import { MasonryPreview } from "./components/masonry-preview";
 import type { MasonryVirtualHandle } from "masonix/virtual";
 import { ScrollToIndexBar } from "./components/scroll-to-index-bar";
-
-// ─── Config ───────────────────────────────────────────────────────────────────
-
-const TABS: { value: ComponentMode; label: string; desc: string }[] = [
-  { value: "masonry", label: "Masonry", desc: "CSS flexbox · round-robin columns" },
-  { value: "masonry-balanced", label: "Balanced", desc: "JS-measured · shortest-column-first" },
-  { value: "masonry-virtual", label: "Virtual", desc: "Virtualized · interval tree · O(log n)" },
-];
-
-const PRESETS: { name: string; description: string; config: Partial<Config> }[] = [
-  {
-    name: "Pinterest",
-    description: "2 cols · tall random heights",
-    config: {
-      component: "masonry",
-      columnMode: "fixed",
-      fixedColumns: 2,
-      gapMode: "fixed",
-      fixedGap: 6,
-      heightMode: "random",
-      minItemH: 200,
-      maxItemH: 600,
-      itemCount: 20,
-      cardStyle: "color-block",
-    },
-  },
-  {
-    name: "Photo grid",
-    description: "Auto columns · uniform height",
-    config: {
-      component: "masonry",
-      columnMode: "columnWidth",
-      autoColumnWidth: 180,
-      gapMode: "fixed",
-      fixedGap: 4,
-      heightMode: "uniform",
-      uniformHeight: 220,
-      itemCount: 40,
-      cardStyle: "color-block",
-    },
-  },
-  {
-    name: "Text notes",
-    description: "Balanced layout · text cards",
-    config: {
-      component: "masonry-balanced",
-      columnMode: "fixed",
-      fixedColumns: 3,
-      gapMode: "fixed",
-      fixedGap: 16,
-      heightMode: "stepped",
-      itemCount: 24,
-      cardStyle: "text-card",
-    },
-  },
-  {
-    name: "10k items",
-    description: "Virtual · 10,000 items",
-    config: {
-      component: "masonry-virtual",
-      columnMode: "custom",
-      customColBps: [
-        { minWidth: 0, value: 2 },
-        { minWidth: 768, value: 3 },
-        { minWidth: 1200, value: 4 },
-      ],
-      gapMode: "fixed",
-      fixedGap: 10,
-      heightMode: "random",
-      minItemH: 100,
-      maxItemH: 400,
-      itemCount: 10000,
-      cardStyle: "color-block",
-    },
-  },
-];
+import { Logo } from "./brand/logo";
 
 // ─── Presets dropdown ─────────────────────────────────────────────────────────
 
@@ -145,8 +71,6 @@ function PresetsDropdown({ onApply }: { onApply: (config: Partial<Config>) => vo
   );
 }
 
-// ─── App ──────────────────────────────────────────────────────────────────────
-
 export default function App() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
   const [shuffleKey, setShuffleKey] = useState(0);
@@ -184,128 +108,130 @@ export default function App() {
   return (
     <div className="flex h-full flex-col text-sm">
       {/* ── Top bar ── */}
-      <header className="flex h-11 shrink-0 items-center gap-3 border-b border-zinc-800 bg-[#111111] px-4">
-        {/* Brand */}
-        <div className="flex items-center gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 32 32"
-            fill="none"
-            width="20"
-            height="20"
-            aria-hidden="true"
-          >
-            <rect x="1" y="2" width="8" height="15" rx="2" fill="#2563eb" />
-            <rect x="1" y="19" width="8" height="9" rx="2" fill="#60a5fa" />
-            <rect x="12" y="2" width="8" height="8" rx="2" fill="#93c5fd" />
-            <rect x="12" y="12" width="8" height="16" rx="2" fill="#3b82f6" />
-            <rect x="23" y="2" width="8" height="11" rx="2" fill="#60a5fa" />
-            <rect x="23" y="15" width="8" height="13" rx="2" fill="#bfdbfe" />
-          </svg>
-          <span className="font-mono text-sm font-bold text-zinc-100">masonix</span>
-        </div>
+      <header className="shrink-0 border-b border-zinc-800 bg-[#111111]">
+        {/* Main row: brand + (tabs on desktop) + right controls */}
+        <div className="flex h-11 items-center gap-3 px-4">
+          {/* Brand */}
+          <Logo size={24} />
 
-        {/* Component tabs */}
-        <div className="flex rounded-lg bg-zinc-950 p-0.5">
-          {TABS.map((tab, tabIndex) => (
+          {/* Component tabs — desktop inline */}
+          <div className="hidden md:flex rounded-lg bg-zinc-950 p-0.5">
+            {TABS.map((tab, tabIndex) => (
+              <button
+                key={tab.value}
+                type="button"
+                title={tab.desc}
+                onClick={() => setConfig((prevConfig) => ({ ...prevConfig, component: tab.value }))}
+                className={clsx(
+                  "rounded-md px-3 py-1.5",
+                  "text-xs font-medium",
+                  "transition-colors",
+                  config.component === tab.value
+                    ? "bg-zinc-700 text-zinc-100 shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-200",
+                )}
+              >
+                <span className="mr-1.5 font-mono text-[9px] opacity-50">{tabIndex + 1}</span>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Active component description */}
+          <span className="hidden truncate text-[11px] text-zinc-500 lg:block">
+            {activeTab.desc}
+          </span>
+
+          <div className="ml-auto flex items-center gap-2">
+            <PresetsDropdown onApply={applyPreset} />
             <button
-              key={tab.value}
               type="button"
-              title={tab.desc}
-              onClick={() => setConfig((prevConfig) => ({ ...prevConfig, component: tab.value }))}
+              onClick={() => setShuffleKey((prevKey) => prevKey + 1)}
               className={clsx(
-                "rounded-md px-3 py-1.5",
-                "text-xs font-medium",
-                "transition-colors",
-                config.component === tab.value
-                  ? "bg-zinc-700 text-zinc-100 shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-200",
+                "flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1",
+                "text-xs text-zinc-400",
+                "transition-colors hover:border-zinc-600 hover:text-zinc-200",
               )}
             >
-              <span className="mr-1.5 font-mono text-[9px] opacity-50">{tabIndex + 1}</span>
-              {tab.label}
+              Shuffle
+              <kbd className="hidden sm:inline-block rounded bg-zinc-800 px-1 py-0.5 font-mono text-[9px] text-zinc-500">
+                S
+              </kbd>
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => {
+                setConfig(DEFAULT_CONFIG);
+                setShuffleKey(0);
+              }}
+              className={clsx(
+                "flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1",
+                "text-xs text-zinc-400",
+                "transition-colors hover:border-zinc-600 hover:text-zinc-200",
+              )}
+            >
+              Reset
+              <kbd className="hidden sm:inline-block rounded bg-zinc-800 px-1 py-0.5 font-mono text-[9px] text-zinc-500">
+                R
+              </kbd>
+            </button>
+          </div>
         </div>
 
-        {/* Active component description */}
-        <span className="hidden truncate text-[11px] text-zinc-500 lg:block">{activeTab.desc}</span>
-
-        <div className="ml-auto flex items-center gap-2">
-          <PresetsDropdown onApply={applyPreset} />
-          <button
-            type="button"
-            onClick={() => setShuffleKey((prevKey) => prevKey + 1)}
-            className={clsx(
-              "flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1",
-              "text-xs text-zinc-400",
-              "transition-colors hover:border-zinc-600 hover:text-zinc-200",
-            )}
-          >
-            Shuffle
-            <kbd className="rounded bg-zinc-800 px-1 py-0.5 font-mono text-[9px] text-zinc-500">
-              S
-            </kbd>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setConfig(DEFAULT_CONFIG);
-              setShuffleKey(0);
-            }}
-            className={clsx(
-              "flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1",
-              "text-xs text-zinc-400",
-              "transition-colors hover:border-zinc-600 hover:text-zinc-200",
-            )}
-          >
-            Reset
-            <kbd className="rounded bg-zinc-800 px-1 py-0.5 font-mono text-[9px] text-zinc-500">
-              R
-            </kbd>
-          </button>
+        {/* Component tabs — mobile second row */}
+        <div className="flex border-t border-zinc-800 px-3 py-2 md:hidden">
+          <div className="flex w-full rounded-lg bg-zinc-950 p-0.5">
+            {TABS.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                title={tab.desc}
+                onClick={() => setConfig((prevConfig) => ({ ...prevConfig, component: tab.value }))}
+                className={clsx(
+                  "flex-1 rounded-md px-2 py-1.5",
+                  "text-xs font-medium",
+                  "transition-colors",
+                  config.component === tab.value
+                    ? "bg-zinc-700 text-zinc-100 shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-200",
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
       {/* ── Body ── */}
-      <div className="flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1">
         <Sidebar config={config} setConfig={setConfig} />
 
         {/* Preview — dot grid scrolls with content */}
-        <ScrollArea.Root className="min-w-0 flex-1">
-          <ScrollArea.Viewport
-            ref={scrollContainerRef}
-            className="h-full"
-            style={{ overflowX: "hidden" }}
+        <ScrollArea
+          className="min-w-0 flex-1"
+          viewportRef={scrollContainerRef}
+          viewportClassName="h-full overflow-x-hidden"
+        >
+          <div
+            className="min-h-full p-6"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
           >
-            <div
-              className="min-h-full p-6"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)",
-                backgroundSize: "24px 24px",
-              }}
-            >
-              {config.component === "masonry-virtual" && (
-                <ScrollToIndexBar maxIndex={items.length - 1} scrollHandleRef={scrollHandleRef} />
-              )}
-              <MasonryPreview
-                items={items}
-                config={config}
-                scrollContainerRef={scrollContainerRef}
-                scrollHandleRef={
-                  config.component === "masonry-virtual" ? scrollHandleRef : undefined
-                }
-              />
-            </div>
-          </ScrollArea.Viewport>
-          <ScrollArea.Scrollbar
-            orientation="vertical"
-            className="flex w-1.5 touch-none select-none p-px transition-opacity duration-150 data-[hovering]:opacity-100"
-          >
-            <ScrollArea.Thumb className="flex-1 rounded-full bg-zinc-600 hover:bg-zinc-500" />
-          </ScrollArea.Scrollbar>
-        </ScrollArea.Root>
+            {config.component === "masonry-virtual" && (
+              <ScrollToIndexBar maxIndex={items.length - 1} scrollHandleRef={scrollHandleRef} />
+            )}
+            <MasonryPreview
+              items={items}
+              config={config}
+              scrollContainerRef={scrollContainerRef}
+              scrollHandleRef={config.component === "masonry-virtual" ? scrollHandleRef : undefined}
+            />
+          </div>
+        </ScrollArea>
       </div>
 
       {/* ── Status bar ── */}
