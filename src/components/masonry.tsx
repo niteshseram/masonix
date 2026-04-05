@@ -7,22 +7,23 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from "react";
-import type { MasonryProps } from "../types";
-import { useColumns } from "../hooks/use-columns";
-import { useContainerWidth } from "../hooks/use-container-width";
-import { useNativeMasonry } from "../hooks/use-native-masonry";
+} from 'react';
+
+import { useColumns } from '../hooks/use-columns';
+import { useContainerWidth } from '../hooks/use-container-width';
+import { useNativeMasonry } from '../hooks/use-native-masonry';
+import type { MasonryProps } from '../types';
 
 // Visually hidden — present in DOM for screen readers but invisible to sighted users
 const VISUALLY_HIDDEN_STYLE: CSSProperties = {
-  position: "absolute",
+  position: 'absolute',
   width: 1,
   height: 1,
   margin: -1,
   padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
   border: 0,
 };
 
@@ -41,7 +42,7 @@ interface ItemProps {
   width: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Render: React.ComponentType<any>;
-  itemRole: "listitem" | undefined;
+  itemRole: 'listitem' | undefined;
   ariaSetSize: number;
   ariaPosInSet: number;
 }
@@ -74,7 +75,7 @@ const MasonryItem = memo(function MasonryItem({
 // ---------------------------------------------------------------------------
 
 function MasonryInner<T = unknown>(
-  props: Omit<MasonryProps<T>, "ref">,
+  props: Omit<MasonryProps<T>, 'ref'>,
   externalRef: React.ForwardedRef<HTMLElement>,
 ): ReactElement | null {
   const {
@@ -88,7 +89,7 @@ function MasonryInner<T = unknown>(
     defaultWidth,
     enableNative,
     role,
-    "aria-label": ariaLabel,
+    'aria-label': ariaLabel,
     className,
     style,
     columnClassName,
@@ -98,17 +99,19 @@ function MasonryInner<T = unknown>(
     itemKey,
   } = props;
 
-  const { ref: internalRef, width: containerWidth } = useContainerWidth(defaultWidth);
+  const { ref: internalRef, width: containerWidth } =
+    useContainerWidth(defaultWidth);
 
   // Merge the internal ResizeObserver ref with the user's forwarded ref
   const mergedRef = useCallback(
     (node: HTMLElement | null) => {
       internalRef(node);
       if (!externalRef) return;
-      if (typeof externalRef === "function") {
+      if (typeof externalRef === 'function') {
         externalRef(node);
       } else {
-        (externalRef as React.MutableRefObject<HTMLElement | null>).current = node;
+        (externalRef as React.MutableRefObject<HTMLElement | null>).current =
+          node;
       }
     },
     [internalRef, externalRef],
@@ -140,30 +143,36 @@ function MasonryInner<T = unknown>(
   }, [items.length, columnCount]);
 
   // aria-live announcement on item count changes (filter/add/remove)
-  const [announcement, setAnnouncement] = useState("");
+  const [announcement, setAnnouncement] = useState('');
   const prevItemCountRef = useRef<number | null>(null);
   useEffect(() => {
-    if (prevItemCountRef.current !== null && prevItemCountRef.current !== items.length) {
-      setAnnouncement(`${items.length} ${items.length === 1 ? "item" : "items"}`);
+    if (
+      prevItemCountRef.current !== null &&
+      prevItemCountRef.current !== items.length
+    ) {
+      setAnnouncement(
+        `${items.length} ${items.length === 1 ? 'item' : 'items'}`,
+      );
     }
     prevItemCountRef.current = items.length;
   }, [items.length]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const Container: any = as ?? "div";
+  const Container: any = as ?? 'div';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ItemWrapper: any = itemAs ?? "div";
+  const ItemWrapper: any = itemAs ?? 'div';
 
-  const containerRole = role === "none" ? undefined : (role ?? "list");
-  const itemRole: "listitem" | undefined = containerRole !== undefined ? "listitem" : undefined;
+  const containerRole = role === 'none' ? undefined : (role ?? 'list');
+  const itemRole: 'listitem' | undefined =
+    containerRole !== undefined ? 'listitem' : undefined;
   const ariaSetSize = items.length;
 
   // Native CSS masonry path
   if (isNative) {
     const nativeStyle: CSSProperties = {
-      display: "grid",
+      display: 'grid',
       gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
-      gridTemplateRows: "masonry",
+      gridTemplateRows: 'masonry',
       ...(resolvedGap > 0 ? { gap: resolvedGap } : {}),
       ...style,
     };
@@ -195,7 +204,11 @@ function MasonryInner<T = unknown>(
             );
           })}
         </Container>
-        <div aria-live="polite" aria-atomic="true" style={VISUALLY_HIDDEN_STYLE}>
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          style={VISUALLY_HIDDEN_STYLE}
+        >
           {announcement}
         </div>
       </>
@@ -204,9 +217,9 @@ function MasonryInner<T = unknown>(
 
   // Flexbox column path
   const containerStyle: CSSProperties = {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "flex-start",
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     ...(resolvedGap > 0 ? { columnGap: resolvedGap } : {}),
     ...style,
   };
@@ -228,8 +241,8 @@ function MasonryInner<T = unknown>(
             style={{
               width: columnWidth,
               minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
+              display: 'flex',
+              flexDirection: 'column',
               ...(resolvedGap > 0 ? { rowGap: resolvedGap } : {}),
             }}
           >

@@ -1,11 +1,12 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
+
 import {
   applyBreakpoints,
   computeColumns,
   effectiveColumnCount,
   parseBreakpoints,
-} from "../core/utils";
-import type { ResponsiveValue } from "../types";
+} from '../core/utils';
+import type { ResponsiveValue } from '../types';
 
 export interface UseColumnsOptions {
   containerWidth: number;
@@ -40,7 +41,7 @@ export function useColumns({
   // The main memo then only does the O(n) scan on each containerWidth change.
   const parsedGap = useMemo(
     () =>
-      gapOption !== undefined && typeof gapOption !== "number"
+      gapOption !== undefined && typeof gapOption !== 'number'
         ? parseBreakpoints(gapOption)
         : null,
     [gapOption],
@@ -48,7 +49,7 @@ export function useColumns({
 
   const parsedColumns = useMemo(
     () =>
-      columns !== undefined && typeof columns !== "number"
+      columns !== undefined && typeof columns !== 'number'
         ? parseBreakpoints(columns)
         : null,
     [columns],
@@ -58,12 +59,12 @@ export function useColumns({
     const gap =
       gapOption === undefined
         ? 0
-        : typeof gapOption === "number"
+        : typeof gapOption === 'number'
           ? gapOption
           : applyBreakpoints(parsedGap!, containerWidth);
 
     const resolvedColumns: number | undefined =
-      columns === undefined || typeof columns === "number"
+      columns === undefined || typeof columns === 'number'
         ? columns
         : applyBreakpoints(parsedColumns!, containerWidth);
 

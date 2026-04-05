@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vp dev",
-    "build": "vp build"
+    "build": "vp build",
+    "dev": "vp dev"
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-rc.0",

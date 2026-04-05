@@ -70,7 +70,7 @@ Requires **React 18 or 19** as a peer dependency.
 Zero JS measurement. Items are distributed into flexbox columns round-robin (1→col0, 2→col1, 3→col2, 4→col0, …), preserving left-to-right, top-to-bottom reading order.
 
 ```tsx
-import { Masonry } from "masonix";
+import { Masonry } from 'masonix';
 
 function Gallery({ photos }) {
   return (
@@ -78,7 +78,9 @@ function Gallery({ photos }) {
       items={photos}
       columns={{ 0: 1, 640: 2, 1024: 3, 1280: 4 }}
       gap={16}
-      render={({ data }) => <img src={data.src} alt={data.alt} className="w-full rounded-lg" />}
+      render={({ data }) => (
+        <img src={data.src} alt={data.alt} className="w-full rounded-lg" />
+      )}
     />
   );
 }
@@ -89,7 +91,7 @@ function Gallery({ photos }) {
 Measures rendered item heights via `ResizeObserver` and places each item into the shortest column. Handles lazy images, variable-height content, and container resize automatically.
 
 ```tsx
-import { MasonryBalanced } from "masonix";
+import { MasonryBalanced } from 'masonix';
 
 function Blog({ posts }) {
   return (
@@ -112,7 +114,9 @@ If you can compute item height ahead of time (e.g. from image aspect ratios), pa
   items={photos}
   columns={3}
   gap={16}
-  getItemHeight={(photo, _index, columnWidth) => columnWidth * (photo.height / photo.width)}
+  getItemHeight={(photo, _index, columnWidth) =>
+    columnWidth * (photo.height / photo.width)
+  }
   render={({ data }) => <Photo photo={data} />}
 />
 ```
@@ -122,7 +126,7 @@ If you can compute item height ahead of time (e.g. from image aspect ratios), pa
 Renders only items within the viewport. Built for 10,000+ item feeds. Drop-in replacement for `MasonryBalanced`.
 
 ```tsx
-import { MasonryVirtual } from "masonix/virtual";
+import { MasonryVirtual } from 'masonix/virtual';
 
 function Feed({ items }) {
   return (
@@ -280,15 +284,19 @@ async function loadMore() {
 Use `scrollRef` to programmatically scroll to any item:
 
 ```tsx
-import { useRef } from "react";
-import { MasonryVirtual, type MasonryVirtualHandle } from "masonix/virtual";
+import { useRef } from 'react';
+import { MasonryVirtual, type MasonryVirtualHandle } from 'masonix/virtual';
 
 function Feed({ items }) {
   const scrollRef = useRef<MasonryVirtualHandle>(null);
 
   return (
     <>
-      <button onClick={() => scrollRef.current?.scrollToIndex(0, { align: "start", smooth: true })}>
+      <button
+        onClick={() =>
+          scrollRef.current?.scrollToIndex(0, { align: 'start', smooth: true })
+        }
+      >
         Back to top
       </button>
       <MasonryVirtual
@@ -320,7 +328,7 @@ By default `MasonryVirtual` tracks the `window` scroll. To use a scrollable div 
 ```tsx
 const containerRef = useRef<HTMLDivElement>(null);
 
-<div ref={containerRef} style={{ height: "100vh", overflow: "auto" }}>
+<div ref={containerRef} style={{ height: '100vh', overflow: 'auto' }}>
   <MasonryVirtual
     items={items}
     columns={3}
@@ -418,10 +426,13 @@ import type {
   ResponsiveValue,
   PositionedItem,
   Positioner,
-} from "masonix";
+} from 'masonix';
 
 // From masonix/virtual
-import type { MasonryVirtualProps, MasonryVirtualHandle } from "masonix/virtual";
+import type {
+  MasonryVirtualProps,
+  MasonryVirtualHandle,
+} from 'masonix/virtual';
 ```
 
 All components are fully generic over your item type:

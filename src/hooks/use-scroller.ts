@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
-import { getScrollTop, getViewportHeight } from "../core/scroll";
-import { isServer } from "../utils/ssr";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+
+import { getScrollTop, getViewportHeight } from '../core/scroll';
+import { isServer } from '../utils/ssr';
 
 export interface ScrollerState {
   scrollTop: number;
@@ -104,12 +105,12 @@ export function useScroller(
     };
 
     const target = container instanceof Window ? window : container;
-    target.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleResize, { passive: true });
+    target.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
-      target.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
+      target.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;

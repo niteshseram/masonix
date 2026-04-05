@@ -1,31 +1,38 @@
-import { useEffect, useRef, useState } from "react";
-import { clsx } from "clsx";
-import { ScrollArea } from "./components/ui/scroll-area";
-import { DEFAULT_CONFIG } from "./components/config-panel";
-import type { Config } from "./components/config-panel";
-import { TABS, PRESETS } from "./playground-config";
-import { makePhotos } from "./demo-data";
-import { Sidebar } from "./components/sidebar";
-import { MasonryPreview } from "./components/masonry-preview";
-import type { MasonryVirtualHandle } from "masonix/virtual";
-import { ScrollToIndexBar } from "./components/scroll-to-index-bar";
-import { Logo } from "./brand/logo";
+import { clsx } from 'clsx';
+import type { MasonryVirtualHandle } from 'masonix/virtual';
+import { useEffect, useRef, useState } from 'react';
+
+import { Logo } from './brand/logo';
+import { DEFAULT_CONFIG } from './components/config-panel';
+import type { Config } from './components/config-panel';
+import { MasonryPreview } from './components/masonry-preview';
+import { ScrollToIndexBar } from './components/scroll-to-index-bar';
+import { Sidebar } from './components/sidebar';
+import { ScrollArea } from './components/ui/scroll-area';
+import { makePhotos } from './demo-data';
+import { TABS, PRESETS } from './playground-config';
 
 // ─── Presets dropdown ─────────────────────────────────────────────────────────
 
-function PresetsDropdown({ onApply }: { onApply: (config: Partial<Config>) => void }) {
+function PresetsDropdown({
+  onApply,
+}: {
+  onApply: (config: Partial<Config>) => void;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="relative">
-      {open && <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />}
+      {open && (
+        <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+      )}
       <button
         type="button"
         onClick={() => setOpen((prevOpen) => !prevOpen)}
         className={clsx(
-          "flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1",
-          "text-xs text-zinc-400",
-          "transition-colors hover:border-zinc-600 hover:text-zinc-200",
+          'flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1',
+          'text-xs text-zinc-400',
+          'transition-colors hover:border-zinc-600 hover:text-zinc-200',
         )}
       >
         Presets
@@ -43,9 +50,9 @@ function PresetsDropdown({ onApply }: { onApply: (config: Partial<Config>) => vo
       {open && (
         <div
           className={clsx(
-            "absolute right-0 top-full z-20 mt-1.5 w-52",
-            "rounded-xl border border-zinc-800 bg-zinc-900",
-            "p-1 shadow-2xl shadow-black/60",
+            'absolute right-0 top-full z-20 mt-1.5 w-52',
+            'rounded-xl border border-zinc-800 bg-zinc-900',
+            'p-1 shadow-2xl shadow-black/60',
           )}
         >
           {PRESETS.map((p) => (
@@ -57,12 +64,16 @@ function PresetsDropdown({ onApply }: { onApply: (config: Partial<Config>) => vo
                 setOpen(false);
               }}
               className={clsx(
-                "flex w-full flex-col rounded-lg px-3 py-2.5 text-left",
-                "transition-colors hover:bg-zinc-800",
+                'flex w-full flex-col rounded-lg px-3 py-2.5 text-left',
+                'transition-colors hover:bg-zinc-800',
               )}
             >
-              <span className="text-xs font-medium text-zinc-200">{p.name}</span>
-              <span className="mt-0.5 text-[10px] text-zinc-500">{p.description}</span>
+              <span className="text-xs font-medium text-zinc-200">
+                {p.name}
+              </span>
+              <span className="mt-0.5 text-[10px] text-zinc-500">
+                {p.description}
+              </span>
             </button>
           ))}
         </div>
@@ -89,21 +100,25 @@ export default function App() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const tag = (e.target as HTMLElement).tagName;
-      if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
-      if (e.key === "s" || e.key === "S") setShuffleKey((prevKey) => prevKey + 1);
-      if (e.key === "r" || e.key === "R") {
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      if (e.key === 's' || e.key === 'S')
+        setShuffleKey((prevKey) => prevKey + 1);
+      if (e.key === 'r' || e.key === 'R') {
         setConfig(DEFAULT_CONFIG);
         setShuffleKey(0);
       }
-      if (e.key === "1") setConfig((c) => ({ ...c, component: "masonry" }));
-      if (e.key === "2") setConfig((c) => ({ ...c, component: "masonry-balanced" }));
-      if (e.key === "3") setConfig((c) => ({ ...c, component: "masonry-virtual" }));
+      if (e.key === '1') setConfig((c) => ({ ...c, component: 'masonry' }));
+      if (e.key === '2')
+        setConfig((c) => ({ ...c, component: 'masonry-balanced' }));
+      if (e.key === '3')
+        setConfig((c) => ({ ...c, component: 'masonry-virtual' }));
     }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  const gapInfo = config.gapMode === "fixed" ? `gap ${config.fixedGap}px` : "responsive gap";
+  const gapInfo =
+    config.gapMode === 'fixed' ? `gap ${config.fixedGap}px` : 'responsive gap';
 
   return (
     <div className="flex h-full flex-col text-sm">
@@ -121,17 +136,24 @@ export default function App() {
                 key={tab.value}
                 type="button"
                 title={tab.desc}
-                onClick={() => setConfig((prevConfig) => ({ ...prevConfig, component: tab.value }))}
+                onClick={() =>
+                  setConfig((prevConfig) => ({
+                    ...prevConfig,
+                    component: tab.value,
+                  }))
+                }
                 className={clsx(
-                  "rounded-md px-3 py-1.5",
-                  "text-xs font-medium",
-                  "transition-colors",
+                  'rounded-md px-3 py-1.5',
+                  'text-xs font-medium',
+                  'transition-colors',
                   config.component === tab.value
-                    ? "bg-zinc-700 text-zinc-100 shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-200",
+                    ? 'bg-zinc-700 text-zinc-100 shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-200',
                 )}
               >
-                <span className="mr-1.5 font-mono text-[9px] opacity-50">{tabIndex + 1}</span>
+                <span className="mr-1.5 font-mono text-[9px] opacity-50">
+                  {tabIndex + 1}
+                </span>
                 {tab.label}
               </button>
             ))}
@@ -148,9 +170,9 @@ export default function App() {
               type="button"
               onClick={() => setShuffleKey((prevKey) => prevKey + 1)}
               className={clsx(
-                "flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1",
-                "text-xs text-zinc-400",
-                "transition-colors hover:border-zinc-600 hover:text-zinc-200",
+                'flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1',
+                'text-xs text-zinc-400',
+                'transition-colors hover:border-zinc-600 hover:text-zinc-200',
               )}
             >
               Shuffle
@@ -165,9 +187,9 @@ export default function App() {
                 setShuffleKey(0);
               }}
               className={clsx(
-                "flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1",
-                "text-xs text-zinc-400",
-                "transition-colors hover:border-zinc-600 hover:text-zinc-200",
+                'flex items-center gap-1.5 rounded border border-zinc-800 px-2.5 py-1',
+                'text-xs text-zinc-400',
+                'transition-colors hover:border-zinc-600 hover:text-zinc-200',
               )}
             >
               Reset
@@ -186,14 +208,19 @@ export default function App() {
                 key={tab.value}
                 type="button"
                 title={tab.desc}
-                onClick={() => setConfig((prevConfig) => ({ ...prevConfig, component: tab.value }))}
+                onClick={() =>
+                  setConfig((prevConfig) => ({
+                    ...prevConfig,
+                    component: tab.value,
+                  }))
+                }
                 className={clsx(
-                  "flex-1 rounded-md px-2 py-1.5",
-                  "text-xs font-medium",
-                  "transition-colors",
+                  'flex-1 rounded-md px-2 py-1.5',
+                  'text-xs font-medium',
+                  'transition-colors',
                   config.component === tab.value
-                    ? "bg-zinc-700 text-zinc-100 shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-200",
+                    ? 'bg-zinc-700 text-zinc-100 shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-200',
                 )}
               >
                 {tab.label}
@@ -217,18 +244,25 @@ export default function App() {
             className="min-h-full p-6"
             style={{
               backgroundImage:
-                "radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
+                'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
             }}
           >
-            {config.component === "masonry-virtual" && (
-              <ScrollToIndexBar maxIndex={items.length - 1} scrollHandleRef={scrollHandleRef} />
+            {config.component === 'masonry-virtual' && (
+              <ScrollToIndexBar
+                maxIndex={items.length - 1}
+                scrollHandleRef={scrollHandleRef}
+              />
             )}
             <MasonryPreview
               items={items}
               config={config}
               scrollContainerRef={scrollContainerRef}
-              scrollHandleRef={config.component === "masonry-virtual" ? scrollHandleRef : undefined}
+              scrollHandleRef={
+                config.component === 'masonry-virtual'
+                  ? scrollHandleRef
+                  : undefined
+              }
             />
           </div>
         </ScrollArea>
@@ -245,17 +279,30 @@ export default function App() {
         </div>
         <div className="ml-auto hidden items-center gap-3 text-[10px] text-zinc-500 lg:flex">
           <span>
-            <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">1</kbd>
-            <kbd className="mx-0.5 rounded bg-zinc-900 px-1 font-mono text-[9px]">2</kbd>
-            <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">3</kbd> component
+            <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">
+              1
+            </kbd>
+            <kbd className="mx-0.5 rounded bg-zinc-900 px-1 font-mono text-[9px]">
+              2
+            </kbd>
+            <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">
+              3
+            </kbd>{' '}
+            component
           </span>
           <span className="text-zinc-600">·</span>
           <span>
-            <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">S</kbd> shuffle
+            <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">
+              S
+            </kbd>{' '}
+            shuffle
           </span>
           <span className="text-zinc-600">·</span>
           <span>
-            <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">R</kbd> reset
+            <kbd className="rounded bg-zinc-900 px-1 font-mono text-[9px]">
+              R
+            </kbd>{' '}
+            reset
           </span>
         </div>
       </footer>

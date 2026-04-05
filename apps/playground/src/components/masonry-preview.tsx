@@ -1,10 +1,11 @@
-import React from "react";
-import { Masonry, MasonryBalanced } from "masonix";
-import { MasonryVirtual } from "masonix/virtual";
-import type { MasonryVirtualHandle } from "masonix/virtual";
-import { ColorBlock, TextCard } from "./cards";
-import type { Config, BpEntry } from "./config-panel";
-import type { Photo } from "../demo-data";
+import { Masonry, MasonryBalanced } from 'masonix';
+import { MasonryVirtual } from 'masonix/virtual';
+import type { MasonryVirtualHandle } from 'masonix/virtual';
+import React from 'react';
+
+import type { Photo } from '../demo-data';
+import { ColorBlock, TextCard } from './cards';
+import type { Config, BpEntry } from './config-panel';
 
 function bpsToRecord(bps: BpEntry[]): Record<number, number> {
   const out: Record<number, number> = {};
@@ -16,9 +17,9 @@ function deriveLayoutProps(config: Config) {
   let columns: number | Record<number, number> | undefined;
   let columnWidth: number | undefined;
 
-  if (config.columnMode === "fixed") {
+  if (config.columnMode === 'fixed') {
     columns = config.fixedColumns;
-  } else if (config.columnMode === "custom") {
+  } else if (config.columnMode === 'custom') {
     columns = bpsToRecord(config.customColBps);
   } else {
     columnWidth = config.autoColumnWidth;
@@ -26,7 +27,9 @@ function deriveLayoutProps(config: Config) {
 
   const maxColumns = config.useMaxColumns ? config.maxColumns : undefined;
   const gap: number | Record<number, number> =
-    config.gapMode === "fixed" ? config.fixedGap : bpsToRecord(config.customGapBps);
+    config.gapMode === 'fixed'
+      ? config.fixedGap
+      : bpsToRecord(config.customGapBps);
 
   return { columns, columnWidth, maxColumns, gap };
 }
@@ -46,11 +49,11 @@ export function MasonryPreview({
 }: MasonryPreviewProps) {
   const { columns, columnWidth, maxColumns, gap } = deriveLayoutProps(config);
 
-  const Render = config.cardStyle === "text-card" ? TextCard : ColorBlock;
+  const Render = config.cardStyle === 'text-card' ? TextCard : ColorBlock;
 
   // Known heights only meaningful for color-block cards with explicit heights
   const getItemHeight =
-    config.useKnownHeights && config.cardStyle === "color-block"
+    config.useKnownHeights && config.cardStyle === 'color-block'
       ? (photo: unknown) => (photo as Photo).height
       : undefined;
 
@@ -59,16 +62,18 @@ export function MasonryPreview({
     columnWidth,
     maxColumns,
     gap,
-    role: config.role as "list" | "grid" | "none",
-    as: config.as as "div" | "ul" | "section" | "main",
-    itemAs: config.itemAs as "div" | "li" | "article",
-    "aria-label": config.ariaLabel || undefined,
+    role: config.role as 'list' | 'grid' | 'none',
+    as: config.as as 'div' | 'ul' | 'section' | 'main',
+    itemAs: config.itemAs as 'div' | 'li' | 'article',
+    'aria-label': config.ariaLabel || undefined,
     itemKey: (photo: unknown) => (photo as Photo).id,
   };
 
-  const minItemHeight = config.useMinItemHeight ? config.minItemHeight : undefined;
+  const minItemHeight = config.useMinItemHeight
+    ? config.minItemHeight
+    : undefined;
 
-  if (config.component === "masonry-virtual") {
+  if (config.component === 'masonry-virtual') {
     return (
       <MasonryVirtual
         {...commonProps}
@@ -85,9 +90,14 @@ export function MasonryPreview({
     );
   }
 
-  if (config.component === "masonry") {
+  if (config.component === 'masonry') {
     return (
-      <Masonry {...commonProps} items={items} render={Render} enableNative={config.enableNative} />
+      <Masonry
+        {...commonProps}
+        items={items}
+        render={Render}
+        enableNative={config.enableNative}
+      />
     );
   }
 

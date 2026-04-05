@@ -8,25 +8,26 @@ import React, {
   useRef,
   useState,
   type RefCallback,
-} from "react";
-import type { MasonryBalancedProps, MasonryRenderProps } from "../types";
-import { useColumns } from "../hooks/use-columns";
-import { useContainerWidth } from "../hooks/use-container-width";
-import { useItemHeights } from "../hooks/use-item-heights";
-import { createPositioner } from "../core/positioner";
+} from 'react';
+
+import { createPositioner } from '../core/positioner';
+import { useColumns } from '../hooks/use-columns';
+import { useContainerWidth } from '../hooks/use-container-width';
+import { useItemHeights } from '../hooks/use-item-heights';
+import type { MasonryBalancedProps, MasonryRenderProps } from '../types';
 
 const DEFAULT_ESTIMATED_HEIGHT = 150;
 
 // Visually hidden — present in DOM for screen readers but invisible to sighted users
 const VISUALLY_HIDDEN_STYLE: CSSProperties = {
-  position: "absolute",
+  position: 'absolute',
   width: 1,
   height: 1,
   margin: -1,
   padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
   border: 0,
 };
 
@@ -46,7 +47,7 @@ interface BalancedItemProps {
   Render: React.ComponentType<any>;
   style: CSSProperties;
   setItemRef?: (node: HTMLElement | null, index: number) => void;
-  itemRole: "listitem" | undefined;
+  itemRole: 'listitem' | undefined;
   ariaSetSize: number;
   ariaPosInSet: number;
 }
@@ -96,7 +97,7 @@ const BalancedItem = memo(function BalancedItem({
 // ---------------------------------------------------------------------------
 
 function MasonryBalancedInner<T = unknown>(
-  props: Omit<MasonryBalancedProps<T>, "ref">,
+  props: Omit<MasonryBalancedProps<T>, 'ref'>,
   externalRef: React.ForwardedRef<HTMLElement>,
 ): ReactElement | null {
   const {
@@ -112,7 +113,7 @@ function MasonryBalancedInner<T = unknown>(
     estimatedItemHeight = DEFAULT_ESTIMATED_HEIGHT,
     minItemHeight,
     role,
-    "aria-label": ariaLabel,
+    'aria-label': ariaLabel,
     className,
     style,
     itemClassName,
@@ -121,16 +122,18 @@ function MasonryBalancedInner<T = unknown>(
     itemKey,
   } = props;
 
-  const { ref: internalRef, width: containerWidth } = useContainerWidth(defaultWidth);
+  const { ref: internalRef, width: containerWidth } =
+    useContainerWidth(defaultWidth);
 
   const mergedRef = useCallback(
     (node: HTMLElement | null) => {
       internalRef(node);
       if (!externalRef) return;
-      if (typeof externalRef === "function") {
+      if (typeof externalRef === 'function') {
         externalRef(node);
       } else {
-        (externalRef as React.MutableRefObject<HTMLElement | null>).current = node;
+        (externalRef as React.MutableRefObject<HTMLElement | null>).current =
+          node;
       }
     },
     [internalRef, externalRef],
@@ -199,26 +202,32 @@ function MasonryBalancedInner<T = unknown>(
   ]);
 
   // aria-live announcement on item count changes (filter/add/remove)
-  const [announcement, setAnnouncement] = useState("");
+  const [announcement, setAnnouncement] = useState('');
   const prevItemCountRef = useRef<number | null>(null);
   useEffect(() => {
-    if (prevItemCountRef.current !== null && prevItemCountRef.current !== items.length) {
-      setAnnouncement(`${items.length} ${items.length === 1 ? "item" : "items"}`);
+    if (
+      prevItemCountRef.current !== null &&
+      prevItemCountRef.current !== items.length
+    ) {
+      setAnnouncement(
+        `${items.length} ${items.length === 1 ? 'item' : 'items'}`,
+      );
     }
     prevItemCountRef.current = items.length;
   }, [items.length]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const Container: any = as ?? "div";
+  const Container: any = as ?? 'div';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ItemWrapper: any = itemAs ?? "div";
+  const ItemWrapper: any = itemAs ?? 'div';
 
-  const containerRole = role === "none" ? undefined : (role ?? "list");
-  const itemRole: "listitem" | undefined = containerRole !== undefined ? "listitem" : undefined;
+  const containerRole = role === 'none' ? undefined : (role ?? 'list');
+  const itemRole: 'listitem' | undefined =
+    containerRole !== undefined ? 'listitem' : undefined;
   const ariaSetSize = items.length;
 
   const containerStyle: CSSProperties = {
-    position: "relative",
+    position: 'relative',
     height: containerHeight,
     ...style,
   };
@@ -237,13 +246,15 @@ function MasonryBalancedInner<T = unknown>(
           const key = itemKey ? itemKey(data as T, index) : index;
 
           const itemStyle: CSSProperties = {
-            position: "absolute",
+            position: 'absolute',
             top,
             insetInlineStart: left,
             width,
             // Hide unmeasured items so they don't flash at the wrong size.
             // Once measured, they snap to their final position.
-            ...(getItemHeight ? {} : { visibility: measured ? "visible" : ("hidden" as const) }),
+            ...(getItemHeight
+              ? {}
+              : { visibility: measured ? 'visible' : ('hidden' as const) }),
           };
 
           return (
@@ -254,7 +265,9 @@ function MasonryBalancedInner<T = unknown>(
               data={data}
               index={index}
               width={width}
-              Render={Render as React.ComponentType<MasonryRenderProps<unknown>>}
+              Render={
+                Render as React.ComponentType<MasonryRenderProps<unknown>>
+              }
               style={itemStyle}
               setItemRef={getItemHeight ? undefined : setItemRef}
               itemRole={itemRole}
@@ -271,6 +284,8 @@ function MasonryBalancedInner<T = unknown>(
   );
 }
 
-export const MasonryBalanced = React.forwardRef(MasonryBalancedInner) as <T = unknown>(
+export const MasonryBalanced = React.forwardRef(MasonryBalancedInner) as <
+  T = unknown,
+>(
   props: MasonryBalancedProps<T>,
 ) => ReactElement | null;

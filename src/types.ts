@@ -1,4 +1,4 @@
-import type * as React from "react";
+import type * as React from 'react';
 
 // ---------------------------------------------------------------------------
 // Breakpoints
@@ -81,8 +81,8 @@ export interface MasonryProps<T = unknown> {
   enableNative?: boolean;
 
   // --- Accessibility ---
-  role?: "grid" | "list" | "none";
-  "aria-label"?: string;
+  role?: 'grid' | 'list' | 'none';
+  'aria-label'?: string;
 
   // --- Styling ---
   className?: string;
@@ -106,7 +106,9 @@ export interface MasonryBalancedProps<T = unknown> extends MasonryProps<T> {
   minItemHeight?: number;
 }
 
-export interface MasonryVirtualProps<T = unknown> extends MasonryBalancedProps<T> {
+export interface MasonryVirtualProps<
+  T = unknown,
+> extends MasonryBalancedProps<T> {
   overscanBy?: number;
   scrollContainer?: React.RefObject<HTMLElement | null>;
   totalItems?: number;
@@ -117,6 +119,6 @@ export interface MasonryVirtualProps<T = unknown> extends MasonryBalancedProps<T
 export interface MasonryVirtualHandle {
   scrollToIndex(
     index: number,
-    options?: { align?: "start" | "center" | "end"; smooth?: boolean },
+    options?: { align?: 'start' | 'center' | 'end'; smooth?: boolean },
   ): void;
 }

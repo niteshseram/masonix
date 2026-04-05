@@ -1,14 +1,15 @@
-import { describe, it, expect } from "vite-plus/test";
-import { createIntervalTree } from "../../core/interval-tree";
+import { describe, it, expect } from 'vite-plus/test';
 
-describe("createIntervalTree", () => {
-  describe("empty tree", () => {
-    it("starts with size 0", () => {
+import { createIntervalTree } from '../../core/interval-tree';
+
+describe('createIntervalTree', () => {
+  describe('empty tree', () => {
+    it('starts with size 0', () => {
       const tree = createIntervalTree();
       expect(tree.size).toBe(0);
     });
 
-    it("search on empty tree returns nothing", () => {
+    it('search on empty tree returns nothing', () => {
       const tree = createIntervalTree();
       const results: number[] = [];
       tree.search(0, 1000, (i) => results.push(i));
@@ -16,8 +17,8 @@ describe("createIntervalTree", () => {
     });
   });
 
-  describe("insert and search", () => {
-    it("finds a single interval that overlaps the query", () => {
+  describe('insert and search', () => {
+    it('finds a single interval that overlaps the query', () => {
       const tree = createIntervalTree();
       tree.insert(0, 100, 300);
       const results: number[] = [];
@@ -25,7 +26,7 @@ describe("createIntervalTree", () => {
       expect(results).toContain(0);
     });
 
-    it("does not return an interval outside the query range", () => {
+    it('does not return an interval outside the query range', () => {
       const tree = createIntervalTree();
       tree.insert(0, 100, 200);
       const results: number[] = [];
@@ -33,7 +34,7 @@ describe("createIntervalTree", () => {
       expect(results).toHaveLength(0);
     });
 
-    it("finds all overlapping intervals in a mixed set", () => {
+    it('finds all overlapping intervals in a mixed set', () => {
       const tree = createIntervalTree();
       tree.insert(0, 0, 100);
       tree.insert(1, 50, 150);
@@ -47,7 +48,7 @@ describe("createIntervalTree", () => {
       expect(results).not.toContain(3); // [400,500] does not overlap
     });
 
-    it("handles touching boundary (inclusive overlap)", () => {
+    it('handles touching boundary (inclusive overlap)', () => {
       const tree = createIntervalTree();
       tree.insert(0, 0, 100);
       const results: number[] = [];
@@ -56,7 +57,7 @@ describe("createIntervalTree", () => {
       expect(results).toContain(0);
     });
 
-    it("passes correct low and high to callback", () => {
+    it('passes correct low and high to callback', () => {
       const tree = createIntervalTree();
       tree.insert(5, 300, 450);
       let gotLow = -1;
@@ -69,7 +70,7 @@ describe("createIntervalTree", () => {
       expect(gotHigh).toBe(450);
     });
 
-    it("does not find a single-point interval outside query", () => {
+    it('does not find a single-point interval outside query', () => {
       const tree = createIntervalTree();
       tree.insert(0, 200, 200); // zero-length interval at 200
       const results: number[] = [];
@@ -78,8 +79,8 @@ describe("createIntervalTree", () => {
     });
   });
 
-  describe("remove", () => {
-    it("removes an item so it is not found in subsequent searches", () => {
+  describe('remove', () => {
+    it('removes an item so it is not found in subsequent searches', () => {
       const tree = createIntervalTree();
       tree.insert(0, 100, 300);
       tree.insert(1, 200, 400);
@@ -90,7 +91,7 @@ describe("createIntervalTree", () => {
       expect(results).toContain(1);
     });
 
-    it("decrements size after removal", () => {
+    it('decrements size after removal', () => {
       const tree = createIntervalTree();
       tree.insert(0, 0, 100);
       tree.insert(1, 100, 200);
@@ -99,13 +100,13 @@ describe("createIntervalTree", () => {
       expect(tree.size).toBe(1);
     });
 
-    it("silently ignores removal of non-existent index", () => {
+    it('silently ignores removal of non-existent index', () => {
       const tree = createIntervalTree();
       expect(() => tree.remove(999)).not.toThrow();
       expect(tree.size).toBe(0);
     });
 
-    it("allows tree to remain searchable after multiple removals", () => {
+    it('allows tree to remain searchable after multiple removals', () => {
       const tree = createIntervalTree();
       for (let i = 0; i < 5; i++) tree.insert(i, i * 100, i * 100 + 80);
       tree.remove(1);
@@ -120,8 +121,8 @@ describe("createIntervalTree", () => {
     });
   });
 
-  describe("clear", () => {
-    it("resets size to 0", () => {
+  describe('clear', () => {
+    it('resets size to 0', () => {
       const tree = createIntervalTree();
       tree.insert(0, 0, 100);
       tree.insert(1, 100, 200);
@@ -129,7 +130,7 @@ describe("createIntervalTree", () => {
       expect(tree.size).toBe(0);
     });
 
-    it("returns no results after clear", () => {
+    it('returns no results after clear', () => {
       const tree = createIntervalTree();
       tree.insert(0, 0, 100);
       tree.insert(1, 100, 200);
@@ -139,7 +140,7 @@ describe("createIntervalTree", () => {
       expect(results).toHaveLength(0);
     });
 
-    it("allows inserts after clear", () => {
+    it('allows inserts after clear', () => {
       const tree = createIntervalTree();
       tree.insert(0, 0, 100);
       tree.clear();
@@ -148,8 +149,8 @@ describe("createIntervalTree", () => {
     });
   });
 
-  describe("size tracking", () => {
-    it("increments on insert and decrements on remove", () => {
+  describe('size tracking', () => {
+    it('increments on insert and decrements on remove', () => {
       const tree = createIntervalTree();
       tree.insert(0, 0, 100);
       expect(tree.size).toBe(1);
@@ -162,8 +163,8 @@ describe("createIntervalTree", () => {
     });
   });
 
-  describe("correctness at scale", () => {
-    it("stress: all returned intervals actually overlap query", () => {
+  describe('correctness at scale', () => {
+    it('stress: all returned intervals actually overlap query', () => {
       const tree = createIntervalTree();
       const N = 200;
       for (let i = 0; i < N; i++) {
@@ -174,7 +175,9 @@ describe("createIntervalTree", () => {
       const queryLow = 1200;
       const queryHigh = 1500;
       const results: Array<{ i: number; low: number; high: number }> = [];
-      tree.search(queryLow, queryHigh, (i, low, high) => results.push({ i, low, high }));
+      tree.search(queryLow, queryHigh, (i, low, high) =>
+        results.push({ i, low, high }),
+      );
 
       expect(results.length).toBeGreaterThan(0);
       for (const { low, high } of results) {
@@ -182,7 +185,7 @@ describe("createIntervalTree", () => {
       }
     });
 
-    it("stress: no false negatives — all overlapping intervals are returned", () => {
+    it('stress: no false negatives — all overlapping intervals are returned', () => {
       const tree = createIntervalTree();
       // Items with non-overlapping intervals placed sequentially
       const intervals: Array<[number, number]> = [];

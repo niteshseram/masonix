@@ -1,9 +1,10 @@
-import { renderHook } from "@testing-library/react";
-import { describe, it, expect } from "vite-plus/test";
-import { usePositioner } from "../../hooks/use-positioner";
+import { renderHook } from '@testing-library/react';
+import { describe, it, expect } from 'vite-plus/test';
 
-describe("usePositioner", () => {
-  it("returns a positioner with correct columnCount and columnWidth", () => {
+import { usePositioner } from '../../hooks/use-positioner';
+
+describe('usePositioner', () => {
+  it('returns a positioner with correct columnCount and columnWidth', () => {
     const { result } = renderHook(() =>
       usePositioner({ columnCount: 3, columnWidth: 200, gap: 16 }),
     );
@@ -11,7 +12,7 @@ describe("usePositioner", () => {
     expect(result.current.columnWidth).toBe(200);
   });
 
-  it("places items using shortest-first", () => {
+  it('places items using shortest-first', () => {
     const { result } = renderHook(() =>
       usePositioner({ columnCount: 3, columnWidth: 100, gap: 0 }),
     );
@@ -24,9 +25,10 @@ describe("usePositioner", () => {
     expect(item.column).toBe(1);
   });
 
-  it("returns a new positioner when columnCount changes", () => {
+  it('returns a new positioner when columnCount changes', () => {
     const { result, rerender } = renderHook(
-      ({ columnCount }) => usePositioner({ columnCount, columnWidth: 100, gap: 0 }),
+      ({ columnCount }) =>
+        usePositioner({ columnCount, columnWidth: 100, gap: 0 }),
       { initialProps: { columnCount: 2 } },
     );
     const first = result.current;
@@ -35,9 +37,10 @@ describe("usePositioner", () => {
     expect(result.current.columnCount).toBe(3);
   });
 
-  it("returns a new positioner when columnWidth changes", () => {
+  it('returns a new positioner when columnWidth changes', () => {
     const { result, rerender } = renderHook(
-      ({ columnWidth }) => usePositioner({ columnCount: 2, columnWidth, gap: 0 }),
+      ({ columnWidth }) =>
+        usePositioner({ columnCount: 2, columnWidth, gap: 0 }),
       { initialProps: { columnWidth: 100 } },
     );
     const first = result.current;
@@ -46,7 +49,7 @@ describe("usePositioner", () => {
     expect(result.current.columnWidth).toBe(200);
   });
 
-  it("returns the same positioner when props are unchanged", () => {
+  it('returns the same positioner when props are unchanged', () => {
     const { result, rerender } = renderHook(() =>
       usePositioner({ columnCount: 2, columnWidth: 100, gap: 16 }),
     );
@@ -55,7 +58,7 @@ describe("usePositioner", () => {
     expect(result.current).toBe(first);
   });
 
-  it("starts with zero items placed", () => {
+  it('starts with zero items placed', () => {
     const { result } = renderHook(() =>
       usePositioner({ columnCount: 3, columnWidth: 100, gap: 0 }),
     );

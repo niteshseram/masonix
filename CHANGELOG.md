@@ -72,7 +72,6 @@
   Previously, every call to `resolveResponsiveValue` with an object value re-parsed and re-sorted breakpoints — including on every container resize, which is the hot path.
 
   `resolveResponsiveValue` is now split into two primitives:
-
   - `parseBreakpoints(value)` — parses and sorts breakpoints once, O(n log n)
   - `applyBreakpoints(breakpoints, containerWidth)` — linear scan against a pre-sorted array, O(n)
 
@@ -101,7 +100,7 @@
   // After — stable callback inside BalancedItem
   const refCallback = useCallback(
     (node: HTMLElement | null) => setItemRef?.(node, index),
-    [setItemRef, index]
+    [setItemRef, index],
   );
   ```
 

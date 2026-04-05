@@ -1,13 +1,14 @@
-import type React from "react";
-import { clsx } from "clsx";
-import { ScrollArea } from "../ui/scroll-area";
-import { Seg } from "../ui/seg";
-import { NumInput, inputCls } from "../ui/num-input";
-import { Toggle } from "../ui/toggle";
-import { Slider } from "../ui/slider";
-import { Section, Collapsible, Row, Field } from "./layout";
-import { BpEditor } from "./bp-editor";
-import type { Config } from "./types";
+import { clsx } from 'clsx';
+import type React from 'react';
+
+import { NumInput, inputCls } from '../ui/num-input';
+import { ScrollArea } from '../ui/scroll-area';
+import { Seg } from '../ui/seg';
+import { Slider } from '../ui/slider';
+import { Toggle } from '../ui/toggle';
+import { BpEditor } from './bp-editor';
+import { Section, Collapsible, Row, Field } from './layout';
+import type { Config } from './types';
 
 export type {
   ComponentMode,
@@ -17,8 +18,8 @@ export type {
   CardStyle,
   BpEntry,
   Config,
-} from "./types";
-export { DEFAULT_CONFIG } from "./types";
+} from './types';
+export { DEFAULT_CONFIG } from './types';
 
 export function ConfigPanel({
   config,
@@ -32,9 +33,10 @@ export function ConfigPanel({
   }
 
   const isBalancedOrVirtual =
-    config.component === "masonry-balanced" || config.component === "masonry-virtual";
-  const knownHeightsDisabled = config.cardStyle === "text-card";
-  const maxCount = config.component === "masonry-virtual" ? 500 : 100;
+    config.component === 'masonry-balanced' ||
+    config.component === 'masonry-virtual';
+  const knownHeightsDisabled = config.cardStyle === 'text-card';
+  const maxCount = config.component === 'masonry-virtual' ? 500 : 100;
 
   return (
     <ScrollArea
@@ -50,56 +52,56 @@ export function ConfigPanel({
               value={config.itemCount}
               min={0}
               max={maxCount}
-              onChange={(v) => set("itemCount", v)}
+              onChange={(v) => set('itemCount', v)}
             />
           </Row>
           <Field label="Card">
             <Seg
               value={config.cardStyle}
               options={[
-                { label: "Color block", value: "color-block" },
-                { label: "Text card", value: "text-card" },
+                { label: 'Color block', value: 'color-block' },
+                { label: 'Text card', value: 'text-card' },
               ]}
-              onChange={(v) => set("cardStyle", v)}
+              onChange={(v) => set('cardStyle', v)}
             />
           </Field>
           <Field label="Heights">
             <Seg
               value={config.heightMode}
               options={[
-                { label: "Stepped", value: "stepped" },
-                { label: "Random", value: "random" },
-                { label: "Uniform", value: "uniform" },
+                { label: 'Stepped', value: 'stepped' },
+                { label: 'Random', value: 'random' },
+                { label: 'Uniform', value: 'uniform' },
               ]}
-              onChange={(v) => set("heightMode", v)}
+              onChange={(v) => set('heightMode', v)}
             />
           </Field>
-          {config.heightMode === "random" && (
+          {config.heightMode === 'random' && (
             <Row label="Range">
               <div className="flex items-center gap-1.5">
                 <NumInput
                   value={config.minItemH}
                   min={20}
                   max={config.maxItemH - 20}
-                  onChange={(v) => set("minItemH", v)}
+                  onChange={(v) => set('minItemH', v)}
                 />
                 <span className="text-xs text-zinc-600">–</span>
                 <NumInput
                   value={config.maxItemH}
                   min={config.minItemH + 20}
                   max={800}
-                  onChange={(v) => set("maxItemH", v)}
+                  onChange={(v) => set('maxItemH', v)}
                 />
               </div>
             </Row>
           )}
-          {config.heightMode === "uniform" && (
+          {config.heightMode === 'uniform' && (
             <Row label="Height">
               <NumInput
                 value={config.uniformHeight}
                 min={20}
                 max={800}
-                onChange={(v) => set("uniformHeight", v)}
+                onChange={(v) => set('uniformHeight', v)}
               />
             </Row>
           )}
@@ -111,51 +113,54 @@ export function ConfigPanel({
             <Seg
               value={config.columnMode}
               options={[
-                { label: "Fixed", value: "fixed" },
-                { label: "Custom", value: "custom" },
-                { label: "Auto", value: "columnWidth" },
+                { label: 'Fixed', value: 'fixed' },
+                { label: 'Custom', value: 'custom' },
+                { label: 'Auto', value: 'columnWidth' },
               ]}
-              onChange={(v) => set("columnMode", v)}
+              onChange={(v) => set('columnMode', v)}
             />
           </Field>
-          {config.columnMode === "fixed" && (
+          {config.columnMode === 'fixed' && (
             <Row label="Count">
               <NumInput
                 value={config.fixedColumns}
                 min={1}
                 max={12}
-                onChange={(v) => set("fixedColumns", v)}
+                onChange={(v) => set('fixedColumns', v)}
               />
             </Row>
           )}
-          {config.columnMode === "custom" && (
+          {config.columnMode === 'custom' && (
             <BpEditor
               entries={config.customColBps}
               valueLabel="columns"
               valueMin={1}
               valueMax={12}
-              onChange={(bps) => set("customColBps", bps)}
+              onChange={(bps) => set('customColBps', bps)}
             />
           )}
-          {config.columnMode === "columnWidth" && (
+          {config.columnMode === 'columnWidth' && (
             <Row label="Min width">
               <NumInput
                 value={config.autoColumnWidth}
                 min={50}
                 max={800}
-                onChange={(v) => set("autoColumnWidth", v)}
+                onChange={(v) => set('autoColumnWidth', v)}
               />
             </Row>
           )}
           <Row label="Max cols">
             <div className="flex items-center gap-2">
-              <Toggle value={config.useMaxColumns} onChange={(v) => set("useMaxColumns", v)} />
+              <Toggle
+                value={config.useMaxColumns}
+                onChange={(v) => set('useMaxColumns', v)}
+              />
               {config.useMaxColumns && (
                 <NumInput
                   value={config.maxColumns}
                   min={1}
                   max={12}
-                  onChange={(v) => set("maxColumns", v)}
+                  onChange={(v) => set('maxColumns', v)}
                 />
               )}
             </div>
@@ -168,29 +173,29 @@ export function ConfigPanel({
             <Seg
               value={config.gapMode}
               options={[
-                { label: "Fixed", value: "fixed" },
-                { label: "Custom", value: "custom" },
+                { label: 'Fixed', value: 'fixed' },
+                { label: 'Custom', value: 'custom' },
               ]}
-              onChange={(v) => set("gapMode", v)}
+              onChange={(v) => set('gapMode', v)}
             />
           </Field>
-          {config.gapMode === "fixed" && (
+          {config.gapMode === 'fixed' && (
             <Row label="Size">
               <Slider
                 value={config.fixedGap}
                 min={0}
                 max={64}
-                onChange={(v) => set("fixedGap", v)}
+                onChange={(v) => set('fixedGap', v)}
               />
             </Row>
           )}
-          {config.gapMode === "custom" && (
+          {config.gapMode === 'custom' && (
             <BpEditor
               entries={config.customGapBps}
               valueLabel="gap (px)"
               valueMin={0}
               valueMax={64}
-              onChange={(bps) => set("customGapBps", bps)}
+              onChange={(bps) => set('customGapBps', bps)}
             />
           )}
         </Section>
@@ -202,7 +207,7 @@ export function ConfigPanel({
               <Toggle
                 value={config.useKnownHeights}
                 disabled={knownHeightsDisabled}
-                onChange={(v) => set("useKnownHeights", v)}
+                onChange={(v) => set('useKnownHeights', v)}
               />
             </Row>
             {!config.useKnownHeights && !knownHeightsDisabled && (
@@ -211,7 +216,7 @@ export function ConfigPanel({
                   value={config.estimatedItemHeight}
                   min={10}
                   max={800}
-                  onChange={(v) => set("estimatedItemHeight", v)}
+                  onChange={(v) => set('estimatedItemHeight', v)}
                 />
               </Row>
             )}
@@ -219,14 +224,14 @@ export function ConfigPanel({
               <div className="flex items-center gap-2">
                 <Toggle
                   value={config.useMinItemHeight}
-                  onChange={(v) => set("useMinItemHeight", v)}
+                  onChange={(v) => set('useMinItemHeight', v)}
                 />
                 {config.useMinItemHeight && (
                   <NumInput
                     value={config.minItemHeight}
                     min={0}
                     max={400}
-                    onChange={(v) => set("minItemHeight", v)}
+                    onChange={(v) => set('minItemHeight', v)}
                   />
                 )}
               </div>
@@ -235,14 +240,14 @@ export function ConfigPanel({
         )}
 
         {/* Virtual — virtual only */}
-        {config.component === "masonry-virtual" && (
+        {config.component === 'masonry-virtual' && (
           <Section title="Virtual">
             <Row label="Overscan">
               <Slider
                 value={config.overscanBy}
                 min={0}
                 max={10}
-                onChange={(v) => set("overscanBy", v)}
+                onChange={(v) => set('overscanBy', v)}
               />
             </Row>
           </Section>
@@ -254,47 +259,50 @@ export function ConfigPanel({
             <Seg
               value={config.role}
               options={[
-                { label: "List", value: "list" },
-                { label: "Grid", value: "grid" },
-                { label: "None", value: "none" },
+                { label: 'List', value: 'list' },
+                { label: 'Grid', value: 'grid' },
+                { label: 'None', value: 'none' },
               ]}
-              onChange={(v) => set("role", v)}
+              onChange={(v) => set('role', v)}
             />
           </Field>
-          {config.component === "masonry" && (
+          {config.component === 'masonry' && (
             <Row label="Native CSS">
-              <Toggle value={config.enableNative} onChange={(v) => set("enableNative", v)} />
+              <Toggle
+                value={config.enableNative}
+                onChange={(v) => set('enableNative', v)}
+              />
             </Row>
           )}
           <Field label="Container">
             <Seg
               value={config.as}
               options={[
-                { label: "div", value: "div" },
-                { label: "ul", value: "ul" },
-                { label: "section", value: "section" },
-                { label: "main", value: "main" },
+                { label: 'div', value: 'div' },
+                { label: 'ul', value: 'ul' },
+                { label: 'section', value: 'section' },
+                { label: 'main', value: 'main' },
               ]}
-              onChange={(v) => set("as", v)}
+              onChange={(v) => set('as', v)}
             />
           </Field>
           <Field label="Item">
             <Seg
               value={config.itemAs}
               options={[
-                { label: "div", value: "div" },
-                { label: "li", value: "li" },
-                { label: "article", value: "article" },
+                { label: 'div', value: 'div' },
+                { label: 'li', value: 'li' },
+                { label: 'article', value: 'article' },
               ]}
-              onChange={(v) => set("itemAs", v)}
+              onChange={(v) => set('itemAs', v)}
             />
           </Field>
           <Row label="aria-label">
             <input
-              className={clsx(inputCls, "w-28 placeholder:text-zinc-600")}
+              className={clsx(inputCls, 'w-28 placeholder:text-zinc-600')}
               value={config.ariaLabel}
               placeholder="optional"
-              onChange={(e) => set("ariaLabel", e.target.value)}
+              onChange={(e) => set('ariaLabel', e.target.value)}
             />
           </Row>
         </Collapsible>

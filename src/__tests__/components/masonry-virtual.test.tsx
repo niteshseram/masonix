@@ -1,8 +1,16 @@
-import React from "react";
-import { render, screen, act } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
-import { MasonryVirtual } from "../../components/masonry-virtual";
-import type { MasonryRenderProps } from "../../types";
+import { render, screen, act } from '@testing-library/react';
+import React from 'react';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
+
+import { MasonryVirtual } from '../../components/masonry-virtual';
+import type { MasonryRenderProps } from '../../types';
 
 // ---------------------------------------------------------------------------
 // ResizeObserver mock
@@ -35,7 +43,9 @@ beforeEach(() => {
   mockObserve = vi.fn();
   mockDisconnect = vi.fn();
 
-  globalThis.ResizeObserver = vi.fn().mockImplementation(function (cb: RoCallback) {
+  globalThis.ResizeObserver = vi.fn().mockImplementation(function (
+    cb: RoCallback,
+  ) {
     roCallbacks.push(cb);
     return {
       observe: mockObserve,
@@ -45,7 +55,7 @@ beforeEach(() => {
   });
 
   // Mock scrollTo
-  Object.defineProperty(window, "scrollTo", {
+  Object.defineProperty(window, 'scrollTo', {
     value: vi.fn(),
     writable: true,
     configurable: true,
@@ -53,7 +63,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  Object.defineProperty(window, "scrollTo", {
+  Object.defineProperty(window, 'scrollTo', {
     value: originalScrollTo,
     writable: true,
     configurable: true,
@@ -68,7 +78,10 @@ afterEach(() => {
 type Item = { id: number; label: string };
 
 function makeItems(count: number): Item[] {
-  return Array.from({ length: count }, (_, i) => ({ id: i, label: `Item ${i}` }));
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    label: `Item ${i}`,
+  }));
 }
 
 function ItemRender({ data }: MasonryRenderProps<Item>) {
@@ -79,9 +92,9 @@ function ItemRender({ data }: MasonryRenderProps<Item>) {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("MasonryVirtual", () => {
-  describe("rendering", () => {
-    it("renders items with getItemHeight (no measurement phase)", () => {
+describe('MasonryVirtual', () => {
+  describe('rendering', () => {
+    it('renders items with getItemHeight (no measurement phase)', () => {
       render(
         <MasonryVirtual
           items={makeItems(5)}
@@ -92,7 +105,7 @@ describe("MasonryVirtual", () => {
           getItemHeight={() => 100}
         />,
       );
-      expect(screen.getByTestId("item-0")).toBeTruthy();
+      expect(screen.getByTestId('item-0')).toBeTruthy();
     });
 
     it("uses custom container element via 'as' prop", () => {
@@ -107,12 +120,12 @@ describe("MasonryVirtual", () => {
           getItemHeight={() => 100}
         />,
       );
-      expect(container.querySelector("section")).toBeTruthy();
+      expect(container.querySelector('section')).toBeTruthy();
     });
   });
 
-  describe("virtualization", () => {
-    it("only renders items visible in the viewport", () => {
+  describe('virtualization', () => {
+    it('only renders items visible in the viewport', () => {
       const items = makeItems(50);
 
       const { container } = render(
@@ -127,12 +140,14 @@ describe("MasonryVirtual", () => {
         />,
       );
 
-      const renderedItems = container.querySelectorAll("[data-testid^='item-']");
+      const renderedItems = container.querySelectorAll(
+        "[data-testid^='item-']",
+      );
       expect(renderedItems.length).toBeLessThan(50);
       expect(renderedItems.length).toBeGreaterThan(0);
     });
 
-    it("sets container height to accommodate all items", () => {
+    it('sets container height to accommodate all items', () => {
       const { container } = render(
         <MasonryVirtual
           items={makeItems(3)}
@@ -144,11 +159,11 @@ describe("MasonryVirtual", () => {
         />,
       );
       const containerEl = container.firstElementChild as HTMLElement;
-      expect(containerEl.style.height).toBe("100px");
+      expect(containerEl.style.height).toBe('100px');
     });
   });
 
-  describe("accessibility", () => {
+  describe('accessibility', () => {
     it("applies role='list' by default", () => {
       render(
         <MasonryVirtual
@@ -160,10 +175,10 @@ describe("MasonryVirtual", () => {
           getItemHeight={() => 100}
         />,
       );
-      expect(screen.getByRole("list")).toBeTruthy();
+      expect(screen.getByRole('list')).toBeTruthy();
     });
 
-    it("applies aria-label when provided", () => {
+    it('applies aria-label when provided', () => {
       render(
         <MasonryVirtual
           items={makeItems(2)}
@@ -175,10 +190,12 @@ describe("MasonryVirtual", () => {
           getItemHeight={() => 100}
         />,
       );
-      expect(screen.getByRole("list", { name: "Virtual gallery" })).toBeTruthy();
+      expect(
+        screen.getByRole('list', { name: 'Virtual gallery' }),
+      ).toBeTruthy();
     });
 
-    it("sets aria-setsize on items to total items count", () => {
+    it('sets aria-setsize on items to total items count', () => {
       const { container } = render(
         <MasonryVirtual
           items={makeItems(3)}
@@ -193,11 +210,11 @@ describe("MasonryVirtual", () => {
       const listItems = container.querySelectorAll("[role='listitem']");
       expect(listItems.length).toBeGreaterThan(0);
       for (const item of Array.from(listItems)) {
-        expect(item.getAttribute("aria-setsize")).toBe("100");
+        expect(item.getAttribute('aria-setsize')).toBe('100');
       }
     });
 
-    it("sets aria-posinset on items to 1-based position", () => {
+    it('sets aria-posinset on items to 1-based position', () => {
       const { container } = render(
         <MasonryVirtual
           items={makeItems(3)}
@@ -210,14 +227,14 @@ describe("MasonryVirtual", () => {
       );
       const listItems = container.querySelectorAll("[role='listitem']");
       const positions = Array.from(listItems).map((item) =>
-        Number(item.getAttribute("aria-posinset")),
+        Number(item.getAttribute('aria-posinset')),
       );
       expect(positions).toContain(1);
       expect(positions).toContain(2);
       expect(positions).toContain(3);
     });
 
-    it("uses items.length as aria-setsize when totalItems is not provided", () => {
+    it('uses items.length as aria-setsize when totalItems is not provided', () => {
       const { container } = render(
         <MasonryVirtual
           items={makeItems(5)}
@@ -230,13 +247,13 @@ describe("MasonryVirtual", () => {
       );
       const listItems = container.querySelectorAll("[role='listitem']");
       for (const item of Array.from(listItems)) {
-        expect(item.getAttribute("aria-setsize")).toBe("5");
+        expect(item.getAttribute('aria-setsize')).toBe('5');
       }
     });
   });
 
-  describe("measurement path", () => {
-    it("hides items before they are measured (no getItemHeight)", () => {
+  describe('measurement path', () => {
+    it('hides items before they are measured (no getItemHeight)', () => {
       const { container } = render(
         <MasonryVirtual
           items={makeItems(2)}
@@ -248,11 +265,11 @@ describe("MasonryVirtual", () => {
       );
       const listItems = container.querySelectorAll("[role='listitem']");
       for (const item of Array.from(listItems)) {
-        expect((item as HTMLElement).style.visibility).toBe("hidden");
+        expect((item as HTMLElement).style.visibility).toBe('hidden');
       }
     });
 
-    it("reveals items and updates after measurement", () => {
+    it('reveals items and updates after measurement', () => {
       const { container } = render(
         <MasonryVirtual
           items={makeItems(1)}
@@ -263,20 +280,24 @@ describe("MasonryVirtual", () => {
         />,
       );
 
-      const wrapper = container.querySelector("[role='listitem']") as HTMLElement;
-      expect(wrapper.style.visibility).toBe("hidden");
+      const wrapper = container.querySelector(
+        "[role='listitem']",
+      ) as HTMLElement;
+      expect(wrapper.style.visibility).toBe('hidden');
 
       act(() => {
         fireResize(wrapper, 250);
       });
 
-      const updatedWrapper = container.querySelector("[role='listitem']") as HTMLElement;
-      expect(updatedWrapper.style.visibility).toBe("visible");
+      const updatedWrapper = container.querySelector(
+        "[role='listitem']",
+      ) as HTMLElement;
+      expect(updatedWrapper.style.visibility).toBe('visible');
     });
   });
 
-  describe("observer cleanup", () => {
-    it("disconnects ResizeObserver on unmount", () => {
+  describe('observer cleanup', () => {
+    it('disconnects ResizeObserver on unmount', () => {
       const { unmount } = render(
         <MasonryVirtual
           items={makeItems(3)}
@@ -293,8 +314,8 @@ describe("MasonryVirtual", () => {
     });
   });
 
-  describe("positioning", () => {
-    it("positions items absolutely", () => {
+  describe('positioning', () => {
+    it('positions items absolutely', () => {
       const { container } = render(
         <MasonryVirtual
           items={makeItems(3)}
@@ -307,11 +328,11 @@ describe("MasonryVirtual", () => {
       );
       const listItems = container.querySelectorAll("[role='listitem']");
       for (const item of Array.from(listItems)) {
-        expect((item as HTMLElement).style.position).toBe("absolute");
+        expect((item as HTMLElement).style.position).toBe('absolute');
       }
     });
 
-    it("uses insetInlineStart for RTL support", () => {
+    it('uses insetInlineStart for RTL support', () => {
       const { container } = render(
         <MasonryVirtual
           items={makeItems(3)}

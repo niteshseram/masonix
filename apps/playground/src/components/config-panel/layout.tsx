@@ -1,11 +1,19 @@
-import type React from "react";
-import { useState } from "react";
-import { clsx } from "clsx";
+import { clsx } from 'clsx';
+import type React from 'react';
+import { useState } from 'react';
 
-function SectionHeader({ title, chevron }: { title: string; chevron?: boolean }) {
+function SectionHeader({
+  title,
+  chevron,
+}: {
+  title: string;
+  chevron?: boolean;
+}) {
   return (
     <div className="mb-3 flex items-center justify-between border-b border-zinc-800/70 pb-1.5">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{title}</span>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+        {title}
+      </span>
       {chevron !== undefined && (
         <svg
           width="10"
@@ -14,8 +22,8 @@ function SectionHeader({ title, chevron }: { title: string; chevron?: boolean })
           fill="none"
           aria-hidden
           className={clsx(
-            "text-zinc-500 transition-transform duration-150",
-            chevron && "rotate-180",
+            'text-zinc-500 transition-transform duration-150',
+            chevron && 'rotate-180',
           )}
         >
           <path
@@ -31,7 +39,13 @@ function SectionHeader({ title, chevron }: { title: string; chevron?: boolean })
   );
 }
 
-export function Section({ title, children }: { title: string; children: React.ReactNode }) {
+export function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="mb-5">
       <SectionHeader title={title} />
@@ -40,11 +54,21 @@ export function Section({ title, children }: { title: string; children: React.Re
   );
 }
 
-export function Collapsible({ title, children }: { title: string; children: React.ReactNode }) {
+export function Collapsible({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div className="mb-5">
-      <button type="button" onClick={() => setOpen((v) => !v)} className="w-full">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full"
+      >
         <SectionHeader title={title} chevron={open} />
       </button>
       {open && <div className="flex flex-col gap-2.5">{children}</div>}
@@ -57,7 +81,13 @@ export function Collapsible({ title, children }: { title: string; children: Reac
  * Use for: Toggle, NumInput, Slider, composites.
  * Never put a Seg in Row — use Field instead.
  */
-export function Row({ label, children }: { label: string; children: React.ReactNode }) {
+export function Row({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex items-center gap-2">
       <span className="w-20 shrink-0 text-xs text-zinc-400">{label}</span>
@@ -70,7 +100,13 @@ export function Row({ label, children }: { label: string; children: React.ReactN
  * Field — label above, full-width control below.
  * Always use for Seg so it fills available width.
  */
-export function Field({ label, children }: { label: string; children: React.ReactNode }) {
+export function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-xs text-zinc-400">{label}</span>

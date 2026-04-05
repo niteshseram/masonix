@@ -1,5 +1,6 @@
-import { type RefCallback, useCallback, useRef, useState } from "react";
-import { isServer } from "../utils/ssr";
+import { type RefCallback, useCallback, useRef, useState } from 'react';
+
+import { isServer } from '../utils/ssr';
 
 /**
  * Tracks the inline size of a DOM element via ResizeObserver.

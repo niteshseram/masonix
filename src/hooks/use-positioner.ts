@@ -1,6 +1,7 @@
-import { useMemo } from "react";
-import { createPositioner } from "../core/positioner";
-import type { Positioner } from "../types";
+import { useMemo } from 'react';
+
+import { createPositioner } from '../core/positioner';
+import type { Positioner } from '../types';
 
 export interface UsePositionerOptions {
   columnCount: number;
@@ -13,7 +14,11 @@ export interface UsePositionerOptions {
  * The positioner has no items placed on creation — callers are responsible
  * for populating it (e.g. via `set()` during render or layout effects).
  */
-export function usePositioner({ columnCount, columnWidth, gap }: UsePositionerOptions): Positioner {
+export function usePositioner({
+  columnCount,
+  columnWidth,
+  gap,
+}: UsePositionerOptions): Positioner {
   return useMemo(
     () =>
       createPositioner({

@@ -8,35 +8,36 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from "react";
+} from 'react';
+
+import { createIntervalTree } from '../core/interval-tree';
+import { createPositioner } from '../core/positioner';
+import { getScrollOffset } from '../core/scroll';
+import { useColumns } from '../hooks/use-columns';
+import { useContainerWidth } from '../hooks/use-container-width';
+import { useItemHeights } from '../hooks/use-item-heights';
+import { useScrollToIndex } from '../hooks/use-scroll-to-index';
+import { useScroller } from '../hooks/use-scroller';
 import type {
   MasonryRenderProps,
   MasonryVirtualHandle,
   MasonryVirtualProps,
   PositionedItem,
-} from "../types";
-import { useColumns } from "../hooks/use-columns";
-import { useContainerWidth } from "../hooks/use-container-width";
-import { useItemHeights } from "../hooks/use-item-heights";
-import { useScroller } from "../hooks/use-scroller";
-import { useScrollToIndex } from "../hooks/use-scroll-to-index";
-import { createPositioner } from "../core/positioner";
-import { createIntervalTree } from "../core/interval-tree";
-import { getScrollOffset } from "../core/scroll";
+} from '../types';
 
 const DEFAULT_ESTIMATED_HEIGHT = 150;
 const DEFAULT_OVERSCAN = 2;
 
 // Visually hidden — present in DOM for screen readers but invisible to sighted users
 const VISUALLY_HIDDEN_STYLE: CSSProperties = {
-  position: "absolute",
+  position: 'absolute',
   width: 1,
   height: 1,
   margin: -1,
   padding: 0,
-  overflow: "hidden",
-  clip: "rect(0, 0, 0, 0)",
-  whiteSpace: "nowrap",
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
   border: 0,
 };
 
@@ -91,7 +92,7 @@ const VirtualItem = memo(function VirtualItem({
 // ---------------------------------------------------------------------------
 
 function MasonryVirtualInner<T = unknown>(
-  props: Omit<MasonryVirtualProps<T>, "ref">,
+  props: Omit<MasonryVirtualProps<T>, 'ref'>,
   externalRef: React.ForwardedRef<HTMLElement>,
 ): ReactElement | null {
   const {
@@ -107,7 +108,7 @@ function MasonryVirtualInner<T = unknown>(
     estimatedItemHeight = DEFAULT_ESTIMATED_HEIGHT,
     minItemHeight,
     role,
-    "aria-label": ariaLabel,
+    'aria-label': ariaLabel,
     className,
     style,
     itemClassName,
@@ -123,17 +124,19 @@ function MasonryVirtualInner<T = unknown>(
   } = props;
 
   const containerElRef = useRef<HTMLElement | null>(null);
-  const { ref: widthRef, width: containerWidth } = useContainerWidth(defaultWidth);
+  const { ref: widthRef, width: containerWidth } =
+    useContainerWidth(defaultWidth);
 
   const mergedRef = useCallback(
     (node: HTMLElement | null) => {
       containerElRef.current = node;
       widthRef(node);
       if (!externalRef) return;
-      if (typeof externalRef === "function") {
+      if (typeof externalRef === 'function') {
         externalRef(node);
       } else {
-        (externalRef as React.MutableRefObject<HTMLElement | null>).current = node;
+        (externalRef as React.MutableRefObject<HTMLElement | null>).current =
+          node;
       }
     },
     [widthRef, externalRef],
@@ -159,68 +162,69 @@ function MasonryVirtualInner<T = unknown>(
   const { scrollTop, viewportHeight } = useScroller(scrollContainer);
 
   // Build positioner + interval tree from current layout inputs
-  const { positionedItems, positioner, intervalTree, containerHeight } = useMemo(() => {
-    if (columnCount === 0) {
-      return {
-        positionedItems: [] as Array<PositionedItem & { measured: boolean }>,
-        positioner: createPositioner({
-          columnCount: 1,
-          columnWidth: 0,
-          columnGap: 0,
-          rowGap: 0,
-        }),
-        intervalTree: createIntervalTree(),
-        containerHeight: 0,
-      };
-    }
-
-    const pos = createPositioner({
-      columnCount,
-      columnWidth,
-      columnGap: resolvedGap,
-      rowGap: resolvedGap,
-    });
-
-    const tree = createIntervalTree();
-    let maxBottom = 0;
-
-    const positioned = items.map((data, index) => {
-      let height: number;
-      let measured: boolean;
-
-      if (getItemHeight) {
-        height = Math.max(0, getItemHeight(data, index, columnWidth));
-        measured = true;
-      } else {
-        const measuredHeight = measuredHeights.get(index);
-        measured = measuredHeight !== undefined;
-        height = measuredHeight ?? estimatedItemHeight;
+  const { positionedItems, positioner, intervalTree, containerHeight } =
+    useMemo(() => {
+      if (columnCount === 0) {
+        return {
+          positionedItems: [] as Array<PositionedItem & { measured: boolean }>,
+          positioner: createPositioner({
+            columnCount: 1,
+            columnWidth: 0,
+            columnGap: 0,
+            rowGap: 0,
+          }),
+          intervalTree: createIntervalTree(),
+          containerHeight: 0,
+        };
       }
 
-      const item = pos.set(index, height);
-      tree.insert(index, item.top, item.top + item.height);
+      const pos = createPositioner({
+        columnCount,
+        columnWidth,
+        columnGap: resolvedGap,
+        rowGap: resolvedGap,
+      });
 
-      const bottom = item.top + item.height;
-      if (bottom > maxBottom) maxBottom = bottom;
+      const tree = createIntervalTree();
+      let maxBottom = 0;
 
-      return { ...item, measured };
-    });
+      const positioned = items.map((data, index) => {
+        let height: number;
+        let measured: boolean;
 
-    return {
-      positionedItems: positioned,
-      positioner: pos,
-      intervalTree: tree,
-      containerHeight: maxBottom,
-    };
-  }, [
-    items,
-    columnCount,
-    columnWidth,
-    resolvedGap,
-    getItemHeight,
-    measuredHeights,
-    estimatedItemHeight,
-  ]);
+        if (getItemHeight) {
+          height = Math.max(0, getItemHeight(data, index, columnWidth));
+          measured = true;
+        } else {
+          const measuredHeight = measuredHeights.get(index);
+          measured = measuredHeight !== undefined;
+          height = measuredHeight ?? estimatedItemHeight;
+        }
+
+        const item = pos.set(index, height);
+        tree.insert(index, item.top, item.top + item.height);
+
+        const bottom = item.top + item.height;
+        if (bottom > maxBottom) maxBottom = bottom;
+
+        return { ...item, measured };
+      });
+
+      return {
+        positionedItems: positioned,
+        positioner: pos,
+        intervalTree: tree,
+        containerHeight: maxBottom,
+      };
+    }, [
+      items,
+      columnCount,
+      columnWidth,
+      resolvedGap,
+      getItemHeight,
+      measuredHeights,
+      estimatedItemHeight,
+    ]);
 
   // Compute the container's scroll offset (distance from scroll container top to masonry top)
   const containerOffset = useMemo(() => {
@@ -238,7 +242,8 @@ function MasonryVirtualInner<T = unknown>(
 
     const overscanPx = viewportHeight * overscanBy;
     const viewTop = Math.max(0, scrollTop - containerOffset - overscanPx);
-    const viewBottom = scrollTop - containerOffset + viewportHeight + overscanPx;
+    const viewBottom =
+      scrollTop - containerOffset + viewportHeight + overscanPx;
 
     const indices = new Set<number>();
     let start = Number.POSITIVE_INFINITY;
@@ -255,14 +260,22 @@ function MasonryVirtualInner<T = unknown>(
       startIndex: indices.size > 0 ? start : 0,
       stopIndex: indices.size > 0 ? stop : 0,
     };
-  }, [positionedItems, intervalTree, scrollTop, containerOffset, viewportHeight, overscanBy]);
+  }, [
+    positionedItems,
+    intervalTree,
+    scrollTop,
+    containerOffset,
+    viewportHeight,
+    overscanBy,
+  ]);
 
   // Notify range changes
   const prevRangeRef = useRef<[number, number]>([0, 0]);
   useEffect(() => {
     if (
       onRangeChange &&
-      (prevRangeRef.current[0] !== startIndex || prevRangeRef.current[1] !== stopIndex)
+      (prevRangeRef.current[0] !== startIndex ||
+        prevRangeRef.current[1] !== stopIndex)
     ) {
       prevRangeRef.current = [startIndex, stopIndex];
       onRangeChange(startIndex, stopIndex);
@@ -271,7 +284,7 @@ function MasonryVirtualInner<T = unknown>(
 
   // Scroll-to-index imperative handle
   const scrollContainerResolved =
-    scrollContainer?.current ?? (typeof window !== "undefined" ? window : null);
+    scrollContainer?.current ?? (typeof window !== 'undefined' ? window : null);
 
   const handle = useScrollToIndex({
     positioner,
@@ -283,7 +296,7 @@ function MasonryVirtualInner<T = unknown>(
   // Re-scroll after measurement-driven layout shifts
   const pendingReScrollRef = useRef<{
     index: number;
-    options?: Parameters<MasonryVirtualHandle["scrollToIndex"]>[1];
+    options?: Parameters<MasonryVirtualHandle['scrollToIndex']>[1];
     prevTop: number;
   } | null>(null);
   const handleRef = useRef(handle);
@@ -298,7 +311,10 @@ function MasonryVirtualInner<T = unknown>(
       return;
     }
     pending.prevTop = item.top;
-    handleRef.current.scrollToIndex(pending.index, { ...pending.options, smooth: false });
+    handleRef.current.scrollToIndex(pending.index, {
+      ...pending.options,
+      smooth: false,
+    });
   }, [positionedItems, positioner]);
 
   useImperativeHandle(
@@ -307,7 +323,11 @@ function MasonryVirtualInner<T = unknown>(
       ...handle,
       scrollToIndex: (index, options) => {
         const item = positioner.get(index);
-        pendingReScrollRef.current = { index, options, prevTop: item?.top ?? -1 };
+        pendingReScrollRef.current = {
+          index,
+          options,
+          prevTop: item?.top ?? -1,
+        };
         handle.scrollToIndex(index, options);
       },
     }),
@@ -315,25 +335,30 @@ function MasonryVirtualInner<T = unknown>(
   );
 
   // aria-live announcement on item count changes (filter/add/remove)
-  const [announcement, setAnnouncement] = useState("");
+  const [announcement, setAnnouncement] = useState('');
   const prevItemCountRef = useRef<number | null>(null);
   useEffect(() => {
-    if (prevItemCountRef.current !== null && prevItemCountRef.current !== items.length) {
-      setAnnouncement(`${items.length} ${items.length === 1 ? "item" : "items"}`);
+    if (
+      prevItemCountRef.current !== null &&
+      prevItemCountRef.current !== items.length
+    ) {
+      setAnnouncement(
+        `${items.length} ${items.length === 1 ? 'item' : 'items'}`,
+      );
     }
     prevItemCountRef.current = items.length;
   }, [items.length]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const Container: any = as ?? "div";
+  const Container: any = as ?? 'div';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ItemWrapper: any = itemAs ?? "div";
+  const ItemWrapper: any = itemAs ?? 'div';
 
-  const containerRole = role === "none" ? undefined : (role ?? "list");
+  const containerRole = role === 'none' ? undefined : (role ?? 'list');
   const ariaSetSize = totalItems ?? items.length;
 
   const containerStyle: CSSProperties = {
-    position: "relative",
+    position: 'relative',
     height: containerHeight,
     ...style,
   };
@@ -350,35 +375,41 @@ function MasonryVirtualInner<T = unknown>(
         {positionedItems
           .filter(({ index }) => visibleIndices.has(index))
           .map(({ index, top, left, width, measured }) => {
-          const data = items[index];
-          const key = itemKey ? itemKey(data as T, index) : index;
+            const data = items[index];
+            const key = itemKey ? itemKey(data as T, index) : index;
 
-          const itemStyle: CSSProperties = {
-            position: "absolute",
-            top,
-            insetInlineStart: left,
-            width,
-            ...(getItemHeight ? {} : { visibility: measured ? "visible" : ("hidden" as const) }),
-          };
+            const itemStyle: CSSProperties = {
+              position: 'absolute',
+              top,
+              insetInlineStart: left,
+              width,
+              ...(getItemHeight
+                ? {}
+                : { visibility: measured ? 'visible' : ('hidden' as const) }),
+            };
 
-          return (
-            <VirtualItem
-              key={key}
-              ItemWrapper={ItemWrapper}
-              itemClassName={itemClassName}
-              data={data}
-              index={index}
-              width={width}
-              Render={Render as React.ComponentType<MasonryRenderProps<unknown>>}
-              style={itemStyle}
-              setItemRef={
-                getItemHeight ? undefined : (node: HTMLElement | null) => setItemRef(node, index)
-              }
-              ariaSetSize={ariaSetSize}
-              ariaPosInSet={index + 1}
-            />
-          );
-        })}
+            return (
+              <VirtualItem
+                key={key}
+                ItemWrapper={ItemWrapper}
+                itemClassName={itemClassName}
+                data={data}
+                index={index}
+                width={width}
+                Render={
+                  Render as React.ComponentType<MasonryRenderProps<unknown>>
+                }
+                style={itemStyle}
+                setItemRef={
+                  getItemHeight
+                    ? undefined
+                    : (node: HTMLElement | null) => setItemRef(node, index)
+                }
+                ariaSetSize={ariaSetSize}
+                ariaPosInSet={index + 1}
+              />
+            );
+          })}
       </Container>
       <div aria-live="polite" aria-atomic="true" style={VISUALLY_HIDDEN_STYLE}>
         {announcement}
@@ -387,6 +418,8 @@ function MasonryVirtualInner<T = unknown>(
   );
 }
 
-export const MasonryVirtual = React.forwardRef(MasonryVirtualInner) as <T = unknown>(
+export const MasonryVirtual = React.forwardRef(MasonryVirtualInner) as <
+  T = unknown,
+>(
   props: MasonryVirtualProps<T>,
 ) => ReactElement | null;

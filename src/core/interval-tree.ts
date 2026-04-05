@@ -25,8 +25,22 @@ interface Node {
   parent: Node | null;
 }
 
-function createNode(index: number, low: number, high: number, color: 0 | 1): Node {
-  return { index, low, high, max: high, color, left: null, right: null, parent: null };
+function createNode(
+  index: number,
+  low: number,
+  high: number,
+  color: 0 | 1,
+): Node {
+  return {
+    index,
+    low,
+    high,
+    max: high,
+    color,
+    left: null,
+    right: null,
+    parent: null,
+  };
 }
 
 export interface IntervalTree {
@@ -151,7 +165,8 @@ export function createIntervalTree(): IntervalTree {
     while (currentNode !== null) {
       parentNode = currentNode;
       currentNode.max = Math.max(currentNode.max, high);
-      currentNode = low < currentNode.low ? currentNode.left : currentNode.right;
+      currentNode =
+        low < currentNode.low ? currentNode.left : currentNode.right;
     }
 
     newNode.parent = parentNode;
@@ -334,7 +349,8 @@ export function createIntervalTree(): IntervalTree {
       }
 
       // Push children (right first so left is processed first)
-      if (node.right && node.right.max >= queryLow) searchStack.push(node.right);
+      if (node.right && node.right.max >= queryLow)
+        searchStack.push(node.right);
       if (node.left && node.left.max >= queryLow) searchStack.push(node.left);
     }
   }

@@ -52,19 +52,19 @@
     }
   },
   "scripts": {
-    "dev": "vp pack --watch",
     "build": "tsc -p tsconfig.build.json --noEmit && vp pack",
-    "test": "vp test",
-    "test:run": "vp test --run",
-    "test:coverage": "vp test --run --coverage",
-    "playground": "pnpm -F masonix-playground dev",
-    "lint": "vp lint",
+    "dev": "vp pack --watch",
     "format": "vp fmt",
     "format:check": "vp fmt --check",
-    "tc": "tsc --noEmit",
-    "size": "size-limit",
+    "gh-release": "gh release create \"v$(node -p \"require('./package.json').version\")\" --generate-notes",
+    "lint": "vp lint",
+    "playground": "pnpm -F masonix-playground dev",
     "release": "pnpm build && changeset publish",
-    "gh-release": "gh release create \"v$(node -p \"require('./package.json').version\")\" --generate-notes"
+    "size": "size-limit",
+    "tc": "tsc --noEmit",
+    "test": "vp test",
+    "test:coverage": "vp test --run --coverage",
+    "test:run": "vp test --run"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",

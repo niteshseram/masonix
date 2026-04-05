@@ -1,4 +1,4 @@
-import { clsx } from "clsx";
+import { clsx } from 'clsx';
 
 /** Segmented control — always full-width; use inside Field, never inside Row. */
 export function Seg<T extends string>({
@@ -18,12 +18,12 @@ export function Seg<T extends string>({
           type="button"
           onClick={() => onChange(option.value)}
           className={clsx(
-            "flex-1 rounded px-2 py-1.5",
-            "text-xs font-medium",
-            "transition-colors",
+            'flex-1 rounded px-2 py-1.5',
+            'text-xs font-medium',
+            'transition-colors',
             value === option.value
-              ? "bg-zinc-700 text-zinc-100 shadow-sm"
-              : "text-zinc-400 hover:text-zinc-200",
+              ? 'bg-zinc-700 text-zinc-100 shadow-sm'
+              : 'text-zinc-400 hover:text-zinc-200',
           )}
         >
           {option.label}

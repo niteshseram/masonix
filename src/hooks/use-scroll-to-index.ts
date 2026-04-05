@@ -1,6 +1,7 @@
-import { useCallback, useRef } from "react";
-import { getScrollOffset, scrollTo } from "../core/scroll";
-import type { MasonryVirtualHandle, Positioner } from "../types";
+import { useCallback, useRef } from 'react';
+
+import { getScrollOffset, scrollTo } from '../core/scroll';
+import type { MasonryVirtualHandle, Positioner } from '../types';
 
 interface UseScrollToIndexOptions {
   positioner: Positioner;
@@ -31,8 +32,8 @@ export function useScrollToIndex({
   viewportHeightRef.current = viewportHeight;
 
   const prefersReducedMotion = useCallback((): boolean => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }, []);
 
   const getContainerOffset = useCallback((): number => {
@@ -41,22 +42,22 @@ export function useScrollToIndex({
     return getScrollOffset(el, scrollContainerRef.current);
   }, [containerRef]);
 
-  const scrollToIndex: MasonryVirtualHandle["scrollToIndex"] = useCallback(
+  const scrollToIndex: MasonryVirtualHandle['scrollToIndex'] = useCallback(
     (index, options) => {
       const item = positionerRef.current.get(index);
       if (!item) return;
 
       const containerOffset = getContainerOffset();
-      const align = options?.align ?? "start";
+      const align = options?.align ?? 'start';
       const smooth = options?.smooth ?? false;
       const vh = viewportHeightRef.current;
 
       let targetTop: number;
       switch (align) {
-        case "center":
+        case 'center':
           targetTop = containerOffset + item.top - (vh - item.height) / 2;
           break;
-        case "end":
+        case 'end':
           targetTop = containerOffset + item.top - vh + item.height;
           break;
         default: // "start"

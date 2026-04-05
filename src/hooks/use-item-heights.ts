@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface UseItemHeightsResult {
   /** Map of item index → measured height in px */
@@ -17,7 +17,9 @@ export interface UseItemHeightsResult {
  * @param minItemHeight - Optional lower bound; heights below this are clamped.
  */
 export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
-  const [measuredHeights, setMeasuredHeights] = useState<Map<number, number>>(() => new Map());
+  const [measuredHeights, setMeasuredHeights] = useState<Map<number, number>>(
+    () => new Map(),
+  );
 
   const observerRef = useRef<ResizeObserver | null>(null);
   const elementToIndex = useRef(new WeakMap<Element, number>());
@@ -60,7 +62,10 @@ export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
             : entry.contentRect.height;
 
           const minHeight = minItemHeightRef.current;
-          const clamped = minHeight !== undefined ? Math.max(minHeight, rawHeight) : rawHeight;
+          const clamped =
+            minHeight !== undefined
+              ? Math.max(minHeight, rawHeight)
+              : rawHeight;
           if (clamped > 0) updates.push([itemIndex, clamped]);
         }
 
@@ -68,7 +73,8 @@ export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
 
         setMeasuredHeights((prev) => {
           const next = new Map(prev);
-          for (const [itemIndex, height] of updates) next.set(itemIndex, height);
+          for (const [itemIndex, height] of updates)
+            next.set(itemIndex, height);
           return next;
         });
       });

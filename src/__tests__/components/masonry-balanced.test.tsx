@@ -1,8 +1,16 @@
-import React from "react";
-import { render, screen, act } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
-import { MasonryBalanced } from "../../components/masonry-balanced";
-import type { MasonryRenderProps } from "../../types";
+import { render, screen, act } from '@testing-library/react';
+import React from 'react';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
+
+import { MasonryBalanced } from '../../components/masonry-balanced';
+import type { MasonryRenderProps } from '../../types';
 
 // ---------------------------------------------------------------------------
 // ResizeObserver mock
@@ -33,7 +41,9 @@ beforeEach(() => {
   mockObserve = vi.fn();
   mockDisconnect = vi.fn();
 
-  globalThis.ResizeObserver = vi.fn().mockImplementation(function (cb: RoCallback) {
+  globalThis.ResizeObserver = vi.fn().mockImplementation(function (
+    cb: RoCallback,
+  ) {
     roCallbacks.push(cb);
     return {
       observe: mockObserve,
@@ -54,7 +64,10 @@ afterEach(() => {
 type Item = { id: number; label: string };
 
 function makeItems(count: number): Item[] {
-  return Array.from({ length: count }, (_, i) => ({ id: i, label: `Item ${i}` }));
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    label: `Item ${i}`,
+  }));
 }
 
 function ItemRender({ data }: MasonryRenderProps<Item>) {
@@ -65,9 +78,9 @@ function ItemRender({ data }: MasonryRenderProps<Item>) {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("MasonryBalanced", () => {
-  describe("rendering", () => {
-    it("renders all items", () => {
+describe('MasonryBalanced', () => {
+  describe('rendering', () => {
+    it('renders all items', () => {
       render(
         <MasonryBalanced
           items={makeItems(5)}
@@ -93,12 +106,12 @@ describe("MasonryBalanced", () => {
           getItemHeight={() => 100}
         />,
       );
-      expect(container.querySelector("section")).toBeTruthy();
+      expect(container.querySelector('section')).toBeTruthy();
     });
   });
 
-  describe("getItemHeight fast path", () => {
-    it("positions items without measuring (all items visible immediately)", () => {
+  describe('getItemHeight fast path', () => {
+    it('positions items without measuring (all items visible immediately)', () => {
       const { container } = render(
         <MasonryBalanced
           items={makeItems(3)}
@@ -115,11 +128,11 @@ describe("MasonryBalanced", () => {
       expect(wrappers).toBeTruthy();
       for (const wrapper of Array.from(wrappers!)) {
         const vis = (wrapper as HTMLElement).style.visibility;
-        expect(vis).not.toBe("hidden");
+        expect(vis).not.toBe('hidden');
       }
     });
 
-    it("sets container height to tallest column", () => {
+    it('sets container height to tallest column', () => {
       // 3 items, 3 columns, each 100px tall → container height = 100
       const { container } = render(
         <MasonryBalanced
@@ -132,10 +145,10 @@ describe("MasonryBalanced", () => {
         />,
       );
       const containerEl = container.firstElementChild as HTMLElement;
-      expect(containerEl.style.height).toBe("100px");
+      expect(containerEl.style.height).toBe('100px');
     });
 
-    it("distributes items to shortest columns", () => {
+    it('distributes items to shortest columns', () => {
       // 2 columns, items with varying heights to verify shortest-first placement
       // col0: item0 (300) → height 300
       // col1: item1 (100) → height 100
@@ -151,12 +164,14 @@ describe("MasonryBalanced", () => {
           getItemHeight={(_, index) => heights[index]}
         />,
       );
-      const wrappers = Array.from(container.firstElementChild!.children) as HTMLElement[];
+      const wrappers = Array.from(
+        container.firstElementChild!.children,
+      ) as HTMLElement[];
       // item2 (index=2) should have top=100 (placed after item1 in col1)
-      expect(wrappers[2].style.top).toBe("100px");
+      expect(wrappers[2].style.top).toBe('100px');
     });
 
-    it("applies gap between items in the same column", () => {
+    it('applies gap between items in the same column', () => {
       // 1 column, gap=16, two items of 100px
       // item1.top = 100 + 16 = 116
       const { container } = render(
@@ -169,13 +184,15 @@ describe("MasonryBalanced", () => {
           getItemHeight={() => 100}
         />,
       );
-      const wrappers = Array.from(container.firstElementChild!.children) as HTMLElement[];
-      expect(wrappers[1].style.top).toBe("116px");
+      const wrappers = Array.from(
+        container.firstElementChild!.children,
+      ) as HTMLElement[];
+      expect(wrappers[1].style.top).toBe('116px');
     });
   });
 
-  describe("measurement path", () => {
-    it("hides items before they are measured", () => {
+  describe('measurement path', () => {
+    it('hides items before they are measured', () => {
       const { container } = render(
         <MasonryBalanced
           items={makeItems(2)}
@@ -185,13 +202,15 @@ describe("MasonryBalanced", () => {
           defaultWidth={200}
         />,
       );
-      const wrappers = Array.from(container.firstElementChild!.children) as HTMLElement[];
+      const wrappers = Array.from(
+        container.firstElementChild!.children,
+      ) as HTMLElement[];
       for (const w of wrappers) {
-        expect(w.style.visibility).toBe("hidden");
+        expect(w.style.visibility).toBe('hidden');
       }
     });
 
-    it("reveals items and updates height after measurement", () => {
+    it('reveals items and updates height after measurement', () => {
       const { container } = render(
         <MasonryBalanced
           items={makeItems(1)}
@@ -203,18 +222,19 @@ describe("MasonryBalanced", () => {
       );
 
       const wrapper = container.firstElementChild!.children[0] as HTMLElement;
-      expect(wrapper.style.visibility).toBe("hidden");
+      expect(wrapper.style.visibility).toBe('hidden');
 
       act(() => {
         fireResize(wrapper, 250);
       });
 
-      const updatedWrapper = container.firstElementChild!.children[0] as HTMLElement;
-      expect(updatedWrapper.style.visibility).toBe("visible");
+      const updatedWrapper = container.firstElementChild!
+        .children[0] as HTMLElement;
+      expect(updatedWrapper.style.visibility).toBe('visible');
     });
   });
 
-  describe("accessibility", () => {
+  describe('accessibility', () => {
     it("applies role='list' by default", () => {
       render(
         <MasonryBalanced
@@ -225,10 +245,10 @@ describe("MasonryBalanced", () => {
           getItemHeight={() => 100}
         />,
       );
-      expect(screen.getByRole("list")).toBeTruthy();
+      expect(screen.getByRole('list')).toBeTruthy();
     });
 
-    it("applies aria-label when provided", () => {
+    it('applies aria-label when provided', () => {
       render(
         <MasonryBalanced
           items={makeItems(2)}
@@ -239,10 +259,10 @@ describe("MasonryBalanced", () => {
           getItemHeight={() => 100}
         />,
       );
-      expect(screen.getByRole("list", { name: "Photo gallery" })).toBeTruthy();
+      expect(screen.getByRole('list', { name: 'Photo gallery' })).toBeTruthy();
     });
 
-    it("assigns role=listitem, aria-setsize, and aria-posinset to each item", () => {
+    it('assigns role=listitem, aria-setsize, and aria-posinset to each item', () => {
       const { container } = render(
         <MasonryBalanced
           items={makeItems(3)}
@@ -255,12 +275,12 @@ describe("MasonryBalanced", () => {
       );
       const listItems = container.querySelectorAll('[role="listitem"]');
       expect(listItems).toHaveLength(3);
-      expect(listItems[0].getAttribute("aria-setsize")).toBe("3");
-      expect(listItems[0].getAttribute("aria-posinset")).toBe("1");
-      expect(listItems[2].getAttribute("aria-posinset")).toBe("3");
+      expect(listItems[0].getAttribute('aria-setsize')).toBe('3');
+      expect(listItems[0].getAttribute('aria-posinset')).toBe('1');
+      expect(listItems[2].getAttribute('aria-posinset')).toBe('3');
     });
 
-    it("includes an aria-live polite region", () => {
+    it('includes an aria-live polite region', () => {
       const { container } = render(
         <MasonryBalanced
           items={makeItems(2)}
@@ -272,12 +292,12 @@ describe("MasonryBalanced", () => {
       );
       const liveRegion = container.querySelector('[aria-live="polite"]');
       expect(liveRegion).toBeTruthy();
-      expect(liveRegion?.getAttribute("aria-atomic")).toBe("true");
+      expect(liveRegion?.getAttribute('aria-atomic')).toBe('true');
     });
   });
 
-  describe("shortest-first placement", () => {
-    it("places item 4 in col0 when all columns equal height (shortest-first picks col0)", () => {
+  describe('shortest-first placement', () => {
+    it('places item 4 in col0 when all columns equal height (shortest-first picks col0)', () => {
       // 3 cols, 4 items all 100px → item3 wraps to col0
       const { container } = render(
         <MasonryBalanced
@@ -289,9 +309,11 @@ describe("MasonryBalanced", () => {
           getItemHeight={() => 100}
         />,
       );
-      const wrappers = Array.from(container.firstElementChild!.children) as HTMLElement[];
+      const wrappers = Array.from(
+        container.firstElementChild!.children,
+      ) as HTMLElement[];
       // item3 → col0 → insetInlineStart = 0 (JSDOM renders 0 without unit)
-      expect(["0", "0px"]).toContain(wrappers[3].style.insetInlineStart);
+      expect(['0', '0px']).toContain(wrappers[3].style.insetInlineStart);
     });
   });
 });

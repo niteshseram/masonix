@@ -1,7 +1,15 @@
-import { renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
-import { useScrollToIndex } from "../../hooks/use-scroll-to-index";
-import { createPositioner } from "../../core/positioner";
+import { renderHook } from '@testing-library/react';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
+
+import { createPositioner } from '../../core/positioner';
+import { useScrollToIndex } from '../../hooks/use-scroll-to-index';
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -13,12 +21,13 @@ const originalScrollTo = window.scrollTo;
 beforeEach(() => {
   lastScrollToArgs = null;
 
-  Object.defineProperty(window, "scrollTo", {
+  Object.defineProperty(window, 'scrollTo', {
     value: (options?: ScrollToOptions | number) => {
-      if (options && typeof options === "object") {
+      if (options && typeof options === 'object') {
         lastScrollToArgs = {
           top: (options as ScrollToOptions).top ?? 0,
-          behavior: ((options as ScrollToOptions).behavior ?? "instant") as string,
+          behavior: ((options as ScrollToOptions).behavior ??
+            'instant') as string,
         };
       }
     },
@@ -27,7 +36,7 @@ beforeEach(() => {
   });
 
   // matchMedia may not exist in jsdom — define it
-  Object.defineProperty(window, "matchMedia", {
+  Object.defineProperty(window, 'matchMedia', {
     value: (query: string) => ({
       matches: false,
       media: query,
@@ -40,7 +49,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  Object.defineProperty(window, "scrollTo", {
+  Object.defineProperty(window, 'scrollTo', {
     value: originalScrollTo,
     writable: true,
     configurable: true,
@@ -68,7 +77,7 @@ function makePositionerWithItems() {
 }
 
 function createContainerRef() {
-  const el = document.createElement("div");
+  const el = document.createElement('div');
   el.getBoundingClientRect = vi.fn().mockReturnValue({
     top: 50,
     left: 0,
@@ -84,7 +93,7 @@ function createContainerRef() {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("useScrollToIndex", () => {
+describe('useScrollToIndex', () => {
   it("scrollToIndex with align='start' scrolls to item top", () => {
     const positioner = makePositionerWithItems();
     const containerRef = createContainerRef();
@@ -103,7 +112,7 @@ describe("useScrollToIndex", () => {
 
     expect(lastScrollToArgs).toBeTruthy();
     expect(lastScrollToArgs!.top).toBe(50 + item.top);
-    expect(lastScrollToArgs!.behavior).toBe("instant");
+    expect(lastScrollToArgs!.behavior).toBe('instant');
   });
 
   it("scrollToIndex with align='center' centers item in viewport", () => {
@@ -120,7 +129,7 @@ describe("useScrollToIndex", () => {
     );
 
     const item = positioner.get(1)!;
-    result.current.scrollToIndex(1, { align: "center" });
+    result.current.scrollToIndex(1, { align: 'center' });
 
     const expected = 50 + item.top - (800 - item.height) / 2;
     expect(lastScrollToArgs!.top).toBe(Math.max(0, expected));
@@ -140,13 +149,13 @@ describe("useScrollToIndex", () => {
     );
 
     const item = positioner.get(2)!;
-    result.current.scrollToIndex(2, { align: "end" });
+    result.current.scrollToIndex(2, { align: 'end' });
 
     const expected = 50 + item.top - 800 + item.height;
     expect(lastScrollToArgs!.top).toBe(Math.max(0, expected));
   });
 
-  it("scrollToIndex with smooth=true uses smooth scrolling", () => {
+  it('scrollToIndex with smooth=true uses smooth scrolling', () => {
     const positioner = makePositionerWithItems();
     const containerRef = createContainerRef();
 
@@ -160,14 +169,14 @@ describe("useScrollToIndex", () => {
     );
 
     result.current.scrollToIndex(0, { smooth: true });
-    expect(lastScrollToArgs!.behavior).toBe("smooth");
+    expect(lastScrollToArgs!.behavior).toBe('smooth');
   });
 
-  it("respects prefers-reduced-motion: disables smooth scrolling", () => {
+  it('respects prefers-reduced-motion: disables smooth scrolling', () => {
     // Override matchMedia to report reduced motion
-    Object.defineProperty(window, "matchMedia", {
+    Object.defineProperty(window, 'matchMedia', {
       value: (query: string) => ({
-        matches: query === "(prefers-reduced-motion: reduce)",
+        matches: query === '(prefers-reduced-motion: reduce)',
         media: query,
         addEventListener: () => {},
         removeEventListener: () => {},
@@ -189,10 +198,10 @@ describe("useScrollToIndex", () => {
     );
 
     result.current.scrollToIndex(0, { smooth: true });
-    expect(lastScrollToArgs!.behavior).toBe("instant");
+    expect(lastScrollToArgs!.behavior).toBe('instant');
   });
 
-  it("does nothing if item index not found", () => {
+  it('does nothing if item index not found', () => {
     const positioner = makePositionerWithItems();
     const containerRef = createContainerRef();
 

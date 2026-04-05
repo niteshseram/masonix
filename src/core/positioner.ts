@@ -1,4 +1,4 @@
-import type { PositionedItem, Positioner } from "../types";
+import type { PositionedItem, Positioner } from '../types';
 
 export interface PositionerOptions {
   columnCount: number;
@@ -70,7 +70,11 @@ export function createPositioner(options: PositionerOptions): Positioner {
       const colItems = columnItems[col];
       let currentTop = 0;
 
-      for (let colItemIndex = 0; colItemIndex < colItems.length; colItemIndex++) {
+      for (
+        let colItemIndex = 0;
+        colItemIndex < colItems.length;
+        colItemIndex++
+      ) {
         const item = items[colItems[colItemIndex]];
         if (!item) continue;
 
@@ -103,7 +107,8 @@ export function createPositioner(options: PositionerOptions): Positioner {
   function shortestColumn(): number {
     let minColIndex = 0;
     for (let colIndex = 1; colIndex < columnCount; colIndex++) {
-      if (columnHeights[colIndex] < columnHeights[minColIndex]) minColIndex = colIndex;
+      if (columnHeights[colIndex] < columnHeights[minColIndex])
+        minColIndex = colIndex;
     }
     return minColIndex;
   }
