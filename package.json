@@ -1,6 +1,6 @@
 {
   "name": "masonix",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "The React masonry layout library — lightweight, balanced, virtualized, SSR-ready",
   "keywords": [
     "grid",
