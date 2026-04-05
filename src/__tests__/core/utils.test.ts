@@ -105,6 +105,18 @@ describe('computeColumns', () => {
     expect(result.columnWidth).toBeGreaterThanOrEqual(0);
   });
 
+  it('returns columnWidth >= 0 when containerWidth is 0 (hidden / unmounted)', () => {
+    // gap math can produce negative intermediate value — must be clamped
+    const result = computeColumns(0, { columns: 4, gap: 10 });
+    expect(result.columnWidth).toBeGreaterThanOrEqual(0);
+    expect(result.columnCount).toBe(4);
+  });
+
+  it('clamps columns: 0 to at least 1 column', () => {
+    const result = computeColumns(900, { columns: 0 });
+    expect(result.columnCount).toBe(1);
+  });
+
   it('resolves responsive column count at runtime', () => {
     const result = computeColumns(1024, { columns: { 0: 1, 640: 2, 1024: 4 } });
     expect(result.columnCount).toBe(4);

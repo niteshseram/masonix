@@ -116,6 +116,56 @@ describe('useContainerWidth', () => {
     expect(result.current.width).toBe(400); // unchanged
   });
 
+  it('recovers to non-zero width after a 0-width entry (tab panel becoming visible)', () => {
+    const { result } = renderHook(() => useContainerWidth(400));
+
+    act(() => {
+      result.current.ref(document.createElement('div'));
+    });
+
+    // Simulate element hidden in a tab (width = 0, ignored)
+    act(() => {
+      notifyResize!([
+        {
+          contentBoxSize: [{ inlineSize: 0, blockSize: 0 }],
+          contentRect: { width: 0 } as DOMRectReadOnly,
+          target: document.createElement('div'),
+          borderBoxSize: [],
+          devicePixelContentBoxSize: [],
+        } as unknown as ResizeObserverEntry,
+      ]);
+    });
+    expect(result.current.width).toBe(400); // previous width preserved
+
+    // Simulate tab becoming active — ResizeObserver fires with real width
+    act(() => {
+      notifyResize!([
+        {
+          contentBoxSize: [{ inlineSize: 750, blockSize: 0 }],
+          contentRect: { width: 750 } as DOMRectReadOnly,
+          target: document.createElement('div'),
+          borderBoxSize: [],
+          devicePixelContentBoxSize: [],
+        } as unknown as ResizeObserverEntry,
+      ]);
+    });
+    expect(result.current.width).toBe(750);
+  });
+
+  it('handles empty entries array from ResizeObserver without error', () => {
+    const { result } = renderHook(() => useContainerWidth(400));
+
+    act(() => {
+      result.current.ref(document.createElement('div'));
+    });
+
+    act(() => {
+      notifyResize!([]); // ResizeObserver can fire with no entries
+    });
+
+    expect(result.current.width).toBe(400); // unchanged, no throw
+  });
+
   it('disconnects observer when ref is called with null', () => {
     const mockDisconnect = vi.fn();
     globalThis.ResizeObserver = vi.fn().mockImplementation(function () {

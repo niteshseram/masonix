@@ -103,6 +103,13 @@ describe('useColumns', () => {
       expect(result.current.columnCount).toBe(2);
     });
 
+    it('clamps to 1 column for a single item regardless of configured columns', () => {
+      const { result } = renderHook(() =>
+        useColumns({ containerWidth: 1200, columns: 5, itemCount: 1 }),
+      );
+      expect(result.current.columnCount).toBe(1);
+    });
+
     it('returns configured columnCount when itemCount >= columns', () => {
       const { result } = renderHook(() =>
         useColumns({ containerWidth: 900, columns: 3, itemCount: 10 }),

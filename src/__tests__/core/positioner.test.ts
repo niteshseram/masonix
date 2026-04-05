@@ -125,6 +125,17 @@ describe('createPositioner', () => {
       p.update([[0, 300]]);
       expect(p.get(1)!.top).toBe(topBefore);
     });
+
+    it('returns empty array when no heights actually changed', () => {
+      const p = createPositioner({ columnCount: 2, columnWidth: 100 });
+      p.set(0, 100);
+      p.set(1, 200);
+      const updated = p.update([
+        [0, 100],
+        [1, 200],
+      ]);
+      expect(updated).toHaveLength(0);
+    });
   });
 
   describe('size and all', () => {
