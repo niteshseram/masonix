@@ -1,7 +1,7 @@
 {
   "name": "masonix",
   "version": "0.3.0",
-  "description": "The best React masonry layout library — lightweight, balanced, virtualized, SSR-ready, and Tailwind-compatible.",
+  "description": "The React masonry layout library — lightweight, balanced, virtualized, SSR-ready",
   "keywords": [
     "grid",
     "layout",
