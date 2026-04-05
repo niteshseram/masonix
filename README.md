@@ -23,7 +23,7 @@ Every popular masonry library has at least one of these problems:
 | **Layout flash on hydration** | No SSR fallback or pre-known heights                                            |
 | **Unmaintained**              | Most popular options haven't shipped a release since 2022                       |
 
-masonix solves all of these with a **three-tier progressive enhancement model** — use only what your use case needs.
+**masonix** solves all of these with a **three-tier progressive enhancement model** — use only what your use case needs.
 
 ---
 
