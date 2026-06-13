@@ -155,6 +155,39 @@ Use `onRangeChange` for infinite loading:
 />;
 ```
 
+Use `onEndReached` when you want a load-more signal without manually comparing
+the range. It fires once for each loaded item count.
+
+```tsx
+<MasonryVirtual
+  items={items}
+  columns={3}
+  gap={16}
+  estimatedItemHeight={300}
+  endReachedThreshold={8}
+  onEndReached={() => loadMore()}
+  render={({ data }) => <Card data={data} />}
+/>;
+```
+
+Use `scrollSeek` to render light placeholders while the user is scrolling fast.
+
+```tsx
+<MasonryVirtual
+  items={items}
+  columns={3}
+  gap={16}
+  estimatedItemHeight={300}
+  scrollSeek={{
+    velocityThreshold: 1200,
+    placeholder: ({ height }) => (
+      <div style={{ height }} className="rounded-lg bg-zinc-100" />
+    ),
+  }}
+  render={({ data }) => <Card data={data} />}
+/>;
+```
+
 Use `scrollRef` when you need imperative scrolling:
 
 ```tsx
@@ -326,6 +359,9 @@ These props are available on `Masonry`, `MasonryBalanced`, and
 | `totalItems` | `number` | - | Total item count for accessibility metadata. |
 | `scrollRef` | `Ref<MasonryVirtualHandle>` | - | Imperative scroll handle. |
 | `onRangeChange` | `(startIndex: number, stopIndex: number) => void` | - | Called when the visible item range changes. |
+| `onEndReached` | `(info: MasonryVirtualRange) => void` | - | Called when the rendered range reaches the end threshold. |
+| `endReachedThreshold` | `number` | `0` | Remaining loaded item count before `onEndReached` fires. |
+| `scrollSeek` | `{ velocityThreshold?, placeholder? }` | - | Render placeholders while scroll velocity is above the threshold. |
 
 ## TypeScript
 
@@ -363,6 +399,7 @@ import type {
 import type {
   MasonryVirtualHandle,
   MasonryVirtualProps,
+  MasonryVirtualRange,
 } from 'masonix/virtual';
 ```
 

@@ -1,6 +1,10 @@
 import { Masonry, MasonryBalanced } from 'masonix';
+import type { MasonryRenderProps } from 'masonix';
 import { MasonryVirtual } from 'masonix/virtual';
-import type { MasonryVirtualHandle } from 'masonix/virtual';
+import type {
+  MasonryVirtualHandle,
+  MasonryVirtualRange,
+} from 'masonix/virtual';
 import React from 'react';
 
 import type { Photo } from '../demo-data';
@@ -39,6 +43,21 @@ interface MasonryPreviewProps {
   config: Config;
   scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
   scrollHandleRef?: React.RefObject<MasonryVirtualHandle | null>;
+  onVirtualRangeChange?: (range: MasonryVirtualRange) => void;
+  onVirtualEndReached?: (range: MasonryVirtualRange) => void;
+}
+
+function ScrollSeekPlaceholder({
+  height,
+}: MasonryRenderProps<Photo> & { height: number }) {
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900"
+      style={{ height }}
+    >
+      <div className="h-full animate-pulse bg-gradient-to-br from-zinc-800 via-zinc-900 to-zinc-800" />
+    </div>
+  );
 }
 
 export function MasonryPreview({
@@ -46,10 +65,24 @@ export function MasonryPreview({
   config,
   scrollContainerRef,
   scrollHandleRef,
+  onVirtualRangeChange,
+  onVirtualEndReached,
 }: MasonryPreviewProps) {
   const { columns, columnWidth, maxColumns, gap } = deriveLayoutProps(config);
 
   const Render = config.cardStyle === 'text-card' ? TextCard : ColorBlock;
+
+  const handleRangeChange = React.useCallback(
+    (startIndex: number, stopIndex: number) => {
+      onVirtualRangeChange?.({
+        startIndex,
+        stopIndex,
+        itemCount: items.length,
+        totalItems: items.length,
+      });
+    },
+    [items.length, onVirtualRangeChange],
+  );
 
   // Known heights only meaningful for color-block cards with explicit heights
   const getItemHeight =
@@ -85,6 +118,17 @@ export function MasonryPreview({
         overscanBy={config.overscanBy}
         scrollContainer={scrollContainerRef}
         scrollRef={scrollHandleRef}
+        onRangeChange={handleRangeChange}
+        onEndReached={onVirtualEndReached}
+        endReachedThreshold={config.endReachedThreshold}
+        scrollSeek={
+          config.enableScrollSeek
+            ? {
+                velocityThreshold: config.scrollSeekVelocityThreshold,
+                placeholder: ScrollSeekPlaceholder,
+              }
+            : undefined
+        }
         defaultWidth={800}
       />
     );

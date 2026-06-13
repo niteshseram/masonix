@@ -43,6 +43,9 @@ export interface Config {
   minItemHeight: number;
 
   overscanBy: number;
+  endReachedThreshold: number;
+  enableScrollSeek: boolean;
+  scrollSeekVelocityThreshold: number;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -87,4 +90,7 @@ export const DEFAULT_CONFIG: Config = {
   minItemHeight: 80,
 
   overscanBy: 2,
+  endReachedThreshold: 0,
+  enableScrollSeek: false,
+  scrollSeekVelocityThreshold: 1200,
 };

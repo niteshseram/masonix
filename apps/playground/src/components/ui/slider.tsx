@@ -20,7 +20,7 @@ export function Slider({
         className="flex-1 cursor-pointer accent-blue-500"
         onChange={(e) => onChange(Number(e.target.value))}
       />
-      <span className="w-7 shrink-0 text-right font-mono text-xs tabular-nums text-zinc-300">
+      <span className="w-12 shrink-0 text-right font-mono text-xs tabular-nums text-zinc-300">
         {value}
       </span>
     </div>

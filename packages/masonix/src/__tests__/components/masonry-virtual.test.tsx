@@ -104,6 +104,17 @@ function ItemRender({ data }: MasonryRenderProps<Item>) {
   return <div data-testid={`item-${data.id}`}>{data.label}</div>;
 }
 
+function PlaceholderRender({
+  index,
+  height,
+}: MasonryRenderProps<Item> & { height: number }) {
+  return (
+    <div data-testid={`placeholder-${index}`} style={{ height }}>
+      Loading {index}
+    </div>
+  );
+}
+
 function rect(top: number, height = 800): DOMRect {
   return {
     top,
@@ -268,6 +279,158 @@ describe('MasonryVirtual', () => {
 
       expect(screen.getByTestId('item-0')).toBeTruthy();
       expect(screen.queryByTestId('item-5')).toBeNull();
+    });
+
+    it('calls onEndReached when the visible range reaches the threshold', () => {
+      const onEndReached = vi.fn();
+      Object.defineProperty(window, 'innerHeight', {
+        get: () => 750,
+        configurable: true,
+      });
+
+      render(
+        <MasonryVirtual
+          items={makeItems(10)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          overscanBy={0}
+          endReachedThreshold={2}
+          onEndReached={onEndReached}
+        />,
+      );
+
+      expect(onEndReached).toHaveBeenCalledTimes(1);
+      expect(onEndReached).toHaveBeenCalledWith({
+        startIndex: 0,
+        stopIndex: 7,
+        itemCount: 10,
+        totalItems: 10,
+      });
+    });
+
+    it('does not repeatedly call onEndReached for the same item count', () => {
+      const onEndReached = vi.fn();
+      const items = makeItems(10);
+      Object.defineProperty(window, 'innerHeight', {
+        get: () => 750,
+        configurable: true,
+      });
+
+      const { rerender } = render(
+        <MasonryVirtual
+          items={items}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          overscanBy={0}
+          endReachedThreshold={2}
+          onEndReached={onEndReached}
+        />,
+      );
+
+      rerender(
+        <MasonryVirtual
+          items={items}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          overscanBy={0}
+          endReachedThreshold={2}
+          onEndReached={onEndReached}
+        />,
+      );
+
+      expect(onEndReached).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps onRangeChange callback arguments unchanged', () => {
+      const onRangeChange = vi.fn();
+      Object.defineProperty(window, 'innerHeight', {
+        get: () => 750,
+        configurable: true,
+      });
+
+      render(
+        <MasonryVirtual
+          items={makeItems(10)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          overscanBy={0}
+          onRangeChange={onRangeChange}
+        />,
+      );
+
+      expect(onRangeChange).toHaveBeenCalledWith(0, 7);
+    });
+
+    it('renders scroll-seek placeholders when velocity is above threshold', () => {
+      const renderSpy = vi.fn(ItemRender);
+
+      render(
+        <MasonryVirtual
+          items={makeItems(5)}
+          render={renderSpy}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 120}
+          scrollSeek={{
+            velocityThreshold: 0,
+            placeholder: PlaceholderRender,
+          }}
+        />,
+      );
+
+      expect(screen.getByTestId('placeholder-0')).toBeTruthy();
+      expect(screen.queryByTestId('item-0')).toBeNull();
+      expect(renderSpy).not.toHaveBeenCalled();
+    });
+
+    it('restores real items when scroll-seek velocity is below threshold', () => {
+      const { rerender } = render(
+        <MasonryVirtual
+          items={makeItems(5)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 120}
+          scrollSeek={{
+            velocityThreshold: 0,
+            placeholder: PlaceholderRender,
+          }}
+        />,
+      );
+
+      expect(screen.getByTestId('placeholder-0')).toBeTruthy();
+
+      rerender(
+        <MasonryVirtual
+          items={makeItems(5)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 120}
+          scrollSeek={{
+            velocityThreshold: 1,
+            placeholder: PlaceholderRender,
+          }}
+        />,
+      );
+
+      expect(screen.getByTestId('item-0')).toBeTruthy();
+      expect(screen.queryByTestId('placeholder-0')).toBeNull();
     });
   });
 
@@ -489,6 +652,32 @@ describe('MasonryVirtual', () => {
       );
 
       expect(mockUnobserve).not.toHaveBeenCalled();
+    });
+
+    it('does not observe placeholder items during scroll seek', () => {
+      render(
+        <MasonryVirtual
+          items={makeItems(3)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={100}
+          scrollSeek={{
+            velocityThreshold: 0,
+            placeholder: PlaceholderRender,
+          }}
+        />,
+      );
+
+      expect(screen.getByTestId('placeholder-0')).toBeTruthy();
+      const observedElements = mockObserve.mock.calls.map(
+        ([element]) => element as HTMLElement,
+      );
+      expect(
+        observedElements.some(
+          (element) => element.getAttribute('role') === 'listitem',
+        ),
+      ).toBe(false);
     });
   });
 

@@ -1,6 +1,10 @@
 import { clsx } from 'clsx';
-import type { MasonryVirtualHandle } from 'masonix/virtual';
-import { useEffect, useRef, useState } from 'react';
+import {
+  useScroller,
+  type MasonryVirtualHandle,
+  type MasonryVirtualRange,
+} from 'masonix/virtual';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Logo } from './brand/logo';
 import { DEFAULT_CONFIG } from './components/config-panel';
@@ -11,6 +15,76 @@ import { Sidebar } from './components/sidebar';
 import { ScrollArea } from './components/ui/scroll-area';
 import { makePhotos } from './demo-data';
 import { TABS, PRESETS } from './playground-config';
+
+interface VirtualDiagnostics extends MasonryVirtualRange {
+  endReachedCount: number;
+}
+
+const EMPTY_VIRTUAL_DIAGNOSTICS: VirtualDiagnostics = {
+  startIndex: 0,
+  stopIndex: 0,
+  itemCount: 0,
+  totalItems: 0,
+  endReachedCount: 0,
+};
+
+function getRenderedCount(diagnostics: VirtualDiagnostics): number {
+  if (diagnostics.itemCount === 0) return 0;
+  if (diagnostics.stopIndex < diagnostics.startIndex) return 0;
+  return diagnostics.stopIndex - diagnostics.startIndex + 1;
+}
+
+function VirtualDiagnosticsBar({
+  diagnostics,
+  scrollVelocity,
+}: {
+  diagnostics: VirtualDiagnostics;
+  scrollVelocity: number;
+}) {
+  const renderedCount = getRenderedCount(diagnostics);
+  const rangeLabel =
+    renderedCount === 0
+      ? 'none'
+      : `${diagnostics.startIndex + 1}-${diagnostics.stopIndex + 1}`;
+
+  return (
+    <div
+      className={clsx(
+        'mb-5 flex flex-wrap items-center gap-x-4 gap-y-1',
+        'rounded-lg border border-zinc-800 bg-zinc-950/80 px-3 py-2',
+        'font-mono text-[10px] text-zinc-400',
+      )}
+    >
+      <span>
+        rendered{' '}
+        <strong className="font-semibold text-zinc-100">{renderedCount}</strong>
+      </span>
+      <span>
+        range{' '}
+        <strong className="font-semibold text-zinc-100">{rangeLabel}</strong>
+      </span>
+      <span>
+        total{' '}
+        <strong className="font-semibold text-zinc-100">
+          {diagnostics.itemCount}
+        </strong>
+      </span>
+      <span>
+        velocity{' '}
+        <strong className="font-semibold text-zinc-100">
+          {Math.round(Math.abs(scrollVelocity))}
+        </strong>{' '}
+        px/s
+      </span>
+      <span>
+        end{' '}
+        <strong className="font-semibold text-zinc-100">
+          {diagnostics.endReachedCount}
+        </strong>
+      </span>
+    </div>
+  );
+}
 
 // ─── Presets dropdown ─────────────────────────────────────────────────────────
 
@@ -85,16 +159,45 @@ function PresetsDropdown({
 export default function App() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
   const [shuffleKey, setShuffleKey] = useState(0);
+  const [virtualDiagnostics, setVirtualDiagnostics] =
+    useState<VirtualDiagnostics>(EMPTY_VIRTUAL_DIAGNOSTICS);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollHandleRef = useRef<MasonryVirtualHandle>(null);
+  const { scrollVelocity } = useScroller(scrollContainerRef);
 
-  const items = makePhotos(config.itemCount, shuffleKey, config);
+  const items = useMemo(
+    () => makePhotos(config.itemCount, shuffleKey, config),
+    [config, shuffleKey],
+  );
   const activeTab = TABS.find((t) => t.value === config.component)!;
+
+  const handleVirtualRangeChange = useCallback((range: MasonryVirtualRange) => {
+    setVirtualDiagnostics((prevDiagnostics) => ({
+      ...prevDiagnostics,
+      ...range,
+    }));
+  }, []);
+
+  const handleVirtualEndReached = useCallback((range: MasonryVirtualRange) => {
+    setVirtualDiagnostics((prevDiagnostics) => ({
+      ...prevDiagnostics,
+      ...range,
+      endReachedCount: prevDiagnostics.endReachedCount + 1,
+    }));
+  }, []);
 
   function applyPreset(preset: Partial<Config>) {
     setConfig({ ...DEFAULT_CONFIG, ...preset });
     setShuffleKey(0);
   }
+
+  useEffect(() => {
+    setVirtualDiagnostics({
+      ...EMPTY_VIRTUAL_DIAGNOSTICS,
+      itemCount: items.length,
+      totalItems: items.length,
+    });
+  }, [config.component, items.length, shuffleKey]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -249,10 +352,16 @@ export default function App() {
             }}
           >
             {config.component === 'masonry-virtual' && (
-              <ScrollToIndexBar
-                itemCount={items.length}
-                scrollHandleRef={scrollHandleRef}
-              />
+              <>
+                <ScrollToIndexBar
+                  itemCount={items.length}
+                  scrollHandleRef={scrollHandleRef}
+                />
+                <VirtualDiagnosticsBar
+                  diagnostics={virtualDiagnostics}
+                  scrollVelocity={scrollVelocity}
+                />
+              </>
             )}
             <MasonryPreview
               items={items}
@@ -263,6 +372,8 @@ export default function App() {
                   ? scrollHandleRef
                   : undefined
               }
+              onVirtualRangeChange={handleVirtualRangeChange}
+              onVirtualEndReached={handleVirtualEndReached}
             />
           </div>
         </ScrollArea>

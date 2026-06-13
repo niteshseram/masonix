@@ -6,6 +6,7 @@ import { isServer } from '../utils/ssr';
 export interface ScrollerState {
   scrollTop: number;
   viewportHeight: number;
+  scrollVelocity: number;
 }
 
 interface ScrollStore {
@@ -17,6 +18,7 @@ interface ScrollStore {
 const SERVER_SNAPSHOT: ScrollerState = {
   scrollTop: 0,
   viewportHeight: 0,
+  scrollVelocity: 0,
 };
 
 /**
@@ -33,6 +35,9 @@ export function useScroller(
   const stateRef = useRef<ScrollerState>(SERVER_SNAPSHOT);
   const listenersRef = useRef<Set<() => void>>(new Set());
   const rafIdRef = useRef<number | null>(null);
+  const scrollEndTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const lastTickRef = useRef(0);
 
   const getContainer = useCallback((): HTMLElement | Window => {
@@ -66,11 +71,34 @@ export function useScroller(
 
     const container = getContainer();
     const interval = 1000 / fps;
+    const settleDelay = Math.max(120, interval * 2);
+
+    const clearScrollEndTimeout = (): void => {
+      if (scrollEndTimeoutRef.current !== null) {
+        clearTimeout(scrollEndTimeoutRef.current);
+        scrollEndTimeoutRef.current = null;
+      }
+    };
+
+    const scheduleScrollEnd = (): void => {
+      clearScrollEndTimeout();
+      scrollEndTimeoutRef.current = setTimeout(() => {
+        scrollEndTimeoutRef.current = null;
+        if (stateRef.current.scrollVelocity === 0) return;
+        stateRef.current = {
+          ...stateRef.current,
+          scrollVelocity: 0,
+        };
+        notify();
+      }, settleDelay);
+    };
 
     // Read initial state
+    lastTickRef.current = performance.now() - interval;
     stateRef.current = {
       scrollTop: getScrollTop(container),
       viewportHeight: getViewportHeight(container),
+      scrollVelocity: 0,
     };
     notify();
 
@@ -86,12 +114,16 @@ export function useScroller(
         }
         return;
       }
+      const nextScrollTop = getScrollTop(container);
+      const elapsed = Math.max(1, now - lastTickRef.current);
       lastTickRef.current = now;
-
       stateRef.current = {
-        scrollTop: getScrollTop(container),
+        scrollTop: nextScrollTop,
         viewportHeight: getViewportHeight(container),
+        scrollVelocity:
+          ((nextScrollTop - stateRef.current.scrollTop) / elapsed) * 1000,
       };
+      scheduleScrollEnd();
       notify();
     };
 
@@ -99,7 +131,11 @@ export function useScroller(
     const handleResize = (): void => {
       const viewportHeight = getViewportHeight(container);
       if (viewportHeight !== stateRef.current.viewportHeight) {
-        stateRef.current = { ...stateRef.current, viewportHeight };
+        stateRef.current = {
+          ...stateRef.current,
+          viewportHeight,
+          scrollVelocity: 0,
+        };
         notify();
       }
     };
@@ -115,6 +151,7 @@ export function useScroller(
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
       }
+      clearScrollEndTimeout();
     };
   }, [getContainer, fps, notify]);
 

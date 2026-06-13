@@ -36,7 +36,7 @@ export function ConfigPanel({
     config.component === 'masonry-balanced' ||
     config.component === 'masonry-virtual';
   const knownHeightsDisabled = config.cardStyle === 'text-card';
-  const maxCount = config.component === 'masonry-virtual' ? 500 : 100;
+  const maxCount = config.component === 'masonry-virtual' ? 10000 : 100;
 
   return (
     <ScrollArea
@@ -249,6 +249,30 @@ export function ConfigPanel({
                 max={10}
                 onChange={(v) => set('overscanBy', v)}
               />
+            </Row>
+            <Row label="End threshold">
+              <NumInput
+                value={config.endReachedThreshold}
+                min={0}
+                max={1000}
+                onChange={(v) => set('endReachedThreshold', v)}
+              />
+            </Row>
+            <Row label="Scroll seek">
+              <div className="flex items-center gap-2">
+                <Toggle
+                  value={config.enableScrollSeek}
+                  onChange={(v) => set('enableScrollSeek', v)}
+                />
+                {config.enableScrollSeek && (
+                  <NumInput
+                    value={config.scrollSeekVelocityThreshold}
+                    min={0}
+                    max={20000}
+                    onChange={(v) => set('scrollSeekVelocityThreshold', v)}
+                  />
+                )}
+              </div>
             </Row>
           </Section>
         )}

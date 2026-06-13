@@ -60,6 +60,13 @@ export interface MasonryRenderProps<T> {
   width: number;
 }
 
+export interface MasonryVirtualRange {
+  startIndex: number;
+  stopIndex: number;
+  itemCount: number;
+  totalItems: number;
+}
+
 export interface MasonryProps<T = unknown> {
   // --- Data ---
   items: T[];
@@ -114,6 +121,14 @@ export interface MasonryVirtualProps<
   totalItems?: number;
   scrollRef?: React.Ref<MasonryVirtualHandle>;
   onRangeChange?: (startIndex: number, stopIndex: number) => void;
+  onEndReached?: (info: MasonryVirtualRange) => void;
+  endReachedThreshold?: number;
+  scrollSeek?: {
+    velocityThreshold?: number;
+    placeholder?: React.ComponentType<
+      MasonryRenderProps<T> & { height: number }
+    >;
+  };
 }
 
 export interface MasonryVirtualHandle {

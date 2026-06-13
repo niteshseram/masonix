@@ -86,6 +86,9 @@ export const PRESETS: {
       maxItemH: 400,
       itemCount: 10000,
       cardStyle: 'color-block',
+      endReachedThreshold: 20,
+      enableScrollSeek: true,
+      scrollSeekVelocityThreshold: 1200,
     },
   },
 ];

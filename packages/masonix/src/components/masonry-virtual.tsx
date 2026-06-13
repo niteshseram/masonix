@@ -24,11 +24,13 @@ import type {
   MasonryRenderProps,
   MasonryVirtualHandle,
   MasonryVirtualProps,
+  MasonryVirtualRange,
   PositionedItem,
 } from '../types';
 
 const DEFAULT_ESTIMATED_HEIGHT = 150;
 const DEFAULT_OVERSCAN = 2;
+const DEFAULT_SCROLL_SEEK_VELOCITY = 1200;
 const SCROLL_ALIGNMENT_TOLERANCE = 2;
 
 // Visually hidden — present in DOM for screen readers but invisible to sighted users
@@ -93,7 +95,11 @@ interface VirtualItemProps {
   width: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Render: React.ComponentType<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Placeholder?: React.ComponentType<any>;
   style: CSSProperties;
+  height: number;
+  isPlaceholder: boolean;
   setItemRef?: (node: HTMLElement | null, index: number) => void;
   itemRole: 'listitem' | undefined;
   ariaSetSize: number;
@@ -108,7 +114,10 @@ const VirtualItem = memo(function VirtualItem({
   measureIndex,
   width,
   Render,
+  Placeholder,
   style,
+  height,
+  isPlaceholder,
   setItemRef,
   itemRole,
   ariaSetSize,
@@ -133,7 +142,20 @@ const VirtualItem = memo(function VirtualItem({
       aria-setsize={itemRole ? ariaSetSize : undefined}
       aria-posinset={itemRole ? ariaPosInSet : undefined}
     >
-      <Render index={index} data={data} width={width} />
+      {isPlaceholder ? (
+        Placeholder ? (
+          <Placeholder
+            index={index}
+            data={data}
+            width={width}
+            height={height}
+          />
+        ) : (
+          <div aria-hidden="true" style={{ height }} />
+        )
+      ) : (
+        <Render index={index} data={data} width={width} />
+      )}
     </ItemWrapper>
   );
 });
@@ -172,6 +194,9 @@ function MasonryVirtualInner<T = unknown>(
     totalItems,
     scrollRef,
     onRangeChange,
+    onEndReached,
+    endReachedThreshold = 0,
+    scrollSeek,
   } = props;
 
   const containerElRef = useRef<HTMLElement | null>(null);
@@ -211,7 +236,8 @@ function MasonryVirtualInner<T = unknown>(
   const measurementIndexes = useMeasurementIndexes(items, itemKey);
 
   // Scroll tracking
-  const { scrollTop, viewportHeight } = useScroller(scrollContainer);
+  const { scrollTop, viewportHeight, scrollVelocity } =
+    useScroller(scrollContainer);
 
   // Build positioner + interval tree from current layout inputs
   const { positionedItems, positioner, intervalTree, containerHeight } =
@@ -351,6 +377,40 @@ function MasonryVirtualInner<T = unknown>(
     }
   }, [onRangeChange, startIndex, stopIndex]);
 
+  const totalItemCount = totalItems ?? items.length;
+  const rangeInfo = useMemo<MasonryVirtualRange>(
+    () => ({
+      startIndex,
+      stopIndex,
+      itemCount: items.length,
+      totalItems: totalItemCount,
+    }),
+    [items.length, startIndex, stopIndex, totalItemCount],
+  );
+
+  const endReachedItemCountRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!onEndReached || items.length === 0 || visibleItems.length === 0)
+      return;
+
+    const threshold = Math.max(0, endReachedThreshold);
+    const endIndex = items.length - 1 - threshold;
+    if (
+      stopIndex >= endIndex &&
+      endReachedItemCountRef.current !== items.length
+    ) {
+      endReachedItemCountRef.current = items.length;
+      onEndReached(rangeInfo);
+    }
+  }, [
+    endReachedThreshold,
+    items.length,
+    onEndReached,
+    rangeInfo,
+    stopIndex,
+    visibleItems.length,
+  ]);
+
   const handle = useScrollToIndex({
     positioner,
     containerRef: containerElRef,
@@ -470,7 +530,11 @@ function MasonryVirtualInner<T = unknown>(
   const containerRole = role === 'none' ? undefined : (role ?? 'list');
   const itemRole: 'listitem' | undefined =
     containerRole !== undefined ? 'listitem' : undefined;
-  const ariaSetSize = totalItems ?? items.length;
+  const ariaSetSize = totalItemCount;
+  const isScrollSeekActive =
+    scrollSeek !== undefined &&
+    Math.abs(scrollVelocity) >=
+      (scrollSeek.velocityThreshold ?? DEFAULT_SCROLL_SEEK_VELOCITY);
 
   const containerStyle: CSSProperties = {
     position: 'relative',
@@ -487,7 +551,7 @@ function MasonryVirtualInner<T = unknown>(
         role={containerRole}
         aria-label={ariaLabel}
       >
-        {visibleItems.map(({ index, top, left, width, measured }) => {
+        {visibleItems.map(({ index, top, left, width, height, measured }) => {
           const data = items[index];
           const key = itemKey ? itemKey(data as T, index) : index;
 
@@ -496,7 +560,7 @@ function MasonryVirtualInner<T = unknown>(
             top,
             insetInlineStart: left,
             width,
-            ...(getItemHeight
+            ...(getItemHeight || isScrollSeekActive
               ? {}
               : { visibility: measured ? 'visible' : ('hidden' as const) }),
           };
@@ -513,8 +577,13 @@ function MasonryVirtualInner<T = unknown>(
               Render={
                 Render as React.ComponentType<MasonryRenderProps<unknown>>
               }
+              Placeholder={scrollSeek?.placeholder}
               style={itemStyle}
-              setItemRef={getItemHeight ? undefined : setItemRef}
+              height={height}
+              isPlaceholder={isScrollSeekActive}
+              setItemRef={
+                getItemHeight || isScrollSeekActive ? undefined : setItemRef
+              }
               itemRole={itemRole}
               ariaSetSize={ariaSetSize}
               ariaPosInSet={index + 1}
