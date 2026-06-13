@@ -55,7 +55,7 @@ export function ConfigPanel({
               onChange={(v) => set('itemCount', v)}
             />
           </Row>
-          <Field label="Card">
+          <Field label="Card type">
             <Seg
               value={config.cardStyle}
               options={[
@@ -65,7 +65,7 @@ export function ConfigPanel({
               onChange={(v) => set('cardStyle', v)}
             />
           </Field>
-          <Field label="Heights">
+          <Field label="Height pattern">
             <Seg
               value={config.heightMode}
               options={[
@@ -77,7 +77,7 @@ export function ConfigPanel({
             />
           </Field>
           {config.heightMode === 'random' && (
-            <Row label="Range">
+            <Row label="Height range">
               <div className="flex items-center gap-1.5">
                 <NumInput
                   value={config.minItemH}
@@ -140,7 +140,7 @@ export function ConfigPanel({
             />
           )}
           {config.columnMode === 'columnWidth' && (
-            <Row label="Min width">
+            <Row label="Min column">
               <NumInput
                 value={config.autoColumnWidth}
                 min={50}
@@ -149,7 +149,7 @@ export function ConfigPanel({
               />
             </Row>
           )}
-          <Row label="Max cols">
+          <Row label="Max columns">
             <div className="flex items-center gap-2">
               <Toggle
                 value={config.useMaxColumns}
@@ -180,7 +180,7 @@ export function ConfigPanel({
             />
           </Field>
           {config.gapMode === 'fixed' && (
-            <Row label="Size">
+            <Row label="Gap size">
               <Slider
                 value={config.fixedGap}
                 min={0}
@@ -203,7 +203,7 @@ export function ConfigPanel({
         {/* Measurement — balanced + virtual only */}
         {isBalancedOrVirtual && (
           <Section title="Measurement">
-            <Row label="Known">
+            <Row label="Known heights">
               <Toggle
                 value={config.useKnownHeights}
                 disabled={knownHeightsDisabled}
@@ -211,7 +211,7 @@ export function ConfigPanel({
               />
             </Row>
             {!config.useKnownHeights && !knownHeightsDisabled && (
-              <Row label="Est. height">
+              <Row label="Estimate">
                 <NumInput
                   value={config.estimatedItemHeight}
                   min={10}
@@ -241,7 +241,7 @@ export function ConfigPanel({
 
         {/* Virtual — virtual only */}
         {config.component === 'masonry-virtual' && (
-          <Section title="Virtual">
+          <Section title="Virtualization">
             <Row label="Overscan">
               <Slider
                 value={config.overscanBy}
@@ -301,7 +301,7 @@ export function ConfigPanel({
             <input
               className={clsx(inputCls, 'w-28 placeholder:text-zinc-600')}
               value={config.ariaLabel}
-              placeholder="optional"
+              placeholder="Optional"
               onChange={(e) => set('ariaLabel', e.target.value)}
             />
           </Row>

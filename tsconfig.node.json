@@ -4,5 +4,5 @@
     "types": ["node"],
     "lib": ["ES2022"]
   },
-  "include": ["vite.config.ts", "apps/*/vite.config.ts"]
+  "include": ["apps/*/vite.config.ts", "packages/*/vite.config.ts"]
 }

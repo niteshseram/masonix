@@ -67,7 +67,7 @@ importers:
         version: 2.1.1
       masonix:
         specifier: workspace:*
-        version: link:../..
+        version: link:../../packages/masonix
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.2.2
@@ -96,6 +96,15 @@ importers:
       vite-plus:
         specifier: latest
         version: 0.1.24(@types/node@25.5.0)(@vitest/coverage-v8@4.1.8)(jiti@2.6.1)(jsdom@25.0.1)(typescript@5.9.3)(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(jiti@2.6.1))
+
+  packages/masonix:
+    dependencies:
+      react:
+        specifier: ^18.0.0 || ^19.0.0
+        version: 19.2.4
+      react-dom:
+        specifier: ^18.0.0 || ^19.0.0
+        version: 19.2.4(react@19.2.4)
 
 packages:
 

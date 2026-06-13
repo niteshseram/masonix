@@ -9,8 +9,14 @@ export default defineConfig({
   root: resolve(import.meta.dirname),
   resolve: {
     alias: {
-      'masonix/virtual': resolve(import.meta.dirname, '../../src/virtual.ts'),
-      masonix: resolve(import.meta.dirname, '../../src/index.ts'),
+      'masonix/virtual': resolve(
+        import.meta.dirname,
+        '../../packages/masonix/src/virtual.ts',
+      ),
+      masonix: resolve(
+        import.meta.dirname,
+        '../../packages/masonix/src/index.ts',
+      ),
     },
   },
   server: { port: 3000, open: true },

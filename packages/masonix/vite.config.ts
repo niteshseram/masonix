@@ -43,7 +43,7 @@ export default defineConfig({
       suspicious: 'warn',
     },
     env: { browser: true, es2022: true },
-    ignorePatterns: ['dist/**', 'node_modules/**', 'apps/**'],
+    ignorePatterns: ['dist/**', 'node_modules/**'],
     rules: {
       'no-unused-vars': 'error',
       'no-console': 'warn',

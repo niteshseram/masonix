@@ -9,19 +9,6 @@
 
 ---
 
-## Features
-
-- Three layout modes: CSS masonry, measured masonry, and virtualized masonry.
-- Responsive `columns` and `gap` values based on container width.
-- Source-order DOM rendering for predictable keyboard and screen-reader order.
-- Shortest-column placement for variable-height cards and lazy-loaded media.
-- Optional `getItemHeight` for precomputed layouts and reduced hydration shift.
-- Virtualized rendering for long feeds, with `onRangeChange`, `scrollRef`, and
-  custom scroll-container support.
-- Semantic markup controls with `as`, `itemAs`, `role`, and `aria-label`.
-- No required stylesheet, no bundled card styles, and a separate
-  `masonix/virtual` entry point for virtualization.
-
 ## Install
 
 ```bash
@@ -40,11 +27,11 @@ yarn add masonix
 
 ## Choose a component
 
-| Use case | Component | Import |
-| --- | --- | --- |
-| Simple responsive grids with no item measurement | `Masonry` | `masonix` |
-| Variable-height cards that should stay visually even | `MasonryBalanced` | `masonix` |
-| Long feeds where rendering every item is expensive | `MasonryVirtual` | `masonix/virtual` |
+| Use case                                             | Component         | Import            |
+| ---------------------------------------------------- | ----------------- | ----------------- |
+| Simple responsive grids with no item measurement     | `Masonry`         | `masonix`         |
+| Variable-height cards that should stay visually even | `MasonryBalanced` | `masonix`         |
+| Long feeds where rendering every item is expensive   | `MasonryVirtual`  | `masonix/virtual` |
 
 Start with `Masonry`. Use `MasonryBalanced` when item heights vary enough to
 make columns look uneven. Use `MasonryVirtual` when the list is large enough
@@ -112,7 +99,7 @@ SSR and hydration.
     Math.round(columnWidth * (photo.height / photo.width))
   }
   render={({ data }) => <PhotoCard photo={data} />}
-/>;
+/>
 ```
 
 ## Virtualized Feeds
@@ -152,7 +139,7 @@ Use `onRangeChange` for infinite loading:
     }
   }}
   render={({ data }) => <Card data={data} />}
-/>;
+/>
 ```
 
 Use `scrollRef` when you need imperative scrolling:
@@ -172,7 +159,8 @@ function Feed({ items }) {
             align: 'start',
             smooth: true,
           })
-        }>
+        }
+      >
         Back to top
       </button>
       <MasonryVirtual
@@ -278,54 +266,54 @@ list, section, article grid, or another semantic structure.
 These props are available on `Masonry`, `MasonryBalanced`, and
 `MasonryVirtual`.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `items` | `T[]` | required | Items to render. |
-| `render` | `ComponentType<{ index, data, width }>` | required | Item renderer. |
-| `columns` | `number \| Record<number, number>` | - | Fixed column count or responsive column map. |
-| `columnWidth` | `number` | - | Minimum column width for automatic column counts. |
-| `maxColumns` | `number` | - | Maximum columns when using `columnWidth`. |
-| `gap` | `number \| Record<number, number>` | `0` | Row and column gap in px. |
-| `defaultColumns` | `number` | `3` | Column count used before measurement. |
-| `defaultWidth` | `number` | - | Container width used before measurement. |
-| `className` | `string` | - | Class name for the outer container. |
-| `style` | `CSSProperties` | - | Inline style for the outer container. |
-| `itemClassName` | `string` | - | Class name for each item wrapper. |
-| `as` | `ElementType` | `"div"` | Outer container element. |
-| `itemAs` | `ElementType` | `"div"` | Item wrapper element. |
-| `itemKey` | `(data: T, index: number) => string \| number` | - | Stable React key extractor. |
-| `role` | `"grid" \| "list" \| "none"` | `"list"` | ARIA role. |
-| `aria-label` | `string` | - | ARIA label. |
-| `ref` | `Ref<HTMLElement>` | - | Ref for the outer container. |
+| Prop             | Type                                           | Default  | Description                                       |
+| ---------------- | ---------------------------------------------- | -------- | ------------------------------------------------- |
+| `items`          | `T[]`                                          | required | Items to render.                                  |
+| `render`         | `ComponentType<{ index, data, width }>`        | required | Item renderer.                                    |
+| `columns`        | `number \| Record<number, number>`             | -        | Fixed column count or responsive column map.      |
+| `columnWidth`    | `number`                                       | -        | Minimum column width for automatic column counts. |
+| `maxColumns`     | `number`                                       | -        | Maximum columns when using `columnWidth`.         |
+| `gap`            | `number \| Record<number, number>`             | `0`      | Row and column gap in px.                         |
+| `defaultColumns` | `number`                                       | `3`      | Column count used before measurement.             |
+| `defaultWidth`   | `number`                                       | -        | Container width used before measurement.          |
+| `className`      | `string`                                       | -        | Class name for the outer container.               |
+| `style`          | `CSSProperties`                                | -        | Inline style for the outer container.             |
+| `itemClassName`  | `string`                                       | -        | Class name for each item wrapper.                 |
+| `as`             | `ElementType`                                  | `"div"`  | Outer container element.                          |
+| `itemAs`         | `ElementType`                                  | `"div"`  | Item wrapper element.                             |
+| `itemKey`        | `(data: T, index: number) => string \| number` | -        | Stable React key extractor.                       |
+| `role`           | `"grid" \| "list" \| "none"`                   | `"list"` | ARIA role.                                        |
+| `aria-label`     | `string`                                       | -        | ARIA label.                                       |
+| `ref`            | `Ref<HTMLElement>`                             | -        | Ref for the outer container.                      |
 
 ### Masonry
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `columnClassName` | `string` | Class name for each CSS-mode column wrapper. |
-| `enableNative` | `boolean` | Use native CSS masonry when the browser supports it. |
+| Prop              | Type      | Description                                          |
+| ----------------- | --------- | ---------------------------------------------------- |
+| `columnClassName` | `string`  | Class name for each CSS-mode column wrapper.         |
+| `enableNative`    | `boolean` | Use native CSS masonry when the browser supports it. |
 
 ### MasonryBalanced
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `getItemHeight` | `(data: T, index: number, columnWidth: number) => number` | - | Return a known item height and skip measurement. |
-| `estimatedItemHeight` | `number` | `150` | Placeholder height before measurement. |
-| `minItemHeight` | `number` | - | Clamp measured heights to at least this value. |
+| Prop                  | Type                                                      | Default | Description                                      |
+| --------------------- | --------------------------------------------------------- | ------- | ------------------------------------------------ |
+| `getItemHeight`       | `(data: T, index: number, columnWidth: number) => number` | -       | Return a known item height and skip measurement. |
+| `estimatedItemHeight` | `number`                                                  | `150`   | Placeholder height before measurement.           |
+| `minItemHeight`       | `number`                                                  | -       | Clamp measured heights to at least this value.   |
 
 ### MasonryVirtual
 
 `MasonryVirtual` also accepts `getItemHeight` and `minItemHeight` from
 `MasonryBalanced`.
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `estimatedItemHeight` | `number` | `150` | Height estimate for unrendered items and initial layout. |
-| `overscanBy` | `number` | `2` | Extra viewport-heights to render above and below the visible range. |
-| `scrollContainer` | `RefObject<HTMLElement \| null>` | `window` | Custom scroll container. |
-| `totalItems` | `number` | - | Total item count for accessibility metadata. |
-| `scrollRef` | `Ref<MasonryVirtualHandle>` | - | Imperative scroll handle. |
-| `onRangeChange` | `(startIndex: number, stopIndex: number) => void` | - | Called when the visible item range changes. |
+| Prop                  | Type                                              | Default  | Description                                                         |
+| --------------------- | ------------------------------------------------- | -------- | ------------------------------------------------------------------- |
+| `estimatedItemHeight` | `number`                                          | `150`    | Height estimate for unrendered items and initial layout.            |
+| `overscanBy`          | `number`                                          | `2`      | Extra viewport-heights to render above and below the visible range. |
+| `scrollContainer`     | `RefObject<HTMLElement \| null>`                  | `window` | Custom scroll container.                                            |
+| `totalItems`          | `number`                                          | -        | Total item count for accessibility metadata.                        |
+| `scrollRef`           | `Ref<MasonryVirtualHandle>`                       | -        | Imperative scroll handle.                                           |
+| `onRangeChange`       | `(startIndex: number, stopIndex: number) => void` | -        | Called when the visible item range changes.                         |
 
 ## TypeScript
 
@@ -365,40 +353,3 @@ import type {
   MasonryVirtualProps,
 } from 'masonix/virtual';
 ```
-
-## Repository
-
-This repository is a pnpm workspace. The npm package lives in `packages/`, and
-the playground lives in `apps/`.
-
-| Package | Path | Description |
-| --- | --- | --- |
-| `masonix` | [`packages/masonix`](./packages/masonix) | React components for CSS masonry, measured masonry, and virtualized masonry |
-
-| App | Path | Description |
-| --- | --- | --- |
-| `masonix-playground` | [`apps/playground`](./apps/playground) | Interactive playground for comparing layout modes |
-
-The package README used by npm lives at
-[`packages/masonix/README.md`](./packages/masonix/README.md).
-
-## Development
-
-```bash
-pnpm install
-pnpm test:run
-pnpm build
-pnpm playground
-```
-
-Package-specific scripts can be run directly with pnpm filters:
-
-```bash
-pnpm -F masonix test:run
-pnpm -F masonix build
-pnpm -F masonix-playground dev
-```
-
-## License
-
-MIT

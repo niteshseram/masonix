@@ -10,8 +10,8 @@ pnpm test              # run tests in watch mode
 pnpm test:coverage     # run with v8 coverage
 pnpm build             # tsc typecheck + vp pack (tsdown, dual ESM/CJS)
 pnpm tc                # tsc --noEmit only
-pnpm lint              # oxlint on src/
-pnpm format            # oxfmt on src/
+pnpm lint              # oxlint on packages/masonix/src/
+pnpm format            # oxfmt on packages/masonix/src/
 pnpm format:check      # format check without writing
 pnpm playground        # start apps/playground dev server (port 3000)
 ```
@@ -19,12 +19,12 @@ pnpm playground        # start apps/playground dev server (port 3000)
 Run a single test file:
 
 ```bash
-pnpm vp test src/__tests__/core/positioner.test.ts
+pnpm -F masonix exec vp test src/__tests__/core/positioner.test.ts
 ```
 
 ## Toolchain
 
-This project uses **vite-plus** (`vp` CLI), which bundles vite, oxlint, oxfmt, and tsdown into one package. All tool config lives in the root `vite.config.ts` under the `pack`, `test`, `lint`, and `fmt` keys — there are no separate tool config files (no `vitest.config`, no `oxlintrc.json`).
+This project uses **vite-plus** (`vp` CLI), which bundles vite, oxlint, oxfmt, and tsdown into one package. Library tool config lives in `packages/masonix/vite.config.ts` under the `pack`, `test`, `lint`, and `fmt` keys — there are no separate tool config files (no `vitest.config`, no `oxlintrc.json`).
 
 Build output (`vp pack` / tsdown):
 
@@ -35,17 +35,21 @@ Build output (`vp pack` / tsdown):
 ## Repository Structure
 
 ```
-apps/playground/    dev sandbox; vite aliases masonix → ../../src/index.ts
-src/
-  core/             pure TS layout engines (no React)
-  __tests__/core/   unit tests for all core modules
-  types.ts          all shared TypeScript interfaces
-  index.ts          public entry — re-exports only
-  virtual.ts        virtual entry — types only (Phase 3)
-  test/setup.ts     vitest setup: ResizeObserver mock only
+apps/playground/          dev sandbox; vite aliases masonix → ../../packages/masonix/src/index.ts
+packages/masonix/
+  src/
+    core/                 pure TS layout engines (no React)
+    __tests__/core/       unit tests for all core modules
+    types.ts              all shared TypeScript interfaces
+    index.ts              public entry — re-exports only
+    virtual.ts            virtual entry — types only (Phase 3)
+    test/setup.ts         vitest setup: ResizeObserver mock only
+  package.json            publishable masonix package metadata
+  README.md               package-level usage docs
+  vite.config.ts          build/test/lint/format config
 ```
 
-`tsconfig.json` covers `src/` only. `tsconfig.node.json` covers `vite.config.ts` and `apps/*/vite.config.ts` (needs `@types/node` for `import.meta.dirname`). `tsconfig.build.json` is used by tsdown for declaration emit.
+The root `tsconfig.json` is a shared base config. `packages/masonix/tsconfig.json` covers the library `src/` directory. `tsconfig.node.json` covers package and app Vite configs (needs `@types/node` for `import.meta.dirname`). `packages/masonix/tsconfig.build.json` is used by tsdown for declaration emit.
 
 ## Architecture
 
@@ -59,15 +63,15 @@ Three components, one package, increasing complexity:
 
 ### Core Engines (Phase 1 — complete)
 
-**`src/core/positioner.ts`** — `createPositioner`: shortest-column-first placement. Each `set(index, height, span?)` places an item in the shortest available column. Maintains `columnItems[][]` for incremental `update()` without full re-layout.
+**`packages/masonix/src/core/positioner.ts`** — `createPositioner`: shortest-column-first placement. Each `set(index, height, span?)` places an item in the shortest available column. Maintains `columnItems[][]` for incremental `update()` without full re-layout.
 
-**`src/core/interval-tree.ts`** — augmented red-black tree. Stores items as `[top, top+height]` intervals for `search(low, high)` — O(log n + k) viewport intersection queries used by `MasonryVirtual`.
+**`packages/masonix/src/core/interval-tree.ts`** — augmented red-black tree. Stores items as `[top, top+height]` intervals for `search(low, high)` — O(log n + k) viewport intersection queries used by `MasonryVirtual`.
 
-**`src/core/utils.ts`** — `resolveResponsiveValue` (Tailwind-compatible breakpoints: sm/md/lg/xl/2xl), `computeColumns` (column count from fixed `columns`, auto from `columnWidth`, or `defaultColumns`), `effectiveColumnCount`.
+**`packages/masonix/src/core/utils.ts`** — `resolveResponsiveValue` (Tailwind-compatible breakpoints: sm/md/lg/xl/2xl), `computeColumns` (column count from fixed `columns`, auto from `columnWidth`, or `defaultColumns`), `effectiveColumnCount`.
 
-**`src/core/scroll.ts`** — scroll utilities for the virtual layer.
+**`packages/masonix/src/core/scroll.ts`** — scroll utilities for the virtual layer.
 
-### Positioner interface (`src/types.ts`)
+### Positioner interface (`packages/masonix/src/types.ts`)
 
 All positioners implement `Positioner`. The key method is `set(index, height, span?)` — `span` is only meaningful in `createPositioner` (column spanning). `update()` does incremental re-layout: only recomputes columns that had a height change, not a full reset.
 
@@ -81,7 +85,7 @@ All positioners implement `Positioner`. The key method is `set(index, height, sp
 
 ## Key Constraints
 
-- **`src/index.ts` and `src/virtual.ts` are thin re-export barrels.** Never add logic there; never import Phase N+1 symbols until those files exist.
+- **`packages/masonix/src/index.ts` and `packages/masonix/src/virtual.ts` are thin re-export barrels.** Never add logic there; never import Phase N+1 symbols until those files exist.
 - All filenames are lowercase with hyphens.
 - `react` and `react-dom` are peer dependencies — never bundle them. External pattern in `vite.config.ts`: `['react', 'react-dom', 'react/jsx-runtime', /^react-dom\//]`.
 - The `"use client"` banner is prepended to all output files by tsdown.

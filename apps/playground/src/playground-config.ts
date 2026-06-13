@@ -4,17 +4,17 @@ export const TABS: { value: ComponentMode; label: string; desc: string }[] = [
   {
     value: 'masonry',
     label: 'Masonry',
-    desc: 'CSS flexbox · round-robin columns',
+    desc: 'CSS layout · source order preserved',
   },
   {
     value: 'masonry-balanced',
     label: 'Balanced',
-    desc: 'JS-measured · shortest-column-first',
+    desc: 'Measured cards · shortest column placement',
   },
   {
     value: 'masonry-virtual',
     label: 'Virtual',
-    desc: 'Virtualized · interval tree · O(log n)',
+    desc: 'Windowed rendering for long feeds',
   },
 ];
 
@@ -24,8 +24,8 @@ export const PRESETS: {
   config: Partial<Config>;
 }[] = [
   {
-    name: 'Pinterest',
-    description: '2 cols · tall random heights',
+    name: 'Tall gallery',
+    description: 'Two columns with varied heights',
     config: {
       component: 'masonry',
       columnMode: 'fixed',
@@ -40,8 +40,8 @@ export const PRESETS: {
     },
   },
   {
-    name: 'Photo grid',
-    description: 'Auto columns · uniform height',
+    name: 'Photo wall',
+    description: 'Auto-fit columns with even cards',
     config: {
       component: 'masonry',
       columnMode: 'columnWidth',
@@ -55,8 +55,8 @@ export const PRESETS: {
     },
   },
   {
-    name: 'Text notes',
-    description: 'Balanced layout · text cards',
+    name: 'Note cards',
+    description: 'Measured cards with mixed heights',
     config: {
       component: 'masonry-balanced',
       columnMode: 'fixed',
@@ -69,8 +69,8 @@ export const PRESETS: {
     },
   },
   {
-    name: '10k items',
-    description: 'Virtual · 10,000 items',
+    name: 'Large feed',
+    description: 'Virtualized 10,000-item layout',
     config: {
       component: 'masonry-virtual',
       columnMode: 'custom',
