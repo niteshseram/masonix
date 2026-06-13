@@ -62,6 +62,32 @@ function getMaxScrollTop(container: HTMLElement | Window): number {
   return Math.max(0, container.scrollHeight - container.clientHeight);
 }
 
+function hasLayoutContain(containValue: string): boolean {
+  const tokens = containValue.trim().split(/\s+/);
+  return (
+    tokens.includes('layout') ||
+    tokens.includes('content') ||
+    tokens.includes('strict')
+  );
+}
+
+function withLayoutContain(containValue: string): string {
+  const tokens = containValue
+    .trim()
+    .split(/\s+/)
+    .filter((token) => token.length > 0 && token !== 'none');
+
+  if (!tokens.includes('layout')) {
+    tokens.push('layout');
+  }
+
+  if (!tokens.includes('paint')) {
+    tokens.push('paint');
+  }
+
+  return tokens.join(' ');
+}
+
 function getTargetScrollTop(
   item: PositionedItem,
   containerOffset: number,
@@ -315,6 +341,32 @@ function MasonryVirtualInner<T = unknown>(
   const getScrollContainer = useCallback((): HTMLElement | Window | null => {
     if (typeof window === 'undefined') return null;
     return scrollContainer?.current ?? window;
+  }, [scrollContainer]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const container = scrollContainer?.current;
+    if (!container) {
+      return;
+    }
+
+    const computedContain = window.getComputedStyle(container).contain;
+    if (hasLayoutContain(computedContain)) {
+      return;
+    }
+
+    const previousContain = container.style.contain;
+    const nextContain = withLayoutContain(previousContain);
+    container.style.contain = nextContain;
+
+    return () => {
+      if (container.style.contain === nextContain) {
+        container.style.contain = previousContain;
+      }
+    };
   }, [scrollContainer]);
 
   // Determine visible range using interval tree

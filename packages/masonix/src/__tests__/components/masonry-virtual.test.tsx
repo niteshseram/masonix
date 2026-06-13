@@ -281,6 +281,46 @@ describe('MasonryVirtual', () => {
       expect(screen.queryByTestId('item-5')).toBeNull();
     });
 
+    it('contains custom scroll containers so virtual spacer height stays local', () => {
+      const scrollEl = document.createElement('div');
+
+      const { unmount } = render(
+        <MasonryVirtual
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          estimatedItemHeight={100}
+          scrollContainer={{ current: scrollEl }}
+        />,
+      );
+
+      expect(scrollEl.style.contain).toBe('layout paint');
+
+      unmount();
+      expect(scrollEl.style.contain).toBe('');
+    });
+
+    it('preserves custom scroll container containment when already provided', () => {
+      const scrollEl = document.createElement('div');
+      scrollEl.style.contain = 'strict';
+
+      render(
+        <MasonryVirtual
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          estimatedItemHeight={100}
+          scrollContainer={{ current: scrollEl }}
+        />,
+      );
+
+      expect(scrollEl.style.contain).toBe('strict');
+    });
+
     it('calls onEndReached when the visible range reaches the threshold', () => {
       const onEndReached = vi.fn();
       Object.defineProperty(window, 'innerHeight', {
