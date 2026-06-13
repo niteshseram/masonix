@@ -7,7 +7,6 @@
 - 9d26529: Add edge case test coverage and improve dev tooling.
 
   **Edge case tests** (6 new assertions across 4 test files):
-
   - `positioner.update()` with unchanged heights returns `[]` — verifies no spurious re-layouts when measurements stabilise
   - `computeColumns(0, …)` never returns a negative `columnWidth` — the gap arithmetic produces a negative intermediate value that must be clamped to zero
   - `columns: 0` clamps to 1 column — defensive guard against invalid prop values
@@ -16,7 +15,6 @@
   - `useContainerWidth` handles an empty `ResizeObserver` entries array without throwing
 
   **Docs updates**:
-
   - Update README file
 
 ## 0.3.0
@@ -91,7 +89,6 @@
   Previously, every call to `resolveResponsiveValue` with an object value re-parsed and re-sorted breakpoints — including on every container resize, which is the hot path.
 
   `resolveResponsiveValue` is now split into two primitives:
-
   - `parseBreakpoints(value)` — parses and sorts breakpoints once, O(n log n)
   - `applyBreakpoints(breakpoints, containerWidth)` — linear scan against a pre-sorted array, O(n)
 
@@ -120,7 +117,7 @@
   // After — stable callback inside BalancedItem
   const refCallback = useCallback(
     (node: HTMLElement | null) => setItemRef?.(node, index),
-    [setItemRef, index]
+    [setItemRef, index],
   );
   ```
 

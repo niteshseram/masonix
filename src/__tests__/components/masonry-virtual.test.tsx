@@ -20,6 +20,7 @@ type RoCallback = (entries: ResizeObserverEntry[]) => void;
 
 let roCallbacks: RoCallback[] = [];
 let mockObserve: ReturnType<typeof vi.fn>;
+let mockUnobserve: ReturnType<typeof vi.fn>;
 let mockDisconnect: ReturnType<typeof vi.fn>;
 
 function makeEntry(target: Element, height: number): ResizeObserverEntry {
@@ -37,10 +38,19 @@ function fireResize(target: Element, height: number) {
 }
 
 const originalScrollTo = window.scrollTo;
+const originalScrollYDescriptor = Object.getOwnPropertyDescriptor(
+  window,
+  'scrollY',
+);
+const originalInnerHeightDescriptor = Object.getOwnPropertyDescriptor(
+  window,
+  'innerHeight',
+);
 
 beforeEach(() => {
   roCallbacks = [];
   mockObserve = vi.fn();
+  mockUnobserve = vi.fn();
   mockDisconnect = vi.fn();
 
   globalThis.ResizeObserver = vi.fn().mockImplementation(function (
@@ -49,7 +59,7 @@ beforeEach(() => {
     roCallbacks.push(cb);
     return {
       observe: mockObserve,
-      unobserve: vi.fn(),
+      unobserve: mockUnobserve,
       disconnect: mockDisconnect,
     };
   });
@@ -68,6 +78,12 @@ afterEach(() => {
     writable: true,
     configurable: true,
   });
+  if (originalScrollYDescriptor) {
+    Object.defineProperty(window, 'scrollY', originalScrollYDescriptor);
+  }
+  if (originalInnerHeightDescriptor) {
+    Object.defineProperty(window, 'innerHeight', originalInnerHeightDescriptor);
+  }
   vi.restoreAllMocks();
 });
 
@@ -86,6 +102,20 @@ function makeItems(count: number): Item[] {
 
 function ItemRender({ data }: MasonryRenderProps<Item>) {
   return <div data-testid={`item-${data.id}`}>{data.label}</div>;
+}
+
+function rect(top: number, height = 800): DOMRect {
+  return {
+    top,
+    left: 0,
+    right: 600,
+    bottom: top + height,
+    width: 600,
+    height,
+    x: 0,
+    y: top,
+    toJSON: () => ({}),
+  } as DOMRect;
 }
 
 // ---------------------------------------------------------------------------
@@ -160,6 +190,84 @@ describe('MasonryVirtual', () => {
       );
       const containerEl = container.firstElementChild as HTMLElement;
       expect(containerEl.style.height).toBe('100px');
+    });
+
+    it('renders directly from the visible interval-tree hits', () => {
+      const items = makeItems(1000);
+      const renderSpy = vi.fn(ItemRender);
+
+      render(
+        <MasonryVirtual
+          items={items}
+          render={renderSpy}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          overscanBy={0}
+        />,
+      );
+
+      expect(renderSpy).toHaveBeenCalled();
+      expect(renderSpy.mock.calls.length).toBeLessThan(items.length);
+    });
+
+    it('respects window container offset when computing the visible range', () => {
+      Object.defineProperty(window, 'scrollY', {
+        get: () => 550,
+        configurable: true,
+      });
+      Object.defineProperty(window, 'innerHeight', {
+        get: () => 200,
+        configurable: true,
+      });
+
+      render(
+        <MasonryVirtual
+          ref={(node) => {
+            if (node) node.getBoundingClientRect = vi.fn(() => rect(-50));
+          }}
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          overscanBy={0}
+        />,
+      );
+
+      expect(screen.getByTestId('item-0')).toBeTruthy();
+      expect(screen.queryByTestId('item-5')).toBeNull();
+    });
+
+    it('respects custom scroll container offset when computing the visible range', () => {
+      const scrollEl = document.createElement('div');
+      scrollEl.scrollTop = 550;
+      Object.defineProperty(scrollEl, 'clientHeight', {
+        value: 200,
+        configurable: true,
+      });
+      scrollEl.getBoundingClientRect = vi.fn(() => rect(100));
+
+      render(
+        <MasonryVirtual
+          ref={(node) => {
+            if (node) node.getBoundingClientRect = vi.fn(() => rect(50));
+          }}
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          overscanBy={0}
+          scrollContainer={{ current: scrollEl }}
+        />,
+      );
+
+      expect(screen.getByTestId('item-0')).toBeTruthy();
+      expect(screen.queryByTestId('item-5')).toBeNull();
     });
   });
 
@@ -250,6 +358,26 @@ describe('MasonryVirtual', () => {
         expect(item.getAttribute('aria-setsize')).toBe('5');
       }
     });
+
+    it('omits item roles and aria metadata when role="none"', () => {
+      const { container } = render(
+        <MasonryVirtual
+          items={makeItems(3)}
+          render={ItemRender}
+          columns={3}
+          gap={0}
+          defaultWidth={300}
+          getItemHeight={() => 100}
+          role="none"
+        />,
+      );
+
+      expect(container.firstElementChild?.hasAttribute('role')).toBe(false);
+      expect(container.querySelectorAll("[role='listitem']")).toHaveLength(0);
+      expect(container.querySelectorAll('[aria-setsize]')).toHaveLength(0);
+      expect(container.querySelectorAll('[aria-posinset]')).toHaveLength(0);
+      expect(screen.getByTestId('item-0')).toBeTruthy();
+    });
   });
 
   describe('measurement path', () => {
@@ -293,6 +421,74 @@ describe('MasonryVirtual', () => {
         "[role='listitem']",
       ) as HTMLElement;
       expect(updatedWrapper.style.visibility).toBe('visible');
+    });
+
+    it('keeps measured heights attached to itemKey identity after reorder', () => {
+      const items = makeItems(3);
+      const { container, rerender } = render(
+        <MasonryVirtual
+          items={items}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={100}
+          itemKey={(item) => item.id}
+        />,
+      );
+
+      const wrappers = Array.from(
+        container.querySelectorAll("[role='listitem']"),
+      ) as HTMLElement[];
+
+      act(() => {
+        fireResize(wrappers[0], 300);
+        fireResize(wrappers[1], 100);
+        fireResize(wrappers[2], 100);
+      });
+
+      rerender(
+        <MasonryVirtual
+          items={[items[1], items[0], items[2]]}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={100}
+          itemKey={(item) => item.id}
+        />,
+      );
+
+      const item0Wrapper = screen.getByTestId('item-0')
+        .parentElement as HTMLElement;
+      expect(item0Wrapper.style.top).toBe('100px');
+    });
+
+    it('keeps item refs stable across same-item rerenders', () => {
+      const items = makeItems(2);
+      const { rerender } = render(
+        <MasonryVirtual
+          items={items}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={100}
+          itemKey={(item) => item.id}
+        />,
+      );
+
+      mockUnobserve.mockClear();
+
+      rerender(
+        <MasonryVirtual
+          items={items}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={100}
+          itemKey={(item) => item.id}
+        />,
+      );
+
+      expect(mockUnobserve).not.toHaveBeenCalled();
     });
   });
 

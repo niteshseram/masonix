@@ -102,7 +102,7 @@ describe('useScrollToIndex', () => {
       useScrollToIndex({
         positioner,
         containerRef,
-        scrollContainer: window,
+        getScrollContainer: () => window,
         viewportHeight: 800,
       }),
     );
@@ -123,7 +123,7 @@ describe('useScrollToIndex', () => {
       useScrollToIndex({
         positioner,
         containerRef,
-        scrollContainer: window,
+        getScrollContainer: () => window,
         viewportHeight: 800,
       }),
     );
@@ -143,7 +143,7 @@ describe('useScrollToIndex', () => {
       useScrollToIndex({
         positioner,
         containerRef,
-        scrollContainer: window,
+        getScrollContainer: () => window,
         viewportHeight: 800,
       }),
     );
@@ -163,7 +163,7 @@ describe('useScrollToIndex', () => {
       useScrollToIndex({
         positioner,
         containerRef,
-        scrollContainer: window,
+        getScrollContainer: () => window,
         viewportHeight: 800,
       }),
     );
@@ -192,7 +192,7 @@ describe('useScrollToIndex', () => {
       useScrollToIndex({
         positioner,
         containerRef,
-        scrollContainer: window,
+        getScrollContainer: () => window,
         viewportHeight: 800,
       }),
     );
@@ -209,12 +209,51 @@ describe('useScrollToIndex', () => {
       useScrollToIndex({
         positioner,
         containerRef,
-        scrollContainer: window,
+        getScrollContainer: () => window,
         viewportHeight: 800,
       }),
     );
 
     result.current.scrollToIndex(999);
     expect(lastScrollToArgs).toBeNull();
+  });
+
+  it('resolves a custom scroll container when scrollToIndex is called', () => {
+    const positioner = makePositionerWithItems();
+    const containerRef = createContainerRef();
+    const customScrollContainer = document.createElement('div');
+    customScrollContainer.scrollTop = 400;
+    customScrollContainer.getBoundingClientRect = vi.fn().mockReturnValue({
+      top: 20,
+      left: 0,
+      right: 600,
+      bottom: 820,
+      width: 600,
+      height: 800,
+    });
+
+    let scrollTop: number | undefined;
+    customScrollContainer.scrollTo = vi.fn(
+      (options?: ScrollToOptions | number) => {
+        if (typeof options === 'object') scrollTop = options.top;
+      },
+    ) as typeof customScrollContainer.scrollTo;
+
+    let resolvedContainer: HTMLElement | null = null;
+    const { result } = renderHook(() =>
+      useScrollToIndex({
+        positioner,
+        containerRef,
+        getScrollContainer: () => resolvedContainer,
+        viewportHeight: 800,
+      }),
+    );
+
+    resolvedContainer = customScrollContainer;
+    result.current.scrollToIndex(3);
+
+    const item = positioner.get(3)!;
+    expect(customScrollContainer.scrollTo).toHaveBeenCalled();
+    expect(scrollTop).toBe(430 + item.top);
   });
 });

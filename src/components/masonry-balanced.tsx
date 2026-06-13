@@ -14,6 +14,7 @@ import { createPositioner } from '../core/positioner';
 import { useColumns } from '../hooks/use-columns';
 import { useContainerWidth } from '../hooks/use-container-width';
 import { useItemHeights } from '../hooks/use-item-heights';
+import { useMeasurementIndexes } from '../hooks/use-measurement-indexes';
 import type { MasonryBalancedProps, MasonryRenderProps } from '../types';
 
 const DEFAULT_ESTIMATED_HEIGHT = 150;
@@ -42,6 +43,7 @@ interface BalancedItemProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
   index: number;
+  measureIndex: number;
   width: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Render: React.ComponentType<any>;
@@ -57,6 +59,7 @@ const BalancedItem = memo(function BalancedItem({
   itemClassName,
   data,
   index,
+  measureIndex,
   width,
   Render,
   style,
@@ -65,15 +68,15 @@ const BalancedItem = memo(function BalancedItem({
   ariaSetSize,
   ariaPosInSet,
 }: BalancedItemProps): ReactElement {
-  // Keep index in a ref so the callback below never needs index as a dep.
+  // Keep measurement identity in a ref so the callback below never needs it as a dep.
   // setItemRef is permanently stable (useCallback([]) in useItemHeights),
   // so refCallback is created once on mount and never recreated.
-  const indexRef = useRef(index);
-  indexRef.current = index;
+  const measureIndexRef = useRef(measureIndex);
+  measureIndexRef.current = measureIndex;
 
   const refCallback = useCallback<RefCallback<HTMLElement>>(
     (node) => {
-      setItemRef?.(node, indexRef.current);
+      setItemRef?.(node, measureIndexRef.current);
     },
     [setItemRef],
   );
@@ -154,6 +157,7 @@ function MasonryBalancedInner<T = unknown>(
   });
 
   const { measuredHeights, setItemRef } = useItemHeights(minItemHeight);
+  const measurementIndexes = useMeasurementIndexes(items, itemKey);
 
   // Build positioned items from a fresh positioner every time layout inputs change.
   // A fresh positioner is cheaper than incremental update because React's useMemo
@@ -178,7 +182,7 @@ function MasonryBalancedInner<T = unknown>(
         height = Math.max(0, getItemHeight(data, index, columnWidth));
         measured = true;
       } else {
-        const measuredHeight = measuredHeights.get(index);
+        const measuredHeight = measuredHeights.get(measurementIndexes[index]);
         measured = measuredHeight !== undefined;
         height = measuredHeight ?? estimatedItemHeight;
       }
@@ -198,6 +202,7 @@ function MasonryBalancedInner<T = unknown>(
     resolvedGap,
     getItemHeight,
     measuredHeights,
+    measurementIndexes,
     estimatedItemHeight,
   ]);
 
@@ -264,6 +269,7 @@ function MasonryBalancedInner<T = unknown>(
               itemClassName={itemClassName}
               data={data}
               index={index}
+              measureIndex={measurementIndexes[index]}
               width={width}
               Render={
                 Render as React.ComponentType<MasonryRenderProps<unknown>>

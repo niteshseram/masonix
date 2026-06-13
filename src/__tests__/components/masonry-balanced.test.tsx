@@ -232,6 +232,45 @@ describe('MasonryBalanced', () => {
         .children[0] as HTMLElement;
       expect(updatedWrapper.style.visibility).toBe('visible');
     });
+
+    it('keeps measured heights attached to itemKey identity after reorder', () => {
+      const items = makeItems(3);
+      const { container, rerender } = render(
+        <MasonryBalanced
+          items={items}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={100}
+          itemKey={(item) => item.id}
+        />,
+      );
+
+      const wrappers = Array.from(
+        container.firstElementChild!.children,
+      ) as HTMLElement[];
+
+      act(() => {
+        fireResize(wrappers[0], 300);
+        fireResize(wrappers[1], 100);
+        fireResize(wrappers[2], 100);
+      });
+
+      rerender(
+        <MasonryBalanced
+          items={[items[1], items[0], items[2]]}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={100}
+          itemKey={(item) => item.id}
+        />,
+      );
+
+      const item0Wrapper = screen.getByTestId('item-0')
+        .parentElement as HTMLElement;
+      expect(item0Wrapper.style.top).toBe('100px');
+    });
   });
 
   describe('accessibility', () => {

@@ -3,7 +3,7 @@ import type { MasonryVirtualHandle } from 'masonix/virtual';
 import { useEffect, useState } from 'react';
 
 interface ScrollToIndexBarProps {
-  maxIndex: number;
+  itemCount: number;
   scrollHandleRef: React.RefObject<MasonryVirtualHandle | null>;
 }
 
@@ -17,19 +17,21 @@ const inputCls = clsx(
 );
 
 export function ScrollToIndexBar({
-  maxIndex,
+  itemCount,
   scrollHandleRef,
 }: ScrollToIndexBarProps) {
-  const [index, setIndex] = useState(() => Math.floor(maxIndex / 2));
+  const [itemNumber, setItemNumber] = useState(() =>
+    Math.max(1, Math.ceil(itemCount / 2)),
+  );
   const [align, setAlign] = useState<'start' | 'center' | 'end'>('start');
   const [smooth, setSmooth] = useState(false);
 
   useEffect(() => {
-    setIndex((prev) => Math.min(prev, Math.max(0, maxIndex)));
-  }, [maxIndex]);
+    setItemNumber((prev) => Math.min(prev, Math.max(1, itemCount)));
+  }, [itemCount]);
 
   function go() {
-    scrollHandleRef.current?.scrollToIndex(index, { align, smooth });
+    scrollHandleRef.current?.scrollToIndex(itemNumber - 1, { align, smooth });
   }
 
   return (
@@ -40,7 +42,7 @@ export function ScrollToIndexBar({
       )}
     >
       <span className="shrink-0 text-[11px] font-medium text-zinc-400">
-        Jump to
+        Jump to item
       </span>
 
       <input
@@ -52,13 +54,13 @@ export function ScrollToIndexBar({
           '[&::-webkit-inner-spin-button]:appearance-none',
           '[&::-webkit-outer-spin-button]:appearance-none',
         )}
-        value={index}
-        min={0}
-        max={maxIndex}
+        value={itemNumber}
+        min={1}
+        max={itemCount}
         onChange={(event) => {
-          const parsedIndex = parseInt(event.target.value, 10);
-          if (!isNaN(parsedIndex))
-            setIndex(Math.min(maxIndex, Math.max(0, parsedIndex)));
+          const parsedItemNumber = parseInt(event.target.value, 10);
+          if (!isNaN(parsedItemNumber))
+            setItemNumber(Math.min(itemCount, Math.max(1, parsedItemNumber)));
         }}
         onKeyDown={(event) => event.key === 'Enter' && go()}
       />

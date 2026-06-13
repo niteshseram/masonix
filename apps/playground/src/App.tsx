@@ -250,7 +250,7 @@ export default function App() {
           >
             {config.component === 'masonry-virtual' && (
               <ScrollToIndexBar
-                maxIndex={items.length - 1}
+                itemCount={items.length}
                 scrollHandleRef={scrollHandleRef}
               />
             )}

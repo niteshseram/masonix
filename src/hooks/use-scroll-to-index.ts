@@ -6,7 +6,7 @@ import type { MasonryVirtualHandle, Positioner } from '../types';
 interface UseScrollToIndexOptions {
   positioner: Positioner;
   containerRef: React.RefObject<HTMLElement | null>;
-  scrollContainer: HTMLElement | Window;
+  getScrollContainer: () => HTMLElement | Window | null;
   viewportHeight: number;
 }
 
@@ -19,14 +19,14 @@ interface UseScrollToIndexOptions {
 export function useScrollToIndex({
   positioner,
   containerRef,
-  scrollContainer,
+  getScrollContainer,
   viewportHeight,
 }: UseScrollToIndexOptions): MasonryVirtualHandle {
   const positionerRef = useRef(positioner);
   positionerRef.current = positioner;
 
-  const scrollContainerRef = useRef(scrollContainer);
-  scrollContainerRef.current = scrollContainer;
+  const getScrollContainerRef = useRef(getScrollContainer);
+  getScrollContainerRef.current = getScrollContainer;
 
   const viewportHeightRef = useRef(viewportHeight);
   viewportHeightRef.current = viewportHeight;
@@ -38,14 +38,18 @@ export function useScrollToIndex({
 
   const getContainerOffset = useCallback((): number => {
     const el = containerRef.current;
-    if (!el) return 0;
-    return getScrollOffset(el, scrollContainerRef.current);
+    const container = getScrollContainerRef.current();
+    if (!el || !container) return 0;
+    return getScrollOffset(el, container);
   }, [containerRef]);
 
   const scrollToIndex: MasonryVirtualHandle['scrollToIndex'] = useCallback(
     (index, options) => {
       const item = positionerRef.current.get(index);
       if (!item) return;
+
+      const container = getScrollContainerRef.current();
+      if (!container) return;
 
       const containerOffset = getContainerOffset();
       const align = options?.align ?? 'start';
@@ -66,7 +70,7 @@ export function useScrollToIndex({
       }
 
       const useSmooth = smooth && !prefersReducedMotion();
-      scrollTo(scrollContainerRef.current, Math.max(0, targetTop), useSmooth);
+      scrollTo(container, Math.max(0, targetTop), useSmooth);
     },
     [getContainerOffset, prefersReducedMotion],
   );
