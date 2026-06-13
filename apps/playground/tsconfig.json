@@ -1,6 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "paths": {
+      "masonix": ["../../packages/masonix/src/index.ts"],
+      "masonix/virtual": ["../../packages/masonix/src/virtual.ts"]
+    },
     "types": ["node", "vite-plus/client"]
   },
   "include": ["."]
