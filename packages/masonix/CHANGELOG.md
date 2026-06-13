@@ -1,5 +1,11 @@
 # masonix
 
+## 0.4.0
+
+### Minor Changes
+
+- 5f5ea8c: Add virtual feed APIs for end-reached callbacks and scroll-seek placeholders, export virtual range metadata, and expose scroll velocity from `useScroller`.
+
 ## 0.3.2
 
 ### Patch Changes
