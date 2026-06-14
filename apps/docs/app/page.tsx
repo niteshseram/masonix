@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 import { Logo } from '@/components/brand/brand-logo';
 import { HomeHeroScene } from '@/components/home/home-hero-scene';
+import { ThemeSwitcher } from '@/components/theme/theme-switcher';
 
 const componentModes = [
   {
@@ -58,19 +59,22 @@ export default async function HomePage() {
       >
         <nav
           className={clsx(
-            'flex h-14 max-w-7xl items-center gap-4',
+            'flex h-14 max-w-7xl items-center gap-3 sm:gap-4',
             'mx-auto px-4',
           )}
         >
           <Link
             href="/"
-            className={clsx('flex items-center gap-2', 'font-semibold')}
+            className={clsx(
+              'flex items-center gap-2 [&_.masonix-logo-text]:hidden sm:[&_.masonix-logo-text]:inline',
+              'font-semibold',
+            )}
           >
             <Logo size={26} />
           </Link>
           <div
             className={clsx(
-              'flex items-center gap-4',
+              'flex items-center gap-3 sm:gap-4',
               'ml-auto',
               'text-sm',
               'text-fd-muted-foreground',
@@ -90,10 +94,15 @@ export default async function HomePage() {
             </Link>
             <a
               href="https://github.com/niteshseram/masonix"
-              className={clsx('transition-colors', 'hover:text-fd-foreground')}
+              className={clsx(
+                'hidden sm:inline',
+                'transition-colors',
+                'hover:text-fd-foreground',
+              )}
             >
               GitHub
             </a>
+            <ThemeSwitcher />
           </div>
         </nav>
       </header>
