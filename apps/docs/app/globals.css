@@ -20,10 +20,24 @@ body {
 
 .masonix-hero-grid {
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--color-fd-foreground) 8%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-fd-foreground) 8%, transparent) 1px, transparent 1px);
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-fd-foreground) 8%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-fd-foreground) 8%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 44px 44px;
-  mask-image: linear-gradient(to right, transparent, black 14%, black 82%, transparent);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 14%,
+    black 82%,
+    transparent
+  );
 }
 
 .masonix-solver-stage {
@@ -56,7 +70,13 @@ body {
     );
   background-size: 72px 72px;
   opacity: 0.55;
-  mask-image: linear-gradient(to right, transparent, black 18%, black 86%, transparent);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 18%,
+    black 86%,
+    transparent
+  );
 }
 
 .masonix-solver-rail {
@@ -76,7 +96,8 @@ body {
   width: 9px;
   height: 9px;
   content: '';
-  border: 1px solid color-mix(in srgb, var(--color-fd-foreground) 22%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--color-fd-foreground) 22%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--color-fd-background) 74%, transparent);
 }
@@ -107,7 +128,8 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
     0 24px 70px rgba(0, 0, 0, 0.24);
-  transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0) scale(0.86);
+  transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0)
+    scale(0.86);
   transform-origin: 50% 50%;
   animation: masonix-solver-place 9.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
   will-change: transform, opacity;
@@ -156,12 +178,14 @@ body {
   0%,
   10% {
     opacity: 0;
-    transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0) scale(0.86);
+    transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0)
+      scale(0.86);
   }
 
   22% {
     opacity: 0.72;
-    transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0) scale(0.94);
+    transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0)
+      scale(0.94);
   }
 
   38% {
@@ -187,7 +211,8 @@ body {
 
   100% {
     opacity: 0;
-    transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0) scale(0.86);
+    transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0)
+      scale(0.86);
   }
 }
 

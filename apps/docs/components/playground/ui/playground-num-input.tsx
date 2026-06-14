@@ -12,12 +12,14 @@ export const inputCls = clsx(
 );
 
 export function NumInput({
+  ariaLabel,
   value,
   min = 0,
   max = 9999,
   style,
   onChange,
 }: {
+  ariaLabel: string;
   value: number;
   min?: number;
   max?: number;
@@ -42,11 +44,8 @@ export function NumInput({
   return (
     <input
       type="number"
-      className={clsx(
-        'masonix-number-input',
-        inputCls,
-        'w-16',
-      )}
+      aria-label={ariaLabel}
+      className={clsx('masonix-number-input', inputCls, 'w-16')}
       style={style}
       value={draft}
       min={min}

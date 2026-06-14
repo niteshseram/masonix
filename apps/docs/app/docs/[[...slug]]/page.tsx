@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import {
   DocsBody,
   DocsDescription,
@@ -6,6 +5,7 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+import { notFound } from 'next/navigation';
 
 import { source } from '@/lib/docs-source';
 

@@ -45,17 +45,16 @@ export function ScrollToIndexBar({
         'bg-zinc-900/50',
       )}
     >
-      <span className={clsx('shrink-0', 'text-xs font-medium', 'text-zinc-400')}>
+      <span
+        className={clsx('shrink-0', 'text-xs font-medium', 'text-zinc-400')}
+      >
         Jump to item
       </span>
 
       <input
         type="number"
-        className={clsx(
-          'masonix-number-input',
-          inputCls,
-          'w-14',
-        )}
+        aria-label="Item number"
+        className={clsx('masonix-number-input', inputCls, 'w-14')}
         value={itemNumber}
         min={1}
         max={itemCount}
@@ -82,7 +81,9 @@ export function ScrollToIndexBar({
               'px-2 py-1',
               'rounded',
               'text-xs font-medium',
-              align === alignOption ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-400',
+              align === alignOption
+                ? 'bg-zinc-700 text-zinc-100'
+                : 'text-zinc-400',
               'transition-colors',
               align === alignOption ? null : 'hover:text-zinc-200',
             )}
@@ -102,6 +103,7 @@ export function ScrollToIndexBar({
       >
         <input
           type="checkbox"
+          aria-label="Smooth scroll"
           className="accent-blue-500"
           checked={smooth}
           onChange={(event) => setSmooth(event.target.checked)}

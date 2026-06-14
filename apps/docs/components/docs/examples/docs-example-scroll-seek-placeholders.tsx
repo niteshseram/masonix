@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
+import { clsx } from 'clsx';
+import type { MasonryRenderProps } from 'masonix';
+import { MasonryVirtual } from 'masonix/virtual';
 // docs:start scroll-seek-placeholders
-import { useRef } from "react";
-import { clsx } from "clsx";
-import type { MasonryRenderProps } from "masonix";
-import { MasonryVirtual } from "masonix/virtual";
+import { useRef } from 'react';
 // docs:end scroll-seek-placeholders
 
-import { DemoFrame } from "@/components/docs/examples/docs-example-frame";
-import { demoFeedItems } from "@/components/docs/examples/docs-example-feed-data";
+import { demoFeedItems } from '@/components/docs/examples/docs-example-feed-data';
+import { DemoFrame } from '@/components/docs/examples/docs-example-frame';
 
 // docs:start scroll-seek-placeholders
 type FeedItem = {
@@ -27,9 +27,9 @@ function FeedCard({ item }: { item: FeedItem }) {
   return (
     <article
       className={clsx(
-        "overflow-hidden",
-        "rounded-xl border",
-        "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950",
+        'overflow-hidden',
+        'rounded-xl border',
+        'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950',
       )}
     >
       <div className="p-4" style={{ background: item.gradient }}>
@@ -37,16 +37,24 @@ function FeedCard({ item }: { item: FeedItem }) {
           <span className="rounded-full bg-white/85 px-2 py-1 text-xs font-medium text-zinc-900">
             {item.topic}
           </span>
-          <span className="text-xs font-medium text-white/80">{item.metric}</span>
+          <span className="text-xs font-medium text-white/80">
+            {item.metric}
+          </span>
         </div>
-        <p className="mt-8 text-xs font-medium leading-5 text-white/80">{item.tags.join(" / ")}</p>
+        <p className="mt-8 text-xs font-medium leading-5 text-white/80">
+          {item.tags.join(' / ')}
+        </p>
       </div>
       <div className="p-4">
         <div>
-          <h3 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">{item.author}</h3>
+          <h3 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+            {item.author}
+          </h3>
           <p className="text-xs text-zinc-500">{item.handle}</p>
         </div>
-        <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{item.body}</p>
+        <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+          {item.body}
+        </p>
         {item.note ? (
           <p className="mt-3 rounded-lg bg-zinc-100 p-3 text-xs leading-5 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
             {item.note}
@@ -67,13 +75,15 @@ function FeedCard({ item }: { item: FeedItem }) {
   );
 }
 
-function FeedSkeleton({ height }: MasonryRenderProps<FeedItem> & { height: number }) {
+function FeedSkeleton({
+  height,
+}: MasonryRenderProps<FeedItem> & { height: number }) {
   return (
     <div
       className={clsx(
-        "flex flex-col overflow-hidden",
-        "rounded-xl border",
-        "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950",
+        'flex flex-col overflow-hidden',
+        'rounded-xl border',
+        'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950',
       )}
       style={{ height }}
     >
@@ -95,10 +105,10 @@ export function FastFeed({ items }: { items: FeedItem[] }) {
     <div
       ref={scrollContainerRef}
       className={clsx(
-        "min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain",
-        "h-96 p-3",
-        "rounded-lg border",
-        "border-zinc-200 dark:border-zinc-800",
+        'min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain',
+        'h-96 p-3',
+        'rounded-lg border',
+        'border-zinc-200 dark:border-zinc-800',
       )}
     >
       <MasonryVirtual

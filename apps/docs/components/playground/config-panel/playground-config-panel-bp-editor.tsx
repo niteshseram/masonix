@@ -1,7 +1,7 @@
 import { clsx } from 'clsx';
 
-import { NumInput } from '@/components/playground/ui/playground-num-input';
 import type { BpEntry } from '@/components/playground/config-panel/playground-config-panel-types';
+import { NumInput } from '@/components/playground/ui/playground-num-input';
 
 export function BpEditor({
   entries,
@@ -27,7 +27,9 @@ export function BpEditor({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="masonix-bp-editor-grid grid gap-x-1.5">
-        <span className={clsx('text-center text-xs', 'text-zinc-500')}>min-width</span>
+        <span className={clsx('text-center text-xs', 'text-zinc-500')}>
+          min-width
+        </span>
         <span className={clsx('text-center text-xs', 'text-zinc-500')}>
           {valueLabel}
         </span>
@@ -39,6 +41,7 @@ export function BpEditor({
           className="masonix-bp-editor-grid grid items-center gap-x-1.5"
         >
           <NumInput
+            ariaLabel={`Breakpoint ${entryIndex + 1} min-width`}
             value={entry.minWidth}
             min={0}
             max={9999}
@@ -46,6 +49,7 @@ export function BpEditor({
             onChange={(newValue) => update(entryIndex, 'minWidth', newValue)}
           />
           <NumInput
+            ariaLabel={`Breakpoint ${entryIndex + 1} ${valueLabel}`}
             value={entry.value}
             min={valueMin}
             max={valueMax}
@@ -54,6 +58,7 @@ export function BpEditor({
           />
           <button
             type="button"
+            aria-label={`Remove breakpoint ${entryIndex + 1}`}
             onClick={() =>
               onChange(entries.filter((_entry, index) => index !== entryIndex))
             }

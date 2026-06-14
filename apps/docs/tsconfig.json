@@ -7,10 +7,5 @@
     },
     "types": ["node", "react", "react-dom"]
   },
-  "include": [
-    ".",
-    ".next/types/**/*.ts",
-    ".source/**/*.ts",
-    "next-env.d.ts"
-  ]
+  "include": [".", ".next/types/**/*.ts", ".source/**/*.ts", "next-env.d.ts"]
 }

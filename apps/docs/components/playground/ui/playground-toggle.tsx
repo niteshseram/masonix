@@ -1,10 +1,12 @@
 import { clsx } from 'clsx';
 
 export function Toggle({
+  ariaLabel,
   value,
   disabled,
   onChange,
 }: {
+  ariaLabel: string;
   value: boolean;
   disabled?: boolean;
   onChange: (nextValue: boolean) => void;
@@ -13,6 +15,7 @@ export function Toggle({
     <button
       type="button"
       role="switch"
+      aria-label={ariaLabel}
       aria-checked={value}
       disabled={disabled}
       onClick={() => {

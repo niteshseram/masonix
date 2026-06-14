@@ -19,11 +19,11 @@ yarn add masonix
 
 ## Components
 
-| Use case | Component | Import |
-| --- | --- | --- |
-| Simple responsive grids | `Masonry` | `masonix` |
-| Variable-height balanced layouts | `MasonryBalanced` | `masonix` |
-| Long virtualized feeds | `MasonryVirtual` | `masonix/virtual` |
+| Use case                         | Component         | Import            |
+| -------------------------------- | ----------------- | ----------------- |
+| Simple responsive grids          | `Masonry`         | `masonix`         |
+| Variable-height balanced layouts | `MasonryBalanced` | `masonix`         |
+| Long virtualized feeds           | `MasonryVirtual`  | `masonix/virtual` |
 
 ## Docs
 
@@ -44,7 +44,12 @@ The playground is now part of the docs app at `/playground`.
 
 ```bash
 pnpm install
-pnpm test:run
+pnpm tc
+pnpm lint
+pnpm format:check
+pnpm test
+pnpm test:watch
+pnpm test:coverage
 pnpm build
 pnpm size
 ```
@@ -52,6 +57,7 @@ pnpm size
 Package-specific scripts can be run with pnpm filters:
 
 ```bash
-pnpm -F masonix test:run
+pnpm -F masonix test
+pnpm -F masonix test:watch
 pnpm -F masonix-docs build
 ```

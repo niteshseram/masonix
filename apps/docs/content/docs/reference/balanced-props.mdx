@@ -6,11 +6,11 @@ description: Props for MasonryBalanced measurement and shortest-column placement
 `MasonryBalanced` accepts all [Common Props](/docs/reference/common-props) plus
 these measurement props.
 
-| Prop | Type | Default | Notes |
-| --- | --- | --- | --- |
-| `getItemHeight` | `(data: T, index: number, columnWidth: number) => number` | - | Provides known height and skips waiting for DOM measurement. |
-| `estimatedItemHeight` | `number` | `150` | Initial height before a card is measured. |
-| `minItemHeight` | `number` | - | Clamps measured heights to at least this value. |
+| Prop                  | Type                                                      | Default | Notes                                                        |
+| --------------------- | --------------------------------------------------------- | ------- | ------------------------------------------------------------ |
+| `getItemHeight`       | `(data: T, index: number, columnWidth: number) => number` | -       | Provides known height and skips waiting for DOM measurement. |
+| `estimatedItemHeight` | `number`                                                  | `150`   | Initial height before a card is measured.                    |
+| `minItemHeight`       | `number`                                                  | -       | Clamps measured heights to at least this value.              |
 
 ## Known height function
 

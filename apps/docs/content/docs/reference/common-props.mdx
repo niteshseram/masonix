@@ -5,25 +5,25 @@ description: Props shared by Masonry, MasonryBalanced, and MasonryVirtual.
 
 These props are available on all three components unless noted otherwise.
 
-| Prop | Type | Default | Applies To | Notes |
-| --- | --- | --- | --- | --- |
-| `items` | `T[]` | required | All | Data array rendered by Masonix. |
-| `render` | `ComponentType<MasonryRenderProps<T>>` | required | All | Card renderer receives `index`, `data`, and `width`. |
-| `columns` | `number \| Record<number, number>` | - | All | Fixed count or responsive container-width map. |
-| `columnWidth` | `number` | - | All | Minimum width used to compute automatic column count. |
-| `maxColumns` | `number` | - | All | Caps automatic or responsive column count. |
-| `gap` | `number \| Record<number, number>` | `0` | All | Row and column gap in pixels. |
-| `defaultColumns` | `number` | `3` | All | First-render fallback when width is unknown. |
-| `defaultWidth` | `number` | - | All | First-render fallback container width. |
-| `className` | `string` | - | All | Class on the outer container. |
-| `style` | `CSSProperties` | - | All | Inline style on the outer container. |
-| `itemClassName` | `string` | - | All | Class on every item wrapper. |
-| `as` | `ElementType` | `"div"` | All | Outer container element. |
-| `itemAs` | `ElementType` | `"div"` | All | Item wrapper element. |
-| `itemKey` | `(data: T, index: number) => string \| number` | index fallback | All | Stable identity for React keys and measurements. |
-| `role` | `"grid" \| "list" \| "none"` | `"list"` | All | ARIA role for the outer container. |
-| `aria-label` | `string` | - | All | Accessible label for the layout. |
-| `ref` | `Ref<HTMLElement>` | - | All | Ref for the outer container. |
+| Prop             | Type                                           | Default        | Applies To | Notes                                                 |
+| ---------------- | ---------------------------------------------- | -------------- | ---------- | ----------------------------------------------------- |
+| `items`          | `T[]`                                          | required       | All        | Data array rendered by Masonix.                       |
+| `render`         | `ComponentType<MasonryRenderProps<T>>`         | required       | All        | Card renderer receives `index`, `data`, and `width`.  |
+| `columns`        | `number \| Record<number, number>`             | -              | All        | Fixed count or responsive container-width map.        |
+| `columnWidth`    | `number`                                       | -              | All        | Minimum width used to compute automatic column count. |
+| `maxColumns`     | `number`                                       | -              | All        | Caps automatic or responsive column count.            |
+| `gap`            | `number \| Record<number, number>`             | `0`            | All        | Row and column gap in pixels.                         |
+| `defaultColumns` | `number`                                       | `3`            | All        | First-render fallback when width is unknown.          |
+| `defaultWidth`   | `number`                                       | -              | All        | First-render fallback container width.                |
+| `className`      | `string`                                       | -              | All        | Class on the outer container.                         |
+| `style`          | `CSSProperties`                                | -              | All        | Inline style on the outer container.                  |
+| `itemClassName`  | `string`                                       | -              | All        | Class on every item wrapper.                          |
+| `as`             | `ElementType`                                  | `"div"`        | All        | Outer container element.                              |
+| `itemAs`         | `ElementType`                                  | `"div"`        | All        | Item wrapper element.                                 |
+| `itemKey`        | `(data: T, index: number) => string \| number` | index fallback | All        | Stable identity for React keys and measurements.      |
+| `role`           | `"grid" \| "list" \| "none"`                   | `"list"`       | All        | ARIA role for the outer container.                    |
+| `aria-label`     | `string`                                       | -              | All        | Accessible label for the layout.                      |
+| `ref`            | `Ref<HTMLElement>`                             | -              | All        | Ref for the outer container.                          |
 
 ## Render props
 

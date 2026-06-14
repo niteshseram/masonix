@@ -22,7 +22,9 @@ export function Seg<T extends string>({
             'rounded',
             value === option.value ? 'shadow-sm' : null,
             'text-xs font-medium',
-            value === option.value ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-400',
+            value === option.value
+              ? 'bg-zinc-700 text-zinc-100'
+              : 'text-zinc-400',
             'transition-colors',
             value === option.value ? null : 'hover:text-zinc-200',
           )}

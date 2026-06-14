@@ -1,11 +1,13 @@
 import { clsx } from 'clsx';
 
 export function Slider({
+  ariaLabel,
   value,
   min,
   max,
   onChange,
 }: {
+  ariaLabel: string;
   value: number;
   min: number;
   max: number;
@@ -15,14 +17,11 @@ export function Slider({
     <div className="flex w-full items-center gap-2">
       <input
         type="range"
+        aria-label={ariaLabel}
         min={min}
         max={max}
         value={value}
-        className={clsx(
-          'flex-1',
-          'accent-blue-500',
-          'cursor-pointer',
-        )}
+        className={clsx('flex-1', 'accent-blue-500', 'cursor-pointer')}
         onChange={(event) => onChange(Number(event.target.value))}
       />
       <span

@@ -18,10 +18,7 @@ const TEXT_BODIES = [
 export function ColorBlock({ data, index, width }: MasonryRenderProps<Photo>) {
   return (
     <div
-      className={clsx(
-        'group relative overflow-hidden',
-        'rounded-2xl',
-      )}
+      className={clsx('group relative overflow-hidden', 'rounded-2xl')}
       style={{ background: data.color, height: data.height }}
     >
       <div
@@ -31,7 +28,12 @@ export function ColorBlock({ data, index, width }: MasonryRenderProps<Photo>) {
         )}
       />
 
-      <div className={clsx('pointer-events-none absolute inset-x-0 top-0 h-px', 'bg-white/25')} />
+      <div
+        className={clsx(
+          'pointer-events-none absolute inset-x-0 top-0 h-px',
+          'bg-white/25',
+        )}
+      />
 
       <span
         className={clsx(
@@ -85,10 +87,22 @@ export function TextCard({ data, index }: MasonryRenderProps<Photo>) {
             'bg-gradient-to-r from-black/15 to-transparent',
           )}
         />
-        <span className={clsx('relative flex-1 truncate', 'text-xs font-semibold', 'text-white/90')}>
+        <span
+          className={clsx(
+            'relative flex-1 truncate',
+            'text-xs font-semibold',
+            'text-white/90',
+          )}
+        >
           {data.alt}
         </span>
-        <span className={clsx('relative shrink-0', 'font-mono text-xs', 'text-white/50')}>
+        <span
+          className={clsx(
+            'relative shrink-0',
+            'font-mono text-xs',
+            'text-white/50',
+          )}
+        >
           #{index + 1}
         </span>
       </div>

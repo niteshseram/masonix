@@ -18,7 +18,12 @@ function SectionHeader({
         'border-zinc-800/70',
       )}
     >
-      <span className={clsx('text-xs font-bold uppercase tracking-widest', 'text-zinc-500')}>
+      <span
+        className={clsx(
+          'text-xs font-bold uppercase tracking-widest',
+          'text-zinc-500',
+        )}
+      >
         {title}
       </span>
       {chevron !== undefined && (
@@ -93,7 +98,9 @@ export function Row({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <span className={clsx('w-24 shrink-0', 'text-xs', 'text-zinc-400')}>{label}</span>
+      <span className={clsx('w-24 shrink-0', 'text-xs', 'text-zinc-400')}>
+        {label}
+      </span>
       <div className="flex flex-1 items-center justify-end">{children}</div>
     </div>
   );

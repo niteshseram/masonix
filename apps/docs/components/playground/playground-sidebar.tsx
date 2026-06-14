@@ -138,8 +138,15 @@ export function Sidebar({ config, setConfig }: SidebarProps) {
       )}
 
       {isMobile && isOpen && (
-        <div
-          className={clsx('absolute inset-0 z-10', 'bg-black/60')}
+        <button
+          type="button"
+          aria-label="Close config"
+          className={clsx(
+            'absolute inset-0 z-10',
+            'p-0',
+            'border-0',
+            'bg-black/60',
+          )}
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -151,15 +158,20 @@ export function Sidebar({ config, setConfig }: SidebarProps) {
             'border-r',
             'border-zinc-800 bg-zinc-950',
             isMobile ? 'absolute inset-y-0 left-0 z-10' : 'h-full',
-            !isResizing &&
-              !isMobile &&
-              'transition-all duration-150 ease-out',
+            !isResizing && !isMobile && 'transition-all duration-150 ease-out',
           )}
           style={{
             width: isMobile ? Math.min(300, viewportWidth - 40) : width,
           }}
         >
-          <div className={clsx('flex h-10 shrink-0 items-center', 'px-2', 'border-b', 'border-zinc-800')}>
+          <div
+            className={clsx(
+              'flex h-10 shrink-0 items-center',
+              'px-2',
+              'border-b',
+              'border-zinc-800',
+            )}
+          >
             <button
               type="button"
               onClick={() => setIsOpen((prevOpen) => !prevOpen)}
@@ -187,10 +199,15 @@ export function Sidebar({ config, setConfig }: SidebarProps) {
           </div>
 
           {isOpen && !isMobile && (
-            <div
+            <button
+              type="button"
+              aria-label="Resize config panel"
               onMouseDown={handleResizeStart}
               className={clsx(
                 'absolute top-0 right-0 h-full w-1',
+                'p-0',
+                'border-0',
+                'bg-transparent',
                 'cursor-col-resize',
                 'transition-colors',
                 'hover:bg-blue-500/30 active:bg-blue-500/50',

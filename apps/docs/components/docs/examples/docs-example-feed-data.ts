@@ -21,8 +21,7 @@ export const demoFeedItems = Array.from({ length: 48 }, (_, itemIndex) => {
     },
     {
       topic: 'Scroll seek',
-      body:
-        'The placeholder pass made fast scrolling feel calmer on lower-end devices without changing item positions.',
+      body: 'The placeholder pass made fast scrolling feel calmer on lower-end devices without changing item positions.',
       note: 'Placeholders keep the measured size while the user is moving quickly.',
       tags: ['placeholders', 'velocity', 'perf'],
       gradient: 'linear-gradient(135deg, #be123c, #fb7185)',
@@ -35,8 +34,7 @@ export const demoFeedItems = Array.from({ length: 48 }, (_, itemIndex) => {
     },
     {
       topic: 'Panels',
-      body:
-        'Container breakpoints made the same component work in the dashboard, the public page, and a constrained review panel.',
+      body: 'Container breakpoints made the same component work in the dashboard, the public page, and a constrained review panel.',
       note: 'This is the kind of uneven editorial card that should create a taller measured item.',
       tags: ['container', 'dashboard'],
       gradient: 'linear-gradient(135deg, #ca8a04, #facc15)',

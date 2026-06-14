@@ -80,9 +80,9 @@
     "lint": "vp lint",
     "size": "size-limit",
     "tc": "tsc --noEmit",
-    "test": "vp test",
+    "test": "vp test run",
     "test:coverage": "vp test --run --coverage",
-    "test:run": "vp test --run"
+    "test:watch": "vp test"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

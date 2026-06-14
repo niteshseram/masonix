@@ -5,28 +5,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-pnpm test:run          # run all tests once (106 tests, ~550ms)
-pnpm test              # run tests in watch mode
-pnpm test:coverage     # run with v8 coverage
-pnpm build             # tsc typecheck + vp pack (tsdown, dual ESM/CJS)
-pnpm tc                # tsc --noEmit only
-pnpm lint              # oxlint on packages/masonix/src/
-pnpm format            # oxfmt on packages/masonix/src/
-pnpm format:check      # format check without writing
+pnpm test              # run all tests once
+pnpm test:watch        # run tests in watch mode
+pnpm test:coverage     # run all tests once with v8 coverage
+pnpm build             # build publishable packages
+pnpm tc                # type-check packages and apps
+pnpm lint              # lint the workspace
+pnpm lint:fix          # lint and fix where supported
+pnpm format            # format the workspace
+pnpm format:check      # check formatting without writing
 pnpm docs              # start apps/docs Next.js dev server
-pnpm docs:build        # build apps/docs
-pnpm playground        # alias for docs dev server; playground lives at /playground
+pnpm docs:build        # build apps/docs and its dependencies
 ```
 
 Run a single test file:
 
 ```bash
-pnpm -F masonix exec vp test src/__tests__/core/positioner.test.ts
+pnpm exec vp test packages/masonix/src/__tests__/core/positioner.test.ts --run
 ```
 
 ## Toolchain
 
-This project uses **vite-plus** (`vp` CLI), which bundles vite, oxlint, oxfmt, and tsdown into one package. Library tool config lives in `packages/masonix/vite.config.ts` under the `pack`, `test`, `lint`, and `fmt` keys — there are no separate tool config files (no `vitest.config`, no `oxlintrc.json`).
+This project uses **vite-plus** (`vp` CLI), which bundles vite, oxlint, oxfmt, and tsdown into one package. Shared workspace config lives in `vite.config.ts` under the `test`, `fmt`, `lint`, and `run` keys. Package build config lives in `packages/masonix/vite.config.ts` under `pack`, with package-local test defaults under `test`. There are no separate tool config files such as `vitest.config` or `oxlintrc.json`.
 
 Build output (`vp pack` / tsdown):
 
@@ -48,10 +48,10 @@ packages/masonix/
     test/setup.ts         vitest setup: ResizeObserver mock only
   package.json            publishable masonix package metadata
   README.md               package-level usage docs
-  vite.config.ts          build/test/lint/format config
+  vite.config.ts          package build/test config
 ```
 
-The root `tsconfig.json` is a shared base config. `packages/masonix/tsconfig.json` covers the library `src/` directory. `tsconfig.node.json` covers package and app Vite configs (needs `@types/node` for `import.meta.dirname`). `packages/masonix/tsconfig.build.json` is used by tsdown for declaration emit.
+The root `vite.config.ts` owns shared test, lint, format, and run-task config. The root `tsconfig.json` is a shared base config. `packages/masonix/tsconfig.json` covers the library `src/` directory. `tsconfig.node.json` covers Vite Plus config files. `packages/masonix/tsconfig.build.json` is used by tsdown for declaration emit.
 
 ## Architecture
 
@@ -89,5 +89,5 @@ All positioners implement `Positioner`. The key method is `set(index, height)`. 
 
 - **`packages/masonix/src/index.ts` and `packages/masonix/src/virtual.ts` are thin re-export barrels.** Never add logic there; never import Phase N+1 symbols until those files exist.
 - All filenames are lowercase with hyphens.
-- `react` and `react-dom` are peer dependencies — never bundle them. External pattern in `vite.config.ts`: `['react', 'react-dom', 'react/jsx-runtime', /^react-dom\//]`.
+- `react` and `react-dom` are peer dependencies — never bundle them. External pattern in `packages/masonix/vite.config.ts`: `['react', 'react-dom', 'react/jsx-runtime', /^react-dom\//]`.
 - The `"use client"` banner is prepended to all output files by tsdown.

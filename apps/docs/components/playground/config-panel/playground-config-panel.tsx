@@ -1,14 +1,6 @@
 import { clsx } from 'clsx';
 import type React from 'react';
 
-import {
-  NumInput,
-  inputCls,
-} from '@/components/playground/ui/playground-num-input';
-import { ScrollArea } from '@/components/playground/ui/playground-scroll-area';
-import { Seg } from '@/components/playground/ui/playground-seg';
-import { Slider } from '@/components/playground/ui/playground-slider';
-import { Toggle } from '@/components/playground/ui/playground-toggle';
 import { BpEditor } from '@/components/playground/config-panel/playground-config-panel-bp-editor';
 import {
   Section,
@@ -17,6 +9,14 @@ import {
   Field,
 } from '@/components/playground/config-panel/playground-config-panel-layout';
 import type { Config } from '@/components/playground/config-panel/playground-config-panel-types';
+import {
+  NumInput,
+  inputCls,
+} from '@/components/playground/ui/playground-num-input';
+import { ScrollArea } from '@/components/playground/ui/playground-scroll-area';
+import { Seg } from '@/components/playground/ui/playground-seg';
+import { Slider } from '@/components/playground/ui/playground-slider';
+import { Toggle } from '@/components/playground/ui/playground-toggle';
 
 export type {
   ComponentMode,
@@ -61,6 +61,7 @@ export function ConfigPanel({
         <Section title="Items">
           <Row label="Count">
             <Slider
+              ariaLabel="Item count"
               value={config.itemCount}
               min={0}
               max={maxCount}
@@ -92,6 +93,7 @@ export function ConfigPanel({
             <Row label="Height range">
               <div className="flex items-center gap-1.5">
                 <NumInput
+                  ariaLabel="Minimum item height"
                   value={config.minItemH}
                   min={20}
                   max={config.maxItemH - 20}
@@ -99,6 +101,7 @@ export function ConfigPanel({
                 />
                 <span className={clsx('text-xs', 'text-zinc-600')}>-</span>
                 <NumInput
+                  ariaLabel="Maximum item height"
                   value={config.maxItemH}
                   min={config.minItemH + 20}
                   max={800}
@@ -110,6 +113,7 @@ export function ConfigPanel({
           {config.heightMode === 'uniform' && (
             <Row label="Height">
               <NumInput
+                ariaLabel="Uniform item height"
                 value={config.uniformHeight}
                 min={20}
                 max={800}
@@ -134,6 +138,7 @@ export function ConfigPanel({
           {config.columnMode === 'fixed' && (
             <Row label="Count">
               <NumInput
+                ariaLabel="Column count"
                 value={config.fixedColumns}
                 min={1}
                 max={12}
@@ -147,12 +152,15 @@ export function ConfigPanel({
               valueLabel="columns"
               valueMin={1}
               valueMax={12}
-              onChange={(nextBreakpoints) => set('customColBps', nextBreakpoints)}
+              onChange={(nextBreakpoints) =>
+                set('customColBps', nextBreakpoints)
+              }
             />
           )}
           {config.columnMode === 'columnWidth' && (
             <Row label="Min column">
               <NumInput
+                ariaLabel="Minimum column width"
                 value={config.autoColumnWidth}
                 min={50}
                 max={800}
@@ -163,11 +171,13 @@ export function ConfigPanel({
           <Row label="Max columns">
             <div className="flex items-center gap-2">
               <Toggle
+                ariaLabel="Use max columns"
                 value={config.useMaxColumns}
                 onChange={(nextValue) => set('useMaxColumns', nextValue)}
               />
               {config.useMaxColumns && (
                 <NumInput
+                  ariaLabel="Maximum columns"
                   value={config.maxColumns}
                   min={1}
                   max={12}
@@ -192,6 +202,7 @@ export function ConfigPanel({
           {config.gapMode === 'fixed' && (
             <Row label="Gap size">
               <Slider
+                ariaLabel="Gap size"
                 value={config.fixedGap}
                 min={0}
                 max={64}
@@ -205,7 +216,9 @@ export function ConfigPanel({
               valueLabel="gap (px)"
               valueMin={0}
               valueMax={64}
-              onChange={(nextBreakpoints) => set('customGapBps', nextBreakpoints)}
+              onChange={(nextBreakpoints) =>
+                set('customGapBps', nextBreakpoints)
+              }
             />
           )}
         </Section>
@@ -214,6 +227,7 @@ export function ConfigPanel({
           <Section title="Measurement">
             <Row label="Known heights">
               <Toggle
+                ariaLabel="Use known heights"
                 value={config.useKnownHeights}
                 disabled={knownHeightsDisabled}
                 onChange={(nextValue) => set('useKnownHeights', nextValue)}
@@ -222,21 +236,26 @@ export function ConfigPanel({
             {!config.useKnownHeights && !knownHeightsDisabled && (
               <Row label="Estimate">
                 <NumInput
+                  ariaLabel="Estimated item height"
                   value={config.estimatedItemHeight}
                   min={10}
                   max={800}
-                  onChange={(nextValue) => set('estimatedItemHeight', nextValue)}
+                  onChange={(nextValue) =>
+                    set('estimatedItemHeight', nextValue)
+                  }
                 />
               </Row>
             )}
             <Row label="Min height">
               <div className="flex items-center gap-2">
                 <Toggle
+                  ariaLabel="Use minimum item height"
                   value={config.useMinItemHeight}
                   onChange={(nextValue) => set('useMinItemHeight', nextValue)}
                 />
                 {config.useMinItemHeight && (
                   <NumInput
+                    ariaLabel="Minimum item height"
                     value={config.minItemHeight}
                     min={0}
                     max={400}
@@ -252,6 +271,7 @@ export function ConfigPanel({
           <Section title="Virtualization">
             <Row label="Overscan">
               <Slider
+                ariaLabel="Overscan"
                 value={config.overscanBy}
                 min={0}
                 max={10}
@@ -260,6 +280,7 @@ export function ConfigPanel({
             </Row>
             <Row label="End threshold">
               <NumInput
+                ariaLabel="End reached threshold"
                 value={config.endReachedThreshold}
                 min={0}
                 max={1000}
@@ -269,11 +290,13 @@ export function ConfigPanel({
             <Row label="Scroll seek">
               <div className="flex items-center gap-2">
                 <Toggle
+                  ariaLabel="Enable scroll seek"
                   value={config.enableScrollSeek}
                   onChange={(nextValue) => set('enableScrollSeek', nextValue)}
                 />
                 {config.enableScrollSeek && (
                   <NumInput
+                    ariaLabel="Scroll seek velocity threshold"
                     value={config.scrollSeekVelocityThreshold}
                     min={0}
                     max={20000}
@@ -302,6 +325,7 @@ export function ConfigPanel({
           {config.component === 'masonry' && (
             <Row label="Native CSS">
               <Toggle
+                ariaLabel="Enable native CSS"
                 value={config.enableNative}
                 onChange={(nextValue) => set('enableNative', nextValue)}
               />
@@ -332,6 +356,7 @@ export function ConfigPanel({
           </Field>
           <Row label="aria-label">
             <input
+              aria-label="aria-label"
               className={clsx(inputCls, 'w-28 placeholder:text-zinc-600')}
               value={config.ariaLabel}
               placeholder="Optional"

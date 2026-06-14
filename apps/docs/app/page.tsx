@@ -1,7 +1,7 @@
-import type { CSSProperties } from 'react';
-import Link from 'next/link';
 import { clsx } from 'clsx';
 import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
+import Link from 'next/link';
+import type { CSSProperties } from 'react';
 
 import { Logo } from '@/components/brand/brand-logo';
 
@@ -9,17 +9,20 @@ const componentModes = [
   {
     name: 'Masonry',
     href: '/docs/components/masonry',
-    detail: 'Responsive CSS layout for product grids, image walls, and simple feeds.',
+    detail:
+      'Responsive CSS layout for product grids, image walls, and simple feeds.',
   },
   {
     name: 'MasonryBalanced',
     href: '/docs/components/masonry-balanced',
-    detail: 'Measured shortest-column placement for cards with unpredictable height.',
+    detail:
+      'Measured shortest-column placement for cards with unpredictable height.',
   },
   {
     name: 'MasonryVirtual',
     href: '/docs/components/masonry-virtual',
-    detail: 'Windowed rendering, scroll seek, and end-reached events for long feeds.',
+    detail:
+      'Windowed rendering, scroll seek, and end-reached events for long feeds.',
   },
 ];
 
@@ -256,7 +259,10 @@ export default async function HomePage() {
             'mx-auto px-4',
           )}
         >
-          <Link href="/" className={clsx('flex items-center gap-2', 'font-semibold')}>
+          <Link
+            href="/"
+            className={clsx('flex items-center gap-2', 'font-semibold')}
+          >
             <Logo size={26} />
           </Link>
           <div
@@ -289,7 +295,9 @@ export default async function HomePage() {
         </nav>
       </header>
 
-      <section className={clsx('relative isolate', 'border-b', 'border-fd-border')}>
+      <section
+        className={clsx('relative isolate', 'border-b', 'border-fd-border')}
+      >
         <HeroScene />
         <div
           className={clsx(
@@ -367,10 +375,19 @@ export default async function HomePage() {
         >
           {proofPoints.map(([value, label]) => (
             <div key={label}>
-              <div className={clsx('font-mono text-2xl font-semibold', 'text-fd-foreground')}>
+              <div
+                className={clsx(
+                  'font-mono text-2xl font-semibold',
+                  'text-fd-foreground',
+                )}
+              >
                 {value}
               </div>
-              <div className={clsx('mt-1', 'text-sm', 'text-fd-muted-foreground')}>{label}</div>
+              <div
+                className={clsx('mt-1', 'text-sm', 'text-fd-muted-foreground')}
+              >
+                {label}
+              </div>
             </div>
           ))}
         </div>
@@ -400,7 +417,13 @@ export default async function HomePage() {
           >
             One library, three layout strategies.
           </h2>
-          <p className={clsx('mt-4', 'text-base leading-7', 'text-fd-muted-foreground')}>
+          <p
+            className={clsx(
+              'mt-4',
+              'text-base leading-7',
+              'text-fd-muted-foreground',
+            )}
+          >
             Start with the simple component, move to measured placement when
             visual balance matters, and switch to virtualization when rendering
             everything starts costing scroll performance.
@@ -422,7 +445,9 @@ export default async function HomePage() {
               )}
             >
               <div className="flex items-center justify-between gap-4">
-                <h3 className={clsx('font-semibold', 'text-fd-foreground')}>{mode.name}</h3>
+                <h3 className={clsx('font-semibold', 'text-fd-foreground')}>
+                  {mode.name}
+                </h3>
                 <span
                   className={clsx(
                     'font-mono text-xs',
@@ -465,10 +490,18 @@ export default async function HomePage() {
             >
               First working example
             </p>
-            <h2 className={clsx('mt-3', 'text-3xl font-semibold tracking-normal')}>
+            <h2
+              className={clsx('mt-3', 'text-3xl font-semibold tracking-normal')}
+            >
               Bring your own cards. Masonix handles the placement.
             </h2>
-            <p className={clsx('mt-4', 'text-base leading-7', 'text-fd-muted-foreground')}>
+            <p
+              className={clsx(
+                'mt-4',
+                'text-base leading-7',
+                'text-fd-muted-foreground',
+              )}
+            >
               The docs include live examples, accessibility guidance, virtual
               feed recipes, and a full playground for tuning layout behavior.
             </p>

@@ -1,3 +1,4 @@
+import { clsx } from 'clsx';
 import { Masonry, MasonryBalanced } from 'masonix';
 import type { MasonryRenderProps } from 'masonix';
 import { MasonryVirtual } from 'masonix/virtual';
@@ -5,15 +6,14 @@ import type {
   MasonryVirtualHandle,
   MasonryVirtualRange,
 } from 'masonix/virtual';
-import { clsx } from 'clsx';
 import React from 'react';
 
-import type { Photo } from '@/lib/playground/playground-demo-data';
-import { ColorBlock, TextCard } from '@/components/playground/playground-cards';
 import type {
   Config,
   BpEntry,
 } from '@/components/playground/config-panel/playground-config-panel';
+import { ColorBlock, TextCard } from '@/components/playground/playground-cards';
+import type { Photo } from '@/lib/playground/playground-demo-data';
 
 function bpsToRecord(breakpoints: BpEntry[]): Record<number, number> {
   const breakpointRecord: Record<number, number> = {};

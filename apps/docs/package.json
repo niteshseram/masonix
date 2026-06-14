@@ -5,7 +5,8 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "start": "next start"
+    "start": "next start",
+    "tc": "tsc --noEmit"
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-rc.0",

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
+import { clsx } from 'clsx';
+import { MasonryVirtual, type MasonryVirtualHandle } from 'masonix/virtual';
 // docs:start programmatic-scroll
-import { useRef, useState } from "react";
-import { clsx } from "clsx";
-import { MasonryVirtual, type MasonryVirtualHandle } from "masonix/virtual";
+import { useRef, useState } from 'react';
 // docs:end programmatic-scroll
 
-import { DemoFrame } from "@/components/docs/examples/docs-example-frame";
-import { demoFeedItems } from "@/components/docs/examples/docs-example-feed-data";
+import { demoFeedItems } from '@/components/docs/examples/docs-example-feed-data';
+import { DemoFrame } from '@/components/docs/examples/docs-example-frame';
 
 // docs:start programmatic-scroll
 type FeedItem = {
@@ -37,12 +37,12 @@ function FeedCard({
     <article
       aria-label={`Item ${index + 1}: ${item.author}`}
       className={clsx(
-        "overflow-hidden",
-        "rounded-xl border",
-        "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950",
-        "transition-shadow",
+        'overflow-hidden',
+        'rounded-xl border',
+        'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950',
+        'transition-shadow',
         isTarget
-          ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950"
+          ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950'
           : null,
       )}
     >
@@ -51,10 +51,14 @@ function FeedCard({
           <span className="rounded-full bg-white/85 px-2 py-1 text-xs font-medium text-zinc-900">
             {item.topic}
           </span>
-          <span className="text-xs font-medium text-white/80">{item.metric}</span>
+          <span className="text-xs font-medium text-white/80">
+            {item.metric}
+          </span>
         </div>
         <div className="mt-8 flex items-center justify-between gap-3">
-          <p className="text-xs font-medium leading-5 text-white/80">{item.tags.join(" / ")}</p>
+          <p className="text-xs font-medium leading-5 text-white/80">
+            {item.tags.join(' / ')}
+          </p>
           <span className="rounded-full bg-black/25 px-2 py-1 text-xs font-semibold text-white">
             Item {index + 1}
           </span>
@@ -74,7 +78,9 @@ function FeedCard({
             </span>
           ) : null}
         </div>
-        <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{item.body}</p>
+        <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+          {item.body}
+        </p>
         {item.note ? (
           <p className="mt-3 rounded-lg bg-zinc-100 p-3 text-xs leading-5 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
             {item.note}
@@ -103,7 +109,7 @@ export function JumpableFeed({ items }: { items: FeedItem[] }) {
   function scrollToItem(nextTargetIndex: number) {
     setTargetIndex(nextTargetIndex);
     scrollRef.current?.scrollToIndex(nextTargetIndex, {
-      align: "center",
+      align: 'center',
       smooth: true,
     });
   }
@@ -122,13 +128,15 @@ export function JumpableFeed({ items }: { items: FeedItem[] }) {
                 type="button"
                 aria-pressed={jumpIndex === targetIndex}
                 className={clsx(
-                  "px-3 py-1.5",
-                  "rounded-md border",
-                  "text-xs font-medium",
-                  "border-zinc-200 text-zinc-950 dark:border-zinc-800 dark:text-zinc-50",
-                  "transition-colors",
-                  "hover:bg-zinc-100 dark:hover:bg-zinc-900",
-                  jumpIndex === targetIndex ? "bg-zinc-100 dark:bg-zinc-900" : "bg-transparent",
+                  'px-3 py-1.5',
+                  'rounded-md border',
+                  'text-xs font-medium',
+                  'border-zinc-200 text-zinc-950 dark:border-zinc-800 dark:text-zinc-50',
+                  'transition-colors',
+                  'hover:bg-zinc-100 dark:hover:bg-zinc-900',
+                  jumpIndex === targetIndex
+                    ? 'bg-zinc-100 dark:bg-zinc-900'
+                    : 'bg-transparent',
                 )}
                 onClick={() => scrollToItem(jumpIndex)}
               >
@@ -140,10 +148,10 @@ export function JumpableFeed({ items }: { items: FeedItem[] }) {
       <div
         ref={scrollContainerRef}
         className={clsx(
-          "min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain",
-          "h-96 p-3",
-          "rounded-lg border",
-          "border-zinc-200 dark:border-zinc-800",
+          'min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain',
+          'h-96 p-3',
+          'rounded-lg border',
+          'border-zinc-200 dark:border-zinc-800',
         )}
       >
         <MasonryVirtual
@@ -155,7 +163,11 @@ export function JumpableFeed({ items }: { items: FeedItem[] }) {
           estimatedItemHeight={280}
           itemKey={(item) => item.id}
           render={({ data, index }) => (
-            <FeedCard item={data} index={index} isTarget={index === targetIndex} />
+            <FeedCard
+              item={data}
+              index={index}
+              isTarget={index === targetIndex}
+            />
           )}
         />
       </div>
