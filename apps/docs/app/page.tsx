@@ -1,9 +1,9 @@
 import { clsx } from 'clsx';
 import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
 import Link from 'next/link';
-import type { CSSProperties } from 'react';
 
 import { Logo } from '@/components/brand/brand-logo';
+import { HomeHeroScene } from '@/components/home/home-hero-scene';
 
 const componentModes = [
   {
@@ -40,208 +40,11 @@ export function Gallery({ photos }) {
   );
 }`;
 
-const solverRails = ['47%', '64%', '83%'] as const;
-
-const solverCards = [
-  {
-    id: 1,
-    color: '#22d3ee',
-    left: '47%',
-    top: '9%',
-    width: '15rem',
-    height: 132,
-    fromX: '18rem',
-    fromY: '-6rem',
-    delay: '0ms',
-  },
-  {
-    id: 2,
-    color: '#a78bfa',
-    left: '64%',
-    top: '8%',
-    width: '17.25rem',
-    height: 236,
-    fromX: '20rem',
-    fromY: '-4rem',
-    delay: '180ms',
-  },
-  {
-    id: 3,
-    color: '#fbbf24',
-    left: '47%',
-    top: '30%',
-    width: '15rem',
-    height: 188,
-    fromX: '16rem',
-    fromY: '-2rem',
-    delay: '360ms',
-  },
-  {
-    id: 4,
-    color: '#4ade80',
-    left: '83%',
-    top: '13%',
-    width: '12rem',
-    height: 154,
-    fromX: '12rem',
-    fromY: '-4rem',
-    delay: '540ms',
-  },
-  {
-    id: 5,
-    color: '#f472b6',
-    left: '64%',
-    top: '48%',
-    width: '17.25rem',
-    height: 150,
-    fromX: '15rem',
-    fromY: '4rem',
-    delay: '720ms',
-  },
-  {
-    id: 6,
-    color: '#60a5fa',
-    left: '83%',
-    top: '37%',
-    width: '12rem',
-    height: 226,
-    fromX: '11rem',
-    fromY: '3rem',
-    delay: '900ms',
-  },
-  {
-    id: 7,
-    color: '#f87171',
-    left: '47%',
-    top: '60%',
-    width: '15rem',
-    height: 170,
-    fromX: '14rem',
-    fromY: '7rem',
-    delay: '1080ms',
-  },
-  {
-    id: 8,
-    color: '#34d399',
-    left: '64%',
-    top: '71%',
-    width: '17.25rem',
-    height: 116,
-    fromX: '13rem',
-    fromY: '7rem',
-    delay: '1260ms',
-  },
-] as const;
-
-const mobileSolverCards = [
-  ['#22d3ee', 120],
-  ['#a78bfa', 172],
-  ['#fbbf24', 138],
-  ['#4ade80', 112],
-  ['#f472b6', 152],
-  ['#60a5fa', 124],
-] as const;
-
 const proofPoints = [
   ['3', 'layout modes'],
   ['10k', 'item playground preset'],
   ['5.37 kB', 'virtual bundle'],
 ] as const;
-
-function HeroScene() {
-  return (
-    <div aria-hidden={true} className="absolute inset-0 overflow-hidden">
-      <div className="masonix-hero-grid absolute inset-0" />
-      <div className={clsx('absolute inset-0', 'bg-fd-background/65')} />
-      <div className="masonix-solver-stage absolute inset-y-0 hidden md:block">
-        <div className="masonix-solver-board absolute inset-y-10 right-20">
-          {solverRails.map((left) => (
-            <div
-              key={left}
-              className="masonix-solver-rail absolute inset-y-6 w-px"
-              style={{ left }}
-            />
-          ))}
-          <div className="masonix-solver-scan absolute inset-y-8 w-px" />
-          {solverCards.map((card) => (
-            <div
-              key={card.id}
-              className={clsx(
-                'masonix-solver-card absolute overflow-hidden',
-                'rounded-lg border',
-                'border-white/15',
-              )}
-              style={
-                {
-                  left: card.left,
-                  top: card.top,
-                  width: card.width,
-                  height: card.height,
-                  background: card.color,
-                  animationDelay: card.delay,
-                  '--solver-from-x': card.fromX,
-                  '--solver-from-y': card.fromY,
-                } as CSSProperties
-              }
-            >
-              <div
-                className={clsx(
-                  'absolute inset-0',
-                  'bg-gradient-to-br from-white/20 via-transparent to-black/30',
-                )}
-              />
-              <div className="masonix-solver-measure absolute inset-y-4 w-px" />
-              <span
-                className={clsx(
-                  'absolute bottom-3 left-3',
-                  'font-mono text-xs font-semibold',
-                  'text-white/70',
-                )}
-              >
-                {card.id}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div
-        className={clsx(
-          'masonix-solver-mobile-cluster absolute top-24 -right-8 grid w-60 grid-cols-2 gap-3 md:hidden',
-          'opacity-45',
-        )}
-      >
-        {mobileSolverCards.map(([color, height], index) => (
-          <div
-            key={`${color}-${height}`}
-            className={clsx(
-              'rounded-lg border shadow-xl',
-              'border-white/15 shadow-fd-foreground/10',
-            )}
-            style={
-              {
-                background: color,
-                height,
-                marginTop: index % 2 === 0 ? 0 : 28,
-              } as CSSProperties
-            }
-          />
-        ))}
-      </div>
-      <div
-        className={clsx(
-          'absolute inset-0',
-          'bg-gradient-to-r from-fd-background via-fd-background/90 to-fd-background/25',
-        )}
-      />
-      <div
-        className={clsx(
-          'absolute inset-x-0 bottom-0 h-32',
-          'bg-gradient-to-t from-fd-background to-transparent',
-        )}
-      />
-    </div>
-  );
-}
 
 export default async function HomePage() {
   return (
@@ -298,7 +101,7 @@ export default async function HomePage() {
       <section
         className={clsx('relative isolate', 'border-b', 'border-fd-border')}
       >
-        <HeroScene />
+        <HomeHeroScene />
         <div
           className={clsx(
             'masonix-hero-content relative z-10 flex max-w-7xl items-center',

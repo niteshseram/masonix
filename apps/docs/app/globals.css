@@ -79,6 +79,33 @@ body {
   );
 }
 
+.masonix-solver-window {
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-fd-primary) 16%, transparent),
+      transparent 28%,
+      transparent 72%,
+      color-mix(in srgb, var(--color-fd-primary) 12%, transparent)
+    ),
+    linear-gradient(
+      to right,
+      transparent,
+      color-mix(in srgb, var(--color-fd-primary) 16%, transparent),
+      transparent
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 28px 90px rgba(37, 99, 235, 0.12);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+}
+
 .masonix-solver-rail {
   background: linear-gradient(
     to bottom,
@@ -120,19 +147,19 @@ body {
   );
   filter: drop-shadow(0 0 18px rgba(96, 165, 250, 0.62));
   opacity: 0;
-  animation: masonix-solver-scan 9.8s ease-in-out infinite;
 }
 
 .masonix-solver-card {
-  opacity: 0;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+.masonix-solver-card-surface {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
     0 24px 70px rgba(0, 0, 0, 0.24);
-  transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0)
-    scale(0.86);
   transform-origin: 50% 50%;
-  animation: masonix-solver-place 9.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-  will-change: transform, opacity;
+  will-change: transform, box-shadow;
 }
 
 .masonix-solver-measure {
@@ -145,116 +172,10 @@ body {
   );
   filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.55));
   opacity: 0;
-  animation: masonix-solver-measure 9.8s ease-in-out infinite;
 }
 
 .masonix-solver-mobile-cluster {
   transform: rotate(-2deg);
-}
-
-@keyframes masonix-solver-scan {
-  0%,
-  13% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) scaleY(0.78);
-  }
-
-  20% {
-    opacity: 0.9;
-  }
-
-  48% {
-    opacity: 0.55;
-  }
-
-  66%,
-  100% {
-    opacity: 0;
-    transform: translate3d(36rem, 0, 0) scaleY(1);
-  }
-}
-
-@keyframes masonix-solver-place {
-  0%,
-  10% {
-    opacity: 0;
-    transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0)
-      scale(0.86);
-  }
-
-  22% {
-    opacity: 0.72;
-    transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0)
-      scale(0.94);
-  }
-
-  38% {
-    opacity: 1;
-    transform: translate3d(0, -10px, 0) scale(1.018);
-  }
-
-  50% {
-    opacity: 1;
-    transform: translate3d(0, 5px, 0) scale(0.996);
-  }
-
-  62%,
-  86% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-
-  94% {
-    opacity: 0.72;
-    transform: translate3d(0, 0, 0) scale(0.985);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate3d(var(--solver-from-x), var(--solver-from-y), 0)
-      scale(0.86);
-  }
-}
-
-@keyframes masonix-solver-measure {
-  0%,
-  19% {
-    opacity: 0;
-    transform: translateX(0);
-  }
-
-  28% {
-    opacity: 0.9;
-  }
-
-  42% {
-    opacity: 0.45;
-    transform: translateX(72px);
-  }
-
-  48%,
-  100% {
-    opacity: 0;
-    transform: translateX(110px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .masonix-solver-scan,
-  .masonix-solver-card,
-  .masonix-solver-measure {
-    animation: none;
-  }
-
-  .masonix-solver-scan,
-  .masonix-solver-measure {
-    opacity: 0;
-  }
-
-  .masonix-solver-card {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
 }
 
 .masonix-bp-editor-grid {
