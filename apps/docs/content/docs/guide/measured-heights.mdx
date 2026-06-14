@@ -1,0 +1,60 @@
+---
+title: Measured Heights
+description: Use ResizeObserver, known dimensions, and estimates without layout surprises.
+---
+
+import { ArticleCardsDemo, PhotoGalleryDemo } from '@/components/docs/docs-live-examples';
+
+`MasonryBalanced` and `MasonryVirtual` need item heights. Masonix can measure
+the rendered DOM, or you can provide known heights before render.
+
+## Measured cards
+
+Use measurement when card height depends on rendered content.
+
+<ArticleCardsDemo />
+
+```tsx
+<MasonryBalanced
+  items={articles}
+  columns={{ 0: 1, 640: 2 }}
+  gap={16}
+  estimatedItemHeight={220}
+  itemKey={(article) => article.id}
+  render={({ data }) => <ArticleCard article={data} />}
+/>
+```
+
+`estimatedItemHeight` is the first height Masonix uses before measurement. Pick
+a realistic average so the first layout is close to the final layout.
+
+## Known image heights
+
+Use `getItemHeight` when each item has dimensions.
+
+<PhotoGalleryDemo />
+
+```tsx
+<MasonryBalanced
+  items={photos}
+  columns={{ 0: 1, 560: 2, 860: 3 }}
+  gap={14}
+  defaultWidth={960}
+  itemKey={(photo) => photo.id}
+  getItemHeight={(photo, _index, columnWidth) =>
+    Math.round(columnWidth * (photo.height / photo.width))
+  }
+  render={({ data, width }) => <PhotoCard photo={data} width={width} />}
+/>
+```
+
+Known heights reduce layout shift and make SSR output closer to the hydrated
+browser layout.
+
+## Stability rules
+
+- Always provide `itemKey` when items can reorder or filter.
+- Use `minItemHeight` when cards can temporarily measure too small while media
+  or fonts settle.
+- Keep the measured item wrapper stable; avoid swapping the whole card shell
+  during loading.

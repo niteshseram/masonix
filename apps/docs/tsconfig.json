@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"],
+      "collections/*": ["./.source/*"]
+    },
+    "types": ["node", "react", "react-dom"]
+  },
+  "include": [
+    ".",
+    ".next/types/**/*.ts",
+    ".source/**/*.ts",
+    "next-env.d.ts"
+  ]
+}

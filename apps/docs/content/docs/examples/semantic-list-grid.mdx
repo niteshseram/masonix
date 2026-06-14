@@ -1,0 +1,29 @@
+---
+title: Semantic List Grid
+description: Render masonry as semantic list or grid markup.
+---
+
+import { SemanticListGridDemo } from '@/components/docs/docs-live-examples';
+import { DocsSourceCode } from '@/components/docs/docs-source-code';
+
+Masonry layouts can still be semantic. Use `as`, `itemAs`, `role`, and
+`aria-label` to match the surrounding page. This example uses
+`MasonryBalanced` so the `li` elements stay direct children of the `ul`.
+
+<SemanticListGridDemo />
+
+## Copy-paste example
+
+<DocsSourceCode file="components/docs/examples/docs-example-semantic-list-grid.tsx" snippet="semantic-list-grid" />
+
+## When to use
+
+Use this when the masonry content is a real list of products, articles,
+resources, or search results.
+
+## Notes
+
+- `role="none"` suppresses Masonix roles when outer markup already has meaning.
+- Preserve meaningful reading order in the `items` array.
+- Prefer `MasonryBalanced` or `MasonryVirtual` for strict `ul`/`li` markup.
+- Use `aria-label` when the list needs a name.

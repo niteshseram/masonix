@@ -1,0 +1,72 @@
+---
+title: Hooks
+description: Lower-level Masonix hooks exported for advanced integrations.
+---
+
+Most apps should use the components directly. Hooks are exported for advanced
+integrations, custom diagnostics, and specialized layout surfaces.
+
+## usePositioner
+
+```ts
+import { usePositioner } from 'masonix';
+
+const positioner = usePositioner({
+  columnCount: 3,
+  columnWidth: 240,
+  gap: 16,
+});
+```
+
+Creates a shortest-column positioner for a known column count, column width,
+and gap. Use this only when building custom layout primitives around Masonix
+placement behavior.
+
+## useItemHeights
+
+```ts
+import { useItemHeights } from 'masonix';
+
+const { measuredHeights, setItemRef } = useItemHeights(120);
+```
+
+Tracks measured item heights with `ResizeObserver`. `MasonryBalanced` and
+`MasonryVirtual` use this internally. `setItemRef(node, index)` is stable and
+stores measured heights in a `Map<number, number>`.
+
+## useScroller
+
+```ts
+import { useScroller } from 'masonix/virtual';
+
+const { scrollTop, viewportHeight, scrollVelocity } = useScroller(
+  scrollContainerRef,
+  12,
+);
+```
+
+Tracks scroll position, viewport height, and scroll velocity for either the
+window or a custom scroll container. The second argument is the sampling FPS
+and defaults to `12`.
+
+## useScrollToIndex
+
+```ts
+import { useScrollToIndex } from 'masonix/virtual';
+
+const handle = useScrollToIndex({
+  positioner,
+  containerRef,
+  getScrollContainer,
+  viewportHeight,
+});
+```
+
+Builds a `MasonryVirtualHandle` from positioned items and scroll container
+state. `MasonryVirtual` exposes the result through `scrollRef`; most apps
+should use that component prop instead of calling this hook directly.
+
+## Recommendation
+
+Prefer component props first. Reach for hooks only when the component API cannot
+represent the integration you are building.

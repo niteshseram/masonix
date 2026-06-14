@@ -1,0 +1,61 @@
+---
+title: Types
+description: TypeScript types exported from masonix and masonix/virtual.
+---
+
+## Core entry
+
+```ts
+import type {
+  MasonryProps,
+  MasonryBalancedProps,
+  MasonryRenderProps,
+  ResponsiveValue,
+  PositionedItem,
+  Positioner,
+} from 'masonix';
+```
+
+## Virtual entry
+
+```ts
+import type {
+  MasonryVirtualProps,
+  MasonryVirtualHandle,
+  MasonryVirtualRange,
+} from 'masonix/virtual';
+```
+
+## Generic components
+
+Components are generic over the item type.
+
+```tsx
+type Photo = {
+  id: string;
+  src: string;
+  width: number;
+  height: number;
+};
+
+<MasonryBalanced<Photo>
+  items={photos}
+  itemKey={(photo) => photo.id}
+  render={({ data }) => <img src={data.src} alt="" />}
+/>;
+```
+
+## PositionedItem
+
+```ts
+interface PositionedItem {
+  index: number;
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+  column: number;
+}
+```
+
+`PositionedItem` is useful when building custom diagnostics or layout tooling.

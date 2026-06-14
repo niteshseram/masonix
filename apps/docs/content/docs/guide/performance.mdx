@@ -1,0 +1,68 @@
+---
+title: Performance
+description: Keep masonry layouts fast with stable keys, known heights, and virtualization.
+---
+
+import { ScrollSeekPlaceholdersDemo } from '@/components/docs/docs-live-examples';
+
+Performance work starts with choosing the right component. Do not pay for
+measurement or virtualization until the page needs it.
+
+<ScrollSeekPlaceholdersDemo />
+
+## Keep identity stable
+
+Always provide `itemKey` when items can change.
+
+```tsx
+<MasonryBalanced
+  items={items}
+  itemKey={(item) => item.id}
+  render={({ data }) => <Card item={data} />}
+/>
+```
+
+Stable keys keep React identity, measured heights, and reorder/filter behavior
+attached to the correct item.
+
+## Prefer known heights
+
+Known heights avoid a measure-update cycle.
+
+```tsx
+<MasonryVirtual
+  items={photos}
+  getItemHeight={(photo, _index, columnWidth) =>
+    Math.round(columnWidth * (photo.height / photo.width))
+  }
+  render={({ data }) => <PhotoCard photo={data} />}
+/>
+```
+
+Use this for media grids, generated cards, or any data model that already knows
+its rendered aspect ratio.
+
+## Virtualize large feeds
+
+Use `MasonryVirtual` when DOM size becomes expensive.
+
+```tsx
+<MasonryVirtual
+  items={feedItems}
+  columns={{ 0: 1, 600: 2 }}
+  gap={12}
+  estimatedItemHeight={280}
+  scrollSeek={{
+    velocityThreshold: 900,
+    placeholder: FeedSkeleton,
+  }}
+  render={({ data }) => <FeedCard item={data} />}
+/>
+```
+
+## Practical notes
+
+- Keep render components pure and cheap.
+- Avoid recreating large item arrays unless data actually changed.
+- Use `scrollSeek` for fast feeds with expensive cards.
+- Use the playground diagnostics to compare visible count, velocity, and range.

@@ -1,0 +1,95 @@
+---
+title: MasonryVirtual
+description: Virtualized masonry for large feeds, infinite loading, and fast scrolling.
+---
+
+import { CustomScrollContainerDemo } from '@/components/docs/docs-live-examples';
+
+`MasonryVirtual` computes masonry placement while rendering only the items near
+the viewport. It lives in `masonix/virtual` so virtualization code is included
+only when you import it.
+
+<CustomScrollContainerDemo />
+
+## When to use
+
+- Feeds with hundreds or thousands of items.
+- App panels where scroll performance matters.
+- Layouts that need infinite loading or imperative jump-to-item controls.
+
+## Basic usage
+
+```tsx
+import { useRef } from 'react';
+import { MasonryVirtual } from 'masonix/virtual';
+
+export function Feed({ items }: { items: FeedItem[] }) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      ref={scrollContainerRef}
+      className="h-96 min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain rounded-lg border p-3"
+    >
+      <MasonryVirtual
+        items={items}
+        scrollContainer={scrollContainerRef}
+        columns={{ 0: 1, 620: 2 }}
+        gap={12}
+        estimatedItemHeight={220}
+        itemKey={(item) => item.id}
+        render={({ data }) => <FeedCard item={data} />}
+      />
+    </div>
+  );
+}
+```
+
+## Infinite loading
+
+```tsx
+<MasonryVirtual
+  items={items}
+  totalItems={totalCount}
+  columns={{ 0: 1, 600: 2 }}
+  gap={12}
+  estimatedItemHeight={220}
+  endReachedThreshold={4}
+  onEndReached={() => loadMore()}
+  render={({ data }) => <FeedCard item={data} />}
+/>
+```
+
+`onEndReached` fires when the rendered range reaches the threshold, and it does
+not repeatedly fire for the same loaded item count.
+
+## Imperative scrolling
+
+```tsx
+import { useRef } from 'react';
+import type { MasonryVirtualHandle } from 'masonix/virtual';
+
+const scrollRef = useRef<MasonryVirtualHandle>(null);
+
+scrollRef.current?.scrollToIndex(42, {
+  align: 'center',
+  smooth: true,
+});
+```
+
+Pass the ref with `scrollRef={scrollRef}`.
+
+## Common mistakes
+
+- Do not forget `estimatedItemHeight`; virtual layouts need an offscreen
+  estimate.
+- Do not use window scrolling assumptions when the feed lives in a panel; pass
+  `scrollContainer`.
+- Do not render expensive cards during fast scrolling if a scroll-seek
+  placeholder would work.
+
+## Related
+
+- [Virtual Feeds](/docs/guide/virtual-feeds)
+- [Infinite Feed Example](/docs/examples/infinite-feed)
+- [Virtual Props](/docs/reference/virtual-props)

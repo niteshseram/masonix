@@ -1,0 +1,27 @@
+---
+title: Article Cards
+description: Mixed-height editorial cards using measured shortest-column placement.
+---
+
+import { ArticleCardsDemo } from '@/components/docs/docs-live-examples';
+import { DocsSourceCode } from '@/components/docs/docs-source-code';
+
+Editorial cards often have unpredictable text length. `MasonryBalanced`
+measures the rendered card and places the next item in the shortest column.
+
+<ArticleCardsDemo />
+
+## Copy-paste example
+
+<DocsSourceCode file="components/docs/examples/docs-example-article-cards.tsx" snippet="article-cards" />
+
+## When to use
+
+Use this for blogs, resource hubs, changelogs, case studies, and dashboard
+cards with optional sections.
+
+## Notes
+
+- Pick an `estimatedItemHeight` near the average rendered card.
+- Use stable keys so measured heights follow the correct article.
+- Use `minItemHeight` if loading states can briefly measure too small.

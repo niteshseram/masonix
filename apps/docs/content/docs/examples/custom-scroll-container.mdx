@@ -1,0 +1,27 @@
+---
+title: Custom Scroll Container
+description: Virtualize masonry inside a panel instead of the window.
+---
+
+import { CustomScrollContainerDemo } from '@/components/docs/docs-live-examples';
+import { DocsSourceCode } from '@/components/docs/docs-source-code';
+
+Dashboards and docs often scroll inside panels. Pass `scrollContainer` so
+`MasonryVirtual` measures the correct viewport.
+
+<CustomScrollContainerDemo />
+
+## Copy-paste example
+
+<DocsSourceCode file="components/docs/examples/docs-example-custom-scroll-container.tsx" snippet="custom-scroll-container" />
+
+## When to use
+
+Use this for dashboards, modals, side panels, docs previews, and embedded app
+surfaces.
+
+## Notes
+
+- The ref should point to the element that actually scrolls.
+- Keep the scroll container height constrained.
+- Use `min-h-0` in CSS grid/flex layouts so the panel can scroll.

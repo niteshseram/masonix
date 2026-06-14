@@ -1,0 +1,94 @@
+---
+title: Styling
+description: Style Masonix containers, item wrappers, cards, and semantic markup.
+---
+
+import { ProductGridDemo } from '@/components/docs/docs-live-examples';
+
+Masonix only handles layout. Your app owns the card UI, typography, imagery,
+spacing, hover states, and semantic elements.
+
+<ProductGridDemo />
+
+## Style the container
+
+Use `className` and `style` on the outer Masonix container.
+
+```tsx
+<Masonry
+  items={products}
+  columnWidth={180}
+  maxColumns={3}
+  gap={16}
+  className="mx-auto max-w-6xl px-4"
+  render={({ data }) => <ProductCard product={data} />}
+/>
+```
+
+## Style item wrappers
+
+Use `itemClassName` when every item wrapper needs the same treatment.
+
+```tsx
+<MasonryBalanced
+  items={articles}
+  columns={3}
+  gap={16}
+  itemClassName="overflow-hidden rounded-xl"
+  render={({ data }) => <ArticleCard article={data} />}
+/>
+```
+
+For `Masonry`, `columnClassName` styles the internal column wrappers in CSS
+column mode.
+
+## Card composition
+
+Your render component receives `data`, `index`, and `width`.
+
+```tsx
+import type { MasonryRenderProps } from 'masonix';
+
+function ProductCard({ data, width }: MasonryRenderProps<Product>) {
+  return (
+    <article className="overflow-hidden rounded-xl border bg-white">
+      <div
+        className="relative"
+        style={{ height: data.height, background: data.gradient }}
+      >
+        <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2 py-1 text-xs font-medium text-zinc-900">
+          {data.badge}
+        </span>
+      </div>
+      <div className="p-4">
+        <p className="text-xs text-zinc-500">{data.category}</p>
+        <h3 className="mt-1 text-sm font-semibold">{data.name}</h3>
+        <p className="mt-3 text-xs text-zinc-500">
+          {width}px column · {data.price}
+        </p>
+      </div>
+    </article>
+  );
+}
+```
+
+Use `width` when media or canvas content needs to adapt to the actual column
+width.
+
+## Semantic markup
+
+Use `as`, `itemAs`, `role`, and `aria-label` to make the layout fit your page
+semantics.
+
+```tsx
+<Masonry
+  as="ul"
+  itemAs="li"
+  role="list"
+  aria-label="Featured products"
+  className="m-0 list-none p-0"
+  itemClassName="m-0 list-none p-0"
+  items={products}
+  render={({ data }) => <ProductCard product={data} />}
+/>
+```

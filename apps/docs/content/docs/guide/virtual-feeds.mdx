@@ -1,0 +1,63 @@
+---
+title: Virtual Feeds
+description: Build large Masonix feeds with range events, end-reached loading, and scroll seek.
+---
+
+import { InfiniteFeedDemo } from '@/components/docs/docs-live-examples';
+
+`MasonryVirtual` keeps large feeds responsive by rendering only the items near
+the viewport. The layout is still computed for the full list, so scroll height,
+item positions, and imperative jumps remain consistent.
+
+<InfiniteFeedDemo />
+
+## Infinite loading
+
+Use `onEndReached` when the rendered range reaches the loaded end.
+
+```tsx
+<MasonryVirtual
+  items={items}
+  totalItems={totalCount}
+  columns={{ 0: 1, 600: 2 }}
+  gap={12}
+  estimatedItemHeight={280}
+  endReachedThreshold={4}
+  onEndReached={() => loadMore()}
+  render={({ data }) => <FeedCard item={data} />}
+/>
+```
+
+`onEndReached` fires once per loaded item count, so small scroll movements near
+the end do not repeatedly call your loader for the same data.
+
+## Range changes
+
+Use `onRangeChange` when you need the current rendered range.
+
+```tsx
+<MasonryVirtual
+  items={items}
+  onRangeChange={(startIndex, stopIndex) => {
+    reportVisibleRange({ startIndex, stopIndex });
+  }}
+  render={({ data }) => <FeedCard item={data} />}
+/>
+```
+
+The range includes overscan. It is useful for diagnostics, analytics, or
+prefetching.
+
+## Scroll seek
+
+`scrollSeek` swaps real card rendering for lightweight placeholders while
+scroll velocity is above the threshold. Placeholders receive the same width and
+height budget, so the layout does not collapse.
+
+## Practical notes
+
+- Use realistic `estimatedItemHeight` values.
+- Add `getItemHeight` when item heights are already known.
+- Pass `scrollContainer` when the feed scrolls inside a panel instead of the
+  window.
+- Keep card rendering pure and avoid expensive effects inside visible items.

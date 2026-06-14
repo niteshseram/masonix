@@ -1,0 +1,37 @@
+---
+title: Balanced Props
+description: Props for MasonryBalanced measurement and shortest-column placement.
+---
+
+`MasonryBalanced` accepts all [Common Props](/docs/reference/common-props) plus
+these measurement props.
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `getItemHeight` | `(data: T, index: number, columnWidth: number) => number` | - | Provides known height and skips waiting for DOM measurement. |
+| `estimatedItemHeight` | `number` | `150` | Initial height before a card is measured. |
+| `minItemHeight` | `number` | - | Clamps measured heights to at least this value. |
+
+## Known height function
+
+```tsx
+<MasonryBalanced
+  items={photos}
+  getItemHeight={(photo, _index, columnWidth) =>
+    Math.round(columnWidth * (photo.height / photo.width))
+  }
+  render={({ data }) => <PhotoCard photo={data} />}
+/>
+```
+
+Return the rendered height in pixels for the current column width.
+
+## Estimate strategy
+
+Pick an `estimatedItemHeight` close to the average card height. A realistic
+estimate makes the initial layout closer to the measured layout.
+
+## Minimum height
+
+Use `minItemHeight` when a card can briefly measure too small while fonts,
+media, or async content settle.

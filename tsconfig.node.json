@@ -4,5 +4,11 @@
     "types": ["node"],
     "lib": ["ES2022"]
   },
-  "include": ["apps/*/vite.config.ts", "packages/*/vite.config.ts"]
+  "include": [
+    "apps/*/next.config.mjs",
+    "apps/*/postcss.config.mjs",
+    "apps/*/source.config.ts",
+    "apps/*/vite.config.ts",
+    "packages/*/vite.config.ts"
+  ]
 }

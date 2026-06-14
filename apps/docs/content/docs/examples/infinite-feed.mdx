@@ -1,0 +1,27 @@
+---
+title: Infinite Feed
+description: Load more virtual masonry items with onEndReached.
+---
+
+import { InfiniteFeedDemo } from '@/components/docs/docs-live-examples';
+import { DocsSourceCode } from '@/components/docs/docs-source-code';
+
+Use `onEndReached` when a virtual feed needs to request the next page of data
+as the user approaches the loaded end.
+
+<InfiniteFeedDemo />
+
+## Copy-paste example
+
+<DocsSourceCode file="components/docs/examples/docs-example-infinite-feed.tsx" snippet="infinite-feed" />
+
+## When to use
+
+Use this when a feed is too large to render all at once and data arrives in
+pages.
+
+## Notes
+
+- `endReachedThreshold` is measured in remaining loaded items.
+- `onEndReached` fires once per loaded item count.
+- Pass `totalItems` when the loaded count differs from the known total count.

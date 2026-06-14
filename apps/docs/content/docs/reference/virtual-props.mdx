@@ -1,0 +1,58 @@
+---
+title: Virtual Props
+description: Props and handle types for MasonryVirtual.
+---
+
+`MasonryVirtual` accepts all [Common Props](/docs/reference/common-props) and
+all [Balanced Props](/docs/reference/balanced-props), plus these virtual props.
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `overscanBy` | `number` | `2` | Extra viewport heights rendered above and below the visible range. |
+| `scrollContainer` | `RefObject<HTMLElement \| null>` | `window` | Custom scroll container for panel-based feeds. |
+| `totalItems` | `number` | `items.length` | Total count for accessibility metadata when not every item is loaded. |
+| `scrollRef` | `Ref<MasonryVirtualHandle>` | - | Imperative scroll handle. |
+| `onRangeChange` | `(startIndex: number, stopIndex: number) => void` | - | Called when rendered range changes after overscan. |
+| `onEndReached` | `(info: MasonryVirtualRange) => void` | - | Called when the rendered range reaches the end threshold. |
+| `endReachedThreshold` | `number` | `0` | Remaining loaded item count before `onEndReached` fires. |
+| `scrollSeek` | `{ velocityThreshold?, placeholder? }` | - | Renders placeholders during fast scrolling. |
+
+## Range type
+
+```ts
+interface MasonryVirtualRange {
+  startIndex: number;
+  stopIndex: number;
+  itemCount: number;
+  totalItems: number;
+}
+```
+
+## Scroll handle
+
+```ts
+interface MasonryVirtualHandle {
+  scrollToIndex(
+    index: number,
+    options?: {
+      align?: 'start' | 'center' | 'end';
+      smooth?: boolean;
+    },
+  ): void;
+}
+```
+
+## Scroll seek
+
+```tsx
+<MasonryVirtual
+  items={items}
+  scrollSeek={{
+    velocityThreshold: 1200,
+    placeholder: FeedSkeleton,
+  }}
+  render={({ data }) => <FeedCard item={data} />}
+/>
+```
+
+When `velocityThreshold` is omitted, Masonix uses `1200` px/s.

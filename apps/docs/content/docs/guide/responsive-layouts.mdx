@@ -1,0 +1,59 @@
+---
+title: Responsive Layouts
+description: Build masonry layouts with breakpoint maps or automatic column widths.
+---
+
+import { BasicLayoutDemo } from '@/components/docs/docs-live-examples';
+
+Responsive Masonix layouts are based on the component container, not just the
+window. That makes the same grid work in full pages, side panels, cards, and
+resizable app surfaces.
+
+<BasicLayoutDemo />
+
+## Exact column counts
+
+Use `columns` when design specifies exact counts.
+
+```tsx
+<Masonry
+  items={items}
+  columns={{ 0: 1, 640: 2, 1024: 3, 1280: 4 }}
+  gap={{ 0: 10, 640: 14, 1024: 18 }}
+  render={({ data }) => <Card item={data} />}
+/>
+```
+
+Breakpoint keys are minimum container widths in pixels. The largest matching
+key wins.
+
+## Automatic columns
+
+Use `columnWidth` when the card has a minimum comfortable width and the layout
+can decide how many columns fit.
+
+```tsx
+<Masonry
+  items={items}
+  columnWidth={260}
+  maxColumns={5}
+  gap={16}
+  render={({ data }) => <Card item={data} />}
+/>
+```
+
+`maxColumns` prevents very wide containers from creating too many narrow
+vertical lanes.
+
+## Choosing gaps
+
+`gap` can be a number or a breakpoint map. For `MasonryBalanced` and
+`MasonryVirtual`, keep gap values numeric because placement math needs pixel
+values.
+
+## Practical notes
+
+- Use `defaultColumns` for a stable server-rendered first pass.
+- Use `defaultWidth` when known-height math depends on the container width.
+- Prefer container-aware settings over viewport-only assumptions in dashboards
+  and docs layouts.

@@ -1,0 +1,41 @@
+---
+title: Masonry Props
+description: Props specific to the lightweight Masonry component.
+---
+
+`Masonry` accepts all [Common Props](/docs/reference/common-props) plus these
+props.
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `enableNative` | `boolean` | `false` | Uses native CSS masonry when supported by the browser. |
+| `columnClassName` | `string` | - | Class applied to each internal column wrapper in CSS-mode layout. |
+
+## Native CSS masonry
+
+```tsx
+<Masonry
+  enableNative
+  items={items}
+  columns={3}
+  gap={16}
+  render={({ data }) => <Card item={data} />}
+/>
+```
+
+`enableNative` is progressive. Browsers without native support use the regular
+Masonix layout.
+
+## Column classes
+
+```tsx
+<Masonry
+  items={items}
+  columns={3}
+  columnClassName="space-y-4"
+  render={({ data }) => <Card item={data} />}
+/>
+```
+
+Use `columnClassName` for column-level styling only. Use `itemClassName` or the
+card component for item styling.

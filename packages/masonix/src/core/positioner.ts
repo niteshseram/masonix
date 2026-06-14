@@ -11,7 +11,7 @@ export interface PositionerOptions {
  * Shortest-column-first positioner.
  *
  * Each new item is placed in the column with the minimum current height,
- * ensuring visually balanced columns. Supports RTL.
+ * ensuring visually balanced columns.
  */
 export function createPositioner(options: PositionerOptions): Positioner {
   const { columnCount, columnWidth, columnGap = 0, rowGap = 0 } = options;
@@ -78,9 +78,8 @@ export function createPositioner(options: PositionerOptions): Positioner {
         const item = items[colItems[colItemIndex]];
         if (!item) continue;
 
-        // Only recompute top for items whose primary column is `col`
+        // Only recompute top for items whose column changed height.
         if (item.column === col) {
-          // Top is max height of all spanned columns just before this item
           let top = 0;
           if (colItemIndex > 0) {
             const prevItem = items[colItems[colItemIndex - 1]];

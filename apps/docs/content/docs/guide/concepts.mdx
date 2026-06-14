@@ -1,0 +1,64 @@
+---
+title: Concepts
+description: "The layout ideas behind Masonix: source order, columns, measurement, and virtualization."
+---
+
+Masonry layouts look visual, but the most important decisions are data and
+measurement decisions. Masonix keeps those decisions explicit so a layout can
+stay predictable as content grows.
+
+## Source order
+
+Items always start from the order of your `items` array. Item indexes, keys,
+ARIA metadata, and render props refer to that original order even when visual
+placement changes.
+
+`MasonryBalanced` and `MasonryVirtual` render item wrappers in index order while
+positioning them visually. The lightweight `Masonry` fallback groups items into
+column wrappers, so its DOM is column-grouped unless native CSS masonry is
+enabled.
+
+## Column calculation
+
+There are two ways to choose columns:
+
+```tsx
+<Masonry columns={{ 0: 1, 720: 2, 1080: 3 }} />
+```
+
+Use `columns` when design wants exact counts at specific container widths.
+
+```tsx
+<Masonry columnWidth={260} maxColumns={5} />
+```
+
+Use `columnWidth` when cards should keep a comfortable minimum width and the
+component can decide how many columns fit.
+
+## Measurement
+
+`MasonryBalanced` and `MasonryVirtual` need item heights to compute shortest
+columns. They can measure rendered DOM with `ResizeObserver`, or you can pass
+`getItemHeight` when dimensions are already known.
+
+Known heights are best for image grids, SSR, and feeds where you already have
+media dimensions. Measured heights are best for cards whose text, badges, or
+loaded content can change after render.
+
+## Virtualization
+
+`MasonryVirtual` computes the full layout but only renders items near the
+viewport. It uses an estimated height before an item is measured, then updates
+the layout as real heights become available.
+
+Virtualization is most useful when the DOM cost is the bottleneck. For small
+grids, prefer `Masonry` or `MasonryBalanced`.
+
+## SSR defaults
+
+The server cannot measure the browser container. `defaultColumns` and
+`defaultWidth` give Masonix a first-render fallback, then the layout updates
+after the client measures the container.
+
+For image-heavy pages, combine `defaultWidth` with `getItemHeight` so the first
+paint is close to the final layout.

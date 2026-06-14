@@ -13,7 +13,9 @@ pnpm tc                # tsc --noEmit only
 pnpm lint              # oxlint on packages/masonix/src/
 pnpm format            # oxfmt on packages/masonix/src/
 pnpm format:check      # format check without writing
-pnpm playground        # start apps/playground dev server (port 3000)
+pnpm docs              # start apps/docs Next.js dev server
+pnpm docs:build        # build apps/docs
+pnpm playground        # alias for docs dev server; playground lives at /playground
 ```
 
 Run a single test file:
@@ -35,7 +37,7 @@ Build output (`vp pack` / tsdown):
 ## Repository Structure
 
 ```
-apps/playground/          dev sandbox; vite aliases masonix → ../../packages/masonix/src/index.ts
+apps/docs/                Next.js docs site; includes the /playground route
 packages/masonix/
   src/
     core/                 pure TS layout engines (no React)
@@ -63,21 +65,21 @@ Three components, one package, increasing complexity:
 
 ### Core Engines (Phase 1 — complete)
 
-**`packages/masonix/src/core/positioner.ts`** — `createPositioner`: shortest-column-first placement. Each `set(index, height, span?)` places an item in the shortest available column. Maintains `columnItems[][]` for incremental `update()` without full re-layout.
+**`packages/masonix/src/core/positioner.ts`** — `createPositioner`: shortest-column-first placement. Each `set(index, height)` places an item in the shortest available column. Maintains `columnItems[][]` for incremental `update()` without full re-layout.
 
 **`packages/masonix/src/core/interval-tree.ts`** — augmented red-black tree. Stores items as `[top, top+height]` intervals for `search(low, high)` — O(log n + k) viewport intersection queries used by `MasonryVirtual`.
 
-**`packages/masonix/src/core/utils.ts`** — `resolveResponsiveValue` (Tailwind-compatible breakpoints: sm/md/lg/xl/2xl), `computeColumns` (column count from fixed `columns`, auto from `columnWidth`, or `defaultColumns`), `effectiveColumnCount`.
+**`packages/masonix/src/core/utils.ts`** — `resolveResponsiveValue` (numeric container-width breakpoints), `computeColumns` (column count from fixed `columns`, auto from `columnWidth`, or `defaultColumns`), `effectiveColumnCount`.
 
 **`packages/masonix/src/core/scroll.ts`** — scroll utilities for the virtual layer.
 
 ### Positioner interface (`packages/masonix/src/types.ts`)
 
-All positioners implement `Positioner`. The key method is `set(index, height, span?)` — `span` is only meaningful in `createPositioner` (column spanning). `update()` does incremental re-layout: only recomputes columns that had a height change, not a full reset.
+All positioners implement `Positioner`. The key method is `set(index, height)`. `update()` does incremental re-layout: only recomputes columns that had a height change, not a full reset.
 
 ### Responsive values
 
-`ResponsiveValue<T>` accepts a plain value, named breakpoints (`{ sm: 2, lg: 4 }`), or numeric keys (`{ 600: 2, 900: 3 }`). All match Tailwind's default breakpoint scale.
+`ResponsiveValue<T>` accepts a plain value or numeric min-width keys (`{ 600: 2, 900: 3 }`). Breakpoints are based on the measured container width.
 
 ## Code Style
 

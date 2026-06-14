@@ -1,0 +1,15 @@
+{
+  "title": "Guide",
+  "pages": [
+    "getting-started",
+    "concepts",
+    "choosing-a-component",
+    "responsive-layouts",
+    "measured-heights",
+    "virtual-feeds",
+    "styling",
+    "ssr-and-nextjs",
+    "accessibility",
+    "performance"
+  ]
+}

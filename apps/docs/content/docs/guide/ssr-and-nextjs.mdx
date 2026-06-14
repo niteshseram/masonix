@@ -1,0 +1,53 @@
+---
+title: SSR and Next.js
+description: Use Masonix with server rendering, hydration, and known media dimensions.
+---
+
+Masonix components can render on the server. The server cannot measure the
+browser container, so the first layout uses defaults and then updates after
+client measurement.
+
+## Fallback width and columns
+
+```tsx
+<MasonryBalanced
+  items={posts}
+  columns={{ 0: 1, 768: 2, 1200: 3 }}
+  defaultColumns={3}
+  defaultWidth={1200}
+  gap={24}
+  render={({ data }) => <PostCard post={data} />}
+/>
+```
+
+`defaultColumns` controls the first server-rendered column count. `defaultWidth`
+gives known-height functions a width before the container exists in the
+browser.
+
+## Image grids
+
+When image dimensions are known, compute height from the future column width.
+
+```tsx
+<MasonryBalanced
+  items={photos}
+  defaultWidth={960}
+  columns={{ 0: 1, 640: 2, 960: 3 }}
+  getItemHeight={(photo, _index, columnWidth) =>
+    Math.round(columnWidth * (photo.height / photo.width))
+  }
+  render={({ data }) => <PhotoCard photo={data} />}
+/>
+```
+
+This makes the server layout closer to the hydrated browser layout and reduces
+visible movement.
+
+## Next.js notes
+
+- Client components can import `Masonry`, `MasonryBalanced`, and
+  `MasonryVirtual`.
+- Import virtual features from `masonix/virtual` so the virtualization code
+  stays out of non-virtual bundles.
+- Keep data loading outside Masonix; pass the final array through `items`.
+- Prefer known media dimensions for image-heavy routes.

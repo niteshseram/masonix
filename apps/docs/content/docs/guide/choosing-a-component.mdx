@@ -1,0 +1,66 @@
+---
+title: Choosing a component
+description: Pick the right Masonix component for each workload.
+---
+
+The best Masonix component is the one that solves the layout problem without
+adding work your page does not need.
+
+| Situation | Use | Why |
+| --- | --- | --- |
+| Product grid, link wall, simple image list | `Masonry` | No measurement layer, smallest runtime work. |
+| Blog cards, dashboards, mixed text/media cards | `MasonryBalanced` | Measures cards and places the next item in the shortest column. |
+| Activity feed, discovery page, thousands of items | `MasonryVirtual` | Keeps offscreen items out of the DOM. |
+
+## Start with Masonry
+
+```tsx
+<Masonry
+  items={products}
+  columnWidth={180}
+  maxColumns={3}
+  gap={16}
+  render={({ data }) => <ProductCard product={data} />}
+/>
+```
+
+Choose `Masonry` when every item can render up front and visual balance is not
+the primary problem.
+
+## Move to Balanced when heights matter
+
+```tsx
+<MasonryBalanced
+  items={articles}
+  columns={{ 0: 1, 640: 2 }}
+  gap={16}
+  estimatedItemHeight={220}
+  render={({ data }) => <ArticleCard article={data} />}
+/>
+```
+
+Choose `MasonryBalanced` when items have mixed copy length, badges, images, or
+lazy content that makes columns look uneven.
+
+## Move to Virtual when DOM size matters
+
+```tsx
+<MasonryVirtual
+  items={feedItems}
+  columns={{ 0: 1, 600: 2 }}
+  gap={12}
+  estimatedItemHeight={280}
+  render={({ data }) => <FeedCard item={data} />}
+/>
+```
+
+Choose `MasonryVirtual` when rendering every item would make scrolling,
+hydration, or updates expensive.
+
+## Common mistakes
+
+- Do not start with virtualization for small grids.
+- Do not use measured layout when item heights are already known and stable.
+- Do not omit `itemKey` for lists that can reorder, filter, or load more.
+- Do not use CSS string gaps for balanced or virtual layouts; numeric gaps are
+  part of the placement calculation.

@@ -1,0 +1,28 @@
+---
+title: Basic Layout
+description: A clean starter masonry grid with responsive automatic columns.
+---
+
+import { BasicLayoutDemo } from '@/components/docs/docs-live-examples';
+import { DocsSourceCode } from '@/components/docs/docs-source-code';
+
+Use this pattern for the first masonry surface in an app: simple data, stable
+keys, automatic columns, and a reusable card component.
+
+<BasicLayoutDemo />
+
+## Copy-paste example
+
+<DocsSourceCode file="components/docs/examples/docs-example-basic-layout.tsx" snippet="basic-layout" />
+
+## When to use
+
+Use this for cards that are cheap to render and do not need shortest-column
+balancing. It is the best default for product tiles, settings panels, and
+simple content collections.
+
+## Notes
+
+- `columnWidth` keeps cards readable as the container grows.
+- `maxColumns` prevents dense, hard-to-scan layouts on wide screens.
+- `itemKey` keeps identity stable during filters and sorting.

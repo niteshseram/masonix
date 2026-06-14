@@ -1,0 +1,75 @@
+---
+title: Accessibility
+description: Keep Masonix layouts semantic, readable, and source-order friendly.
+---
+
+import { SemanticListGridDemo } from '@/components/docs/docs-live-examples';
+
+Masonry changes visual placement, but it should not make the content harder to
+navigate. Masonix keeps item identity and ARIA metadata tied to the original
+item index.
+
+<SemanticListGridDemo />
+
+## Default roles
+
+By default, Masonix renders the container with `role="list"` and items with
+list item metadata.
+
+```tsx
+<Masonry
+  items={articles}
+  render={({ data }) => <ArticleCard article={data} />}
+/>
+```
+
+Use an accessible label when the list needs a name.
+
+```tsx
+<Masonry
+  items={articles}
+  role="list"
+  aria-label="Latest articles"
+  render={({ data }) => <ArticleCard article={data} />}
+/>
+```
+
+## Semantic elements
+
+Use `as` and `itemAs` when the actual HTML element matters. For strict
+`ul`/`li` markup, prefer `MasonryBalanced` or `MasonryVirtual` because their
+item wrappers are direct children of the container.
+
+```tsx
+<MasonryBalanced
+  as="ul"
+  itemAs="li"
+  role="list"
+  className="m-0 list-none p-0"
+  itemClassName="m-0 list-none p-0"
+  items={articles}
+  render={({ data }) => <ArticleCard article={data} />}
+/>
+```
+
+## Suppressing Masonix semantics
+
+Use `role="none"` when the surrounding page or card markup already provides
+the needed semantics.
+
+```tsx
+<Masonry
+  role="none"
+  items={sections}
+  render={({ data }) => <SectionCard section={data} />}
+/>
+```
+
+When `role="none"` is used, Masonix omits item roles and ARIA item metadata.
+
+## Practical notes
+
+- Keep important reading order in the `items` array.
+- Remember that the lightweight `Masonry` fallback groups DOM by column.
+- Avoid relying on visual column order for keyboard or screen reader flow.
+- Use descriptive labels for galleries, product lists, and feeds.

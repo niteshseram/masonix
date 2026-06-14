@@ -1,0 +1,95 @@
+---
+title: Getting Started
+description: Install Masonix and render a responsive masonry layout with real cards.
+---
+
+import { BasicLayoutDemo } from '@/components/docs/docs-live-examples';
+
+Masonix gives you three React components for masonry layouts: a lightweight
+CSS-first grid, a measured balanced layout, and a virtualized feed for large
+lists. Start with the smallest component that fits the job, then move up only
+when the layout needs measurement or virtualization.
+
+## Install
+
+```bash
+npm install masonix
+```
+
+Masonix supports React 18 and React 19. It ships layout behavior only; your app
+owns card markup, imagery, styling, and data loading.
+
+## First layout
+
+```tsx
+import { Masonry } from 'masonix';
+
+type Task = {
+  id: string;
+  title: string;
+  detail: string;
+  area: string;
+  status: string;
+  accent: string;
+};
+
+function TaskCard({ task }: { task: Task }) {
+  return (
+    <article className="relative overflow-hidden rounded-xl border bg-white p-4 shadow-sm">
+      <div
+        className="absolute inset-y-0 left-0 w-1"
+        style={{ background: task.accent }}
+      />
+      <div className="flex items-center justify-between gap-3 pl-2">
+        <span className="text-xs font-medium text-zinc-500">{task.area}</span>
+        <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs">
+          {task.status}
+        </span>
+      </div>
+      <div className="pl-2 pt-2">
+        <h3 className="text-sm font-semibold">{task.title}</h3>
+        <p className="mt-2 text-sm leading-6 text-zinc-500">{task.detail}</p>
+      </div>
+    </article>
+  );
+}
+
+export function TaskGrid({ tasks }: { tasks: Task[] }) {
+  return (
+    <Masonry
+      items={tasks}
+      columnWidth={190}
+      maxColumns={3}
+      gap={14}
+      itemKey={(task) => task.id}
+      render={({ data }) => <TaskCard task={data} />}
+    />
+  );
+}
+```
+
+<BasicLayoutDemo />
+
+## Choose a component
+
+| Goal | Component | Import |
+| --- | --- | --- |
+| Simple responsive grids with no runtime measurement | `Masonry` | `masonix` |
+| Mixed-height cards that should visually balance | `MasonryBalanced` | `masonix` |
+| Long feeds where rendering everything is expensive | `MasonryVirtual` | `masonix/virtual` |
+
+## Practical defaults
+
+- Use `itemKey` for stable identity, especially when filtering or reordering.
+- Use `columnWidth` when the layout should adapt to available container width.
+- Use breakpoint maps when the product design calls for exact column counts.
+- Use `getItemHeight` when image dimensions are known before render.
+
+Open the [playground](/playground) to compare column strategies, measured
+heights, virtualization, scroll seek, and imperative scrolling.
+
+## Next steps
+
+- Learn the mental model in [Concepts](/docs/guide/concepts).
+- Compare components in [Choosing a component](/docs/guide/choosing-a-component).
+- Build polished cards with [Styling](/docs/guide/styling).

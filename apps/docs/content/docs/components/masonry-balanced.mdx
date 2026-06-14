@@ -1,0 +1,69 @@
+---
+title: MasonryBalanced
+description: Measured shortest-column placement for mixed-height cards.
+---
+
+import { ArticleCardsDemo, PhotoGalleryDemo } from '@/components/docs/docs-live-examples';
+
+`MasonryBalanced` measures item heights and places each item into the shortest
+column. Use it when uneven card heights make a regular grid feel lopsided.
+
+<ArticleCardsDemo />
+
+## When to use
+
+- Editorial cards with mixed copy length.
+- Cards with optional badges, metadata, or media.
+- Image grids where dimensions are known and visual balance matters.
+
+## Basic usage
+
+```tsx
+import { MasonryBalanced } from 'masonix';
+
+export function ArticleGrid({ articles }: { articles: Article[] }) {
+  return (
+    <MasonryBalanced
+      items={articles}
+      columns={{ 0: 1, 640: 2 }}
+      gap={16}
+      estimatedItemHeight={220}
+      itemKey={(article) => article.id}
+      render={({ data }) => <ArticleCard article={data} />}
+    />
+  );
+}
+```
+
+## Known heights
+
+When item dimensions are already known, pass `getItemHeight` to skip the
+measurement wait.
+
+<PhotoGalleryDemo />
+
+```tsx
+<MasonryBalanced
+  items={photos}
+  columns={{ 0: 1, 560: 2, 860: 3 }}
+  gap={14}
+  defaultWidth={960}
+  itemKey={(photo) => photo.id}
+  getItemHeight={(photo, _index, columnWidth) =>
+    Math.round(columnWidth * (photo.height / photo.width))
+  }
+  render={({ data, width }) => <PhotoCard photo={data} width={width} />}
+/>
+```
+
+## Common mistakes
+
+- Do not pass unstable keys; measured heights should follow item identity.
+- Do not use CSS string gaps; balanced placement needs numeric gap values.
+- Do not set `estimatedItemHeight` far from real card heights.
+
+## Related
+
+- [Measured Heights](/docs/guide/measured-heights)
+- [Photo Gallery Example](/docs/examples/photo-gallery)
+- [Balanced Props](/docs/reference/balanced-props)

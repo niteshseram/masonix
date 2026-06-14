@@ -1,0 +1,27 @@
+---
+title: Photo Gallery
+description: A polished image-gallery pattern using known aspect ratios.
+---
+
+import { PhotoGalleryDemo } from '@/components/docs/docs-live-examples';
+import { DocsSourceCode } from '@/components/docs/docs-source-code';
+
+Image galleries feel best when the layout can reserve space before media
+loads. Use known width and height values to compute each rendered item height.
+
+<PhotoGalleryDemo />
+
+## Copy-paste example
+
+<DocsSourceCode file="components/docs/examples/docs-example-photo-gallery.tsx" snippet="photo-gallery" />
+
+## When to use
+
+Use this when the API already gives image dimensions. It works well for
+portfolio pages, editorial galleries, and commerce lookbooks.
+
+## Notes
+
+- Known heights reduce layout shift.
+- `defaultWidth` improves the first server-rendered layout.
+- Keep `alt` text on the actual image, not on the wrapper.

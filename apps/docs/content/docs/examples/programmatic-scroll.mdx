@@ -1,0 +1,30 @@
+---
+title: Programmatic Scroll
+description: Jump to MasonryVirtual items with scrollRef.
+---
+
+import { ProgrammaticScrollDemo } from '@/components/docs/docs-live-examples';
+import { DocsSourceCode } from '@/components/docs/docs-source-code';
+
+Use `scrollRef` when a product needs jump controls, search results, keyboard
+navigation, or a "back to top" action.
+
+Each card in this demo shows its item number, and the most recent jump target is
+highlighted after the control runs.
+
+<ProgrammaticScrollDemo />
+
+## Copy-paste example
+
+<DocsSourceCode file="components/docs/examples/docs-example-programmatic-scroll.tsx" snippet="programmatic-scroll" />
+
+## When to use
+
+Use this for search navigation, selected-item focus, keyboard shortcuts,
+timeline jumps, and admin tools.
+
+## Notes
+
+- `align` can be `start`, `center`, or `end`.
+- `smooth` uses browser smooth scrolling.
+- For custom panels, also pass `scrollContainer`.
