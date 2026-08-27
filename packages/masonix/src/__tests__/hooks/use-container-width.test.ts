@@ -1,12 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { useContainerWidth } from '../../hooks/use-container-width';
 
@@ -64,6 +57,26 @@ describe('useContainerWidth', () => {
           contentRect: { width: 600 } as DOMRectReadOnly,
           target: document.createElement('div'),
           borderBoxSize: [],
+          devicePixelContentBoxSize: [],
+        } as unknown as ResizeObserverEntry,
+      ]);
+    });
+
+    expect(result.current.width).toBe(600);
+  });
+
+  it('uses border-box width consistently after the initial measurement', () => {
+    const { result } = renderHook(() => useContainerWidth());
+    const node = document.createElement('div');
+
+    act(() => {
+      result.current.ref(node);
+      notifyResize!([
+        {
+          contentBoxSize: [{ inlineSize: 560, blockSize: 0 }],
+          contentRect: { width: 560 } as DOMRectReadOnly,
+          target: node,
+          borderBoxSize: [{ inlineSize: 600, blockSize: 0 }],
           devicePixelContentBoxSize: [],
         } as unknown as ResizeObserverEntry,
       ]);

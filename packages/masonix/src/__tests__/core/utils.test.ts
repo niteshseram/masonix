@@ -117,6 +117,21 @@ describe('computeColumns', () => {
     expect(result.columnCount).toBe(1);
   });
 
+  it('normalizes fractional and non-finite column counts', () => {
+    expect(computeColumns(900, { columns: 2.9 }).columnCount).toBe(2);
+    expect(
+      computeColumns(900, { columns: Number.POSITIVE_INFINITY }).columnCount,
+    ).toBe(3);
+  });
+
+  it('normalizes invalid layout dimensions', () => {
+    const result = computeColumns(Number.NaN, {
+      columns: 3,
+      gap: -20,
+    });
+    expect(result).toEqual({ columnCount: 3, columnWidth: 0 });
+  });
+
   it('resolves responsive column count at runtime', () => {
     const result = computeColumns(1024, { columns: { 0: 1, 640: 2, 1024: 4 } });
     expect(result.columnCount).toBe(4);

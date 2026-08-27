@@ -52,6 +52,38 @@ describe('useScroller', () => {
     expect(result.current.viewportHeight).not.toBe(initial);
   });
 
+  it('tracks custom scroll container height with ResizeObserver', () => {
+    let viewportHeight = 200;
+    let notifyResize: (() => void) | undefined;
+    const disconnect = vi.fn();
+    globalThis.ResizeObserver = vi.fn().mockImplementation(function (
+      callback: () => void,
+    ) {
+      notifyResize = callback;
+      return { observe: vi.fn(), unobserve: vi.fn(), disconnect };
+    });
+    const scrollContainer = document.createElement('div');
+    Object.defineProperty(scrollContainer, 'clientHeight', {
+      get: () => viewportHeight,
+      configurable: true,
+    });
+    const scrollContainerRef = { current: scrollContainer };
+
+    const { result, unmount } = renderHook(() =>
+      useScroller(scrollContainerRef),
+    );
+    expect(result.current.viewportHeight).toBe(200);
+
+    act(() => {
+      viewportHeight = 360;
+      notifyResize?.();
+    });
+
+    expect(result.current.viewportHeight).toBe(360);
+    unmount();
+    expect(disconnect).toHaveBeenCalledTimes(1);
+  });
+
   it('cleans up listeners on unmount (no errors after unmount)', () => {
     const { unmount } = renderHook(() => useScroller());
     unmount();

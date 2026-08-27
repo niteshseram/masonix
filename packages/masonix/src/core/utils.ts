@@ -1,5 +1,35 @@
 import type { ResponsiveValue } from '../types';
 
+export function normalizeNonNegativeFinite(
+  value: number,
+  fallback = 0,
+): number {
+  if (!Number.isFinite(value) || value < 0) {
+    return fallback;
+  }
+  return value;
+}
+
+export function normalizePositiveFinite(
+  value: number,
+  fallback: number,
+): number {
+  if (!Number.isFinite(value) || value <= 0) {
+    return fallback;
+  }
+  return value;
+}
+
+export function normalizePositiveInteger(
+  value: number,
+  fallback: number,
+): number {
+  if (!Number.isFinite(value) || value <= 0) {
+    return fallback;
+  }
+  return Math.max(1, Math.floor(value));
+}
+
 // ---------------------------------------------------------------------------
 // Breakpoint resolution
 // ---------------------------------------------------------------------------
@@ -31,7 +61,9 @@ export function applyBreakpoints(
 ): number {
   let result = breakpoints[0]?.[1] ?? 1;
   for (const [breakpoint, breakpointValue] of breakpoints) {
-    if (containerWidth >= breakpoint) result = breakpointValue;
+    if (containerWidth >= breakpoint) {
+      result = breakpointValue;
+    }
   }
   return result;
 }
@@ -50,7 +82,9 @@ export function resolveResponsiveValue(
   value: ResponsiveValue<number>,
   containerWidth: number,
 ): number {
-  if (typeof value === 'number') return value;
+  if (typeof value === 'number') {
+    return value;
+  }
   return applyBreakpoints(parseBreakpoints(value), containerWidth);
 }
 
@@ -80,35 +114,50 @@ export function computeColumns(
     defaultColumns = 3,
     gap = 0,
   } = config;
+  const normalizedContainerWidth = normalizeNonNegativeFinite(containerWidth);
+  const normalizedGap = normalizeNonNegativeFinite(gap);
+  const normalizedDefaultColumns = normalizePositiveInteger(defaultColumns, 3);
 
   let columnCount: number;
 
   if (columns !== undefined) {
     columnCount = resolveResponsiveValue(
       typeof columns === 'number' ? columns : columns,
-      containerWidth,
+      normalizedContainerWidth,
     );
-  } else if (columnWidth !== undefined && columnWidth > 0) {
+  } else if (
+    columnWidth !== undefined &&
+    Number.isFinite(columnWidth) &&
+    columnWidth > 0
+  ) {
     // Auto-calculate from minimum column width
     columnCount = Math.max(
       1,
-      Math.floor((containerWidth + gap) / (columnWidth + gap)),
+      Math.floor(
+        (normalizedContainerWidth + normalizedGap) /
+          (columnWidth + normalizedGap),
+      ),
     );
   } else {
-    columnCount = defaultColumns;
+    columnCount = normalizedDefaultColumns;
   }
 
-  if (maxColumns !== undefined) {
-    columnCount = Math.min(columnCount, maxColumns);
+  columnCount = Number.isFinite(columnCount)
+    ? Math.max(1, Math.floor(columnCount))
+    : normalizedDefaultColumns;
+
+  if (maxColumns !== undefined && Number.isFinite(maxColumns)) {
+    columnCount = Math.min(
+      columnCount,
+      normalizePositiveInteger(maxColumns, 1),
+    );
   }
 
-  columnCount = Math.max(1, columnCount);
-
-  const totalGap = (columnCount - 1) * gap;
+  const totalGap = (columnCount - 1) * normalizedGap;
   const computedColumnWidth =
     columnCount > 0
-      ? Math.floor((containerWidth - totalGap) / columnCount)
-      : containerWidth;
+      ? Math.floor((normalizedContainerWidth - totalGap) / columnCount)
+      : normalizedContainerWidth;
 
   return { columnCount, columnWidth: Math.max(0, computedColumnWidth) };
 }
@@ -121,6 +170,8 @@ export function effectiveColumnCount(
   columnCount: number,
   itemCount: number,
 ): number {
-  if (itemCount === 0) return columnCount;
+  if (itemCount === 0) {
+    return columnCount;
+  }
   return Math.min(columnCount, itemCount);
 }

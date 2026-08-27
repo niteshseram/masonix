@@ -1,4 +1,5 @@
 import type { PositionedItem, Positioner } from '../types';
+import { normalizeNonNegativeFinite, normalizePositiveInteger } from './utils';
 
 export interface PositionerOptions {
   columnCount: number;
@@ -14,10 +15,13 @@ export interface PositionerOptions {
  * ensuring visually balanced columns.
  */
 export function createPositioner(options: PositionerOptions): Positioner {
-  const { columnCount, columnWidth, columnGap = 0, rowGap = 0 } = options;
+  const columnCount = normalizePositiveInteger(options.columnCount, 1);
+  const columnWidth = normalizeNonNegativeFinite(options.columnWidth);
+  const columnGap = normalizeNonNegativeFinite(options.columnGap ?? 0);
+  const rowGap = normalizeNonNegativeFinite(options.rowGap ?? 0);
 
   const columnHeights = new Float64Array(columnCount);
-  const items: PositionedItem[] = [];
+  const items: Array<PositionedItem | undefined> = [];
   // columnItems[col] = ordered list of item indices placed in that column
   const columnItems: number[][] = Array.from({ length: columnCount }, () => []);
   let placedCount = 0;
@@ -27,14 +31,24 @@ export function createPositioner(options: PositionerOptions): Positioner {
   }
 
   function set(index: number, height: number): PositionedItem {
-    // Guard: treat 0-height items as needing estimation
-    // Callers should pass estimatedItemHeight if height is 0
+    if (!Number.isInteger(index) || index < 0) {
+      throw new RangeError(
+        'Positioner item index must be a non-negative integer.',
+      );
+    }
+
+    const existingItem = items[index];
+    if (existingItem) {
+      update([[index, height]]);
+      return existingItem;
+    }
 
     const column = shortestColumn();
     const top = columnHeights[column];
     const left = computeLeft(column);
+    const normalizedHeight = normalizeNonNegativeFinite(height);
 
-    columnHeights[column] = top + height + rowGap;
+    columnHeights[column] = top + normalizedHeight + rowGap;
     columnItems[column].push(index);
 
     const item: PositionedItem = {
@@ -42,7 +56,7 @@ export function createPositioner(options: PositionerOptions): Positioner {
       top,
       left,
       width: columnWidth,
-      height,
+      height: normalizedHeight,
       column,
     };
     items[index] = item;
@@ -56,8 +70,9 @@ export function createPositioner(options: PositionerOptions): Positioner {
 
   function update(updates: Array<[number, number]>): PositionedItem[] {
     const affectedColumns = new Set<number>();
-    for (const [index, newHeight] of updates) {
+    for (const [index, requestedHeight] of updates) {
       const item = items[index];
+      const newHeight = normalizeNonNegativeFinite(requestedHeight);
       if (item && item.height !== newHeight) {
         item.height = newHeight;
         affectedColumns.add(item.column);
@@ -76,7 +91,9 @@ export function createPositioner(options: PositionerOptions): Positioner {
         colItemIndex++
       ) {
         const item = items[colItems[colItemIndex]];
-        if (!item) continue;
+        if (!item) {
+          continue;
+        }
 
         // Only recompute top for items whose column changed height.
         if (item.column === col) {
@@ -100,14 +117,17 @@ export function createPositioner(options: PositionerOptions): Positioner {
   }
 
   function getColumnHeights(): number[] {
-    return Array.from(columnHeights);
+    return Array.from(columnHeights, (height, column) =>
+      columnItems[column].length > 0 ? Math.max(0, height - rowGap) : 0,
+    );
   }
 
   function shortestColumn(): number {
     let minColIndex = 0;
     for (let colIndex = 1; colIndex < columnCount; colIndex++) {
-      if (columnHeights[colIndex] < columnHeights[minColIndex])
+      if (columnHeights[colIndex] < columnHeights[minColIndex]) {
         minColIndex = colIndex;
+      }
     }
     return minColIndex;
   }
@@ -115,20 +135,41 @@ export function createPositioner(options: PositionerOptions): Positioner {
   function tallestColumnHeight(): number {
     let max = 0;
     for (let colIndex = 0; colIndex < columnCount; colIndex++) {
-      if (columnHeights[colIndex] > max) max = columnHeights[colIndex];
+      const contentHeight =
+        columnItems[colIndex].length > 0
+          ? Math.max(0, columnHeights[colIndex] - rowGap)
+          : 0;
+      if (contentHeight > max) {
+        max = contentHeight;
+      }
     }
     return max;
   }
 
   function estimateHeight(totalItems: number, defaultHeight: number): number {
+    const normalizedTotalItems = Math.max(
+      0,
+      Math.floor(normalizeNonNegativeFinite(totalItems)),
+    );
+    const normalizedDefaultHeight = normalizeNonNegativeFinite(defaultHeight);
     const placed = placedCount;
     if (placed === 0) {
-      const rows = Math.ceil(totalItems / columnCount);
-      return rows * (defaultHeight + rowGap);
+      const rows = Math.ceil(normalizedTotalItems / columnCount);
+      return rows * normalizedDefaultHeight + Math.max(0, rows - 1) * rowGap;
     }
-    const avgHeight = tallestColumnHeight() / Math.max(1, placed / columnCount);
-    const remainingRows = Math.ceil((totalItems - placed) / columnCount);
-    return tallestColumnHeight() + remainingRows * (avgHeight + rowGap);
+    const tallestHeight = tallestColumnHeight();
+    if (normalizedTotalItems <= placed) {
+      return tallestHeight;
+    }
+    const totalPlacedHeight = items.reduce(
+      (sum, item) => sum + (item?.height ?? 0),
+      0,
+    );
+    const averageItemHeight = totalPlacedHeight / placed;
+    const remainingRows = Math.ceil(
+      (normalizedTotalItems - placed) / columnCount,
+    );
+    return tallestHeight + remainingRows * (averageItemHeight + rowGap);
   }
 
   function size(): number {
@@ -136,7 +177,7 @@ export function createPositioner(options: PositionerOptions): Positioner {
   }
 
   function all(): PositionedItem[] {
-    return items.slice(0, placedCount);
+    return items.filter((item): item is PositionedItem => item !== undefined);
   }
 
   function clear(): void {

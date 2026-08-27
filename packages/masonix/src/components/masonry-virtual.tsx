@@ -7,16 +7,20 @@ import React, {
   useImperativeHandle,
   useMemo,
   useRef,
-  useState,
   type RefCallback,
 } from 'react';
 
 import { createIntervalTree } from '../core/interval-tree';
 import { createPositioner } from '../core/positioner';
 import { getScrollOffset, getScrollTop } from '../core/scroll';
+import {
+  normalizeNonNegativeFinite,
+  normalizePositiveFinite,
+} from '../core/utils';
 import { useColumns } from '../hooks/use-columns';
 import { useContainerWidth } from '../hooks/use-container-width';
 import { useItemHeights } from '../hooks/use-item-heights';
+import { useMasonryItemCountAnnouncement } from '../hooks/use-masonry-item-count-announcement';
 import { useMeasurementIndexes } from '../hooks/use-measurement-indexes';
 import { useScrollToIndex } from '../hooks/use-scroll-to-index';
 import { useScroller } from '../hooks/use-scroller';
@@ -60,32 +64,6 @@ function getMaxScrollTop(container: HTMLElement | Window): number {
     );
   }
   return Math.max(0, container.scrollHeight - container.clientHeight);
-}
-
-function hasLayoutContain(containValue: string): boolean {
-  const tokens = containValue.trim().split(/\s+/);
-  return (
-    tokens.includes('layout') ||
-    tokens.includes('content') ||
-    tokens.includes('strict')
-  );
-}
-
-function withLayoutContain(containValue: string): string {
-  const tokens = containValue
-    .trim()
-    .split(/\s+/)
-    .filter((token) => token.length > 0 && token !== 'none');
-
-  if (!tokens.includes('layout')) {
-    tokens.push('layout');
-  }
-
-  if (!tokens.includes('paint')) {
-    tokens.push('paint');
-  }
-
-  return tokens.join(' ');
 }
 
 function getTargetScrollTop(
@@ -208,6 +186,7 @@ function MasonryVirtualInner<T = unknown>(
     minItemHeight,
     role,
     'aria-label': ariaLabel,
+    announceItemCountChanges = true,
     className,
     style,
     itemClassName,
@@ -233,7 +212,9 @@ function MasonryVirtualInner<T = unknown>(
     (node: HTMLElement | null) => {
       containerElRef.current = node;
       widthRef(node);
-      if (!externalRef) return;
+      if (!externalRef) {
+        return;
+      }
       if (typeof externalRef === 'function') {
         externalRef(node);
       } else {
@@ -260,6 +241,21 @@ function MasonryVirtualInner<T = unknown>(
 
   const { measuredHeights, setItemRef } = useItemHeights(minItemHeight);
   const measurementIndexes = useMeasurementIndexes(items, itemKey);
+  const normalizedEstimatedItemHeight = normalizePositiveFinite(
+    estimatedItemHeight,
+    DEFAULT_ESTIMATED_HEIGHT,
+  );
+  const normalizedOverscan = normalizeNonNegativeFinite(
+    overscanBy,
+    DEFAULT_OVERSCAN,
+  );
+  const normalizedEndReachedThreshold = Math.floor(
+    normalizeNonNegativeFinite(endReachedThreshold),
+  );
+  const normalizedScrollSeekVelocity = normalizeNonNegativeFinite(
+    scrollSeek?.velocityThreshold ?? DEFAULT_SCROLL_SEEK_VELOCITY,
+    DEFAULT_SCROLL_SEEK_VELOCITY,
+  );
 
   // Scroll tracking
   const { scrollTop, viewportHeight, scrollVelocity } =
@@ -297,19 +293,24 @@ function MasonryVirtualInner<T = unknown>(
         let measured: boolean;
 
         if (getItemHeight) {
-          height = Math.max(0, getItemHeight(data, index, columnWidth));
+          height = normalizeNonNegativeFinite(
+            getItemHeight(data, index, columnWidth),
+            normalizedEstimatedItemHeight,
+          );
           measured = true;
         } else {
           const measuredHeight = measuredHeights.get(measurementIndexes[index]);
           measured = measuredHeight !== undefined;
-          height = measuredHeight ?? estimatedItemHeight;
+          height = measuredHeight ?? normalizedEstimatedItemHeight;
         }
 
         const item = pos.set(index, height);
         tree.insert(index, item.top, item.top + item.height);
 
         const bottom = item.top + item.height;
-        if (bottom > maxBottom) maxBottom = bottom;
+        if (bottom > maxBottom) {
+          maxBottom = bottom;
+        }
 
         return { ...item, measured };
       });
@@ -328,45 +329,23 @@ function MasonryVirtualInner<T = unknown>(
       getItemHeight,
       measuredHeights,
       measurementIndexes,
-      estimatedItemHeight,
+      normalizedEstimatedItemHeight,
     ]);
 
   const getContainerOffset = useCallback(() => {
     const el = containerElRef.current;
-    if (!el || typeof window === 'undefined') return 0;
+    if (!el || typeof window === 'undefined') {
+      return 0;
+    }
     const container = scrollContainer?.current ?? window;
     return getScrollOffset(el, container);
   }, [scrollContainer]); // Re-read on scroll for accurate values
 
   const getScrollContainer = useCallback((): HTMLElement | Window | null => {
-    if (typeof window === 'undefined') return null;
-    return scrollContainer?.current ?? window;
-  }, [scrollContainer]);
-
-  useEffect(() => {
     if (typeof window === 'undefined') {
-      return;
+      return null;
     }
-
-    const container = scrollContainer?.current;
-    if (!container) {
-      return;
-    }
-
-    const computedContain = window.getComputedStyle(container).contain;
-    if (hasLayoutContain(computedContain)) {
-      return;
-    }
-
-    const previousContain = container.style.contain;
-    const nextContain = withLayoutContain(previousContain);
-    container.style.contain = nextContain;
-
-    return () => {
-      if (container.style.contain === nextContain) {
-        container.style.contain = previousContain;
-      }
-    };
+    return scrollContainer?.current ?? window;
   }, [scrollContainer]);
 
   // Determine visible range using interval tree
@@ -380,7 +359,7 @@ function MasonryVirtualInner<T = unknown>(
     }
 
     const containerOffset = getContainerOffset();
-    const overscanPx = viewportHeight * overscanBy;
+    const overscanPx = viewportHeight * normalizedOverscan;
     const viewTop = Math.max(0, scrollTop - containerOffset - overscanPx);
     const viewBottom =
       scrollTop - containerOffset + viewportHeight + overscanPx;
@@ -391,8 +370,12 @@ function MasonryVirtualInner<T = unknown>(
 
     intervalTree.search(viewTop, viewBottom, (index) => {
       indices.push(index);
-      if (index < start) start = index;
-      if (index > stop) stop = index;
+      if (index < start) {
+        start = index;
+      }
+      if (index > stop) {
+        stop = index;
+      }
     });
 
     indices.sort((indexA, indexB) => indexA - indexB);
@@ -413,7 +396,7 @@ function MasonryVirtualInner<T = unknown>(
     scrollTop,
     getContainerOffset,
     viewportHeight,
-    overscanBy,
+    normalizedOverscan,
   ]);
 
   // Notify range changes
@@ -429,7 +412,10 @@ function MasonryVirtualInner<T = unknown>(
     }
   }, [onRangeChange, startIndex, stopIndex]);
 
-  const totalItemCount = totalItems ?? items.length;
+  const totalItemCount =
+    totalItems === undefined || !Number.isFinite(totalItems)
+      ? items.length
+      : Math.max(items.length, Math.floor(Math.max(0, totalItems)));
   const rangeInfo = useMemo<MasonryVirtualRange>(
     () => ({
       startIndex,
@@ -442,11 +428,11 @@ function MasonryVirtualInner<T = unknown>(
 
   const endReachedItemCountRef = useRef<number | null>(null);
   useEffect(() => {
-    if (!onEndReached || items.length === 0 || visibleItems.length === 0)
+    if (!onEndReached || items.length === 0 || visibleItems.length === 0) {
       return;
+    }
 
-    const threshold = Math.max(0, endReachedThreshold);
-    const endIndex = items.length - 1 - threshold;
+    const endIndex = items.length - 1 - normalizedEndReachedThreshold;
     if (
       stopIndex >= endIndex &&
       endReachedItemCountRef.current !== items.length
@@ -455,8 +441,8 @@ function MasonryVirtualInner<T = unknown>(
       onEndReached(rangeInfo);
     }
   }, [
-    endReachedThreshold,
     items.length,
+    normalizedEndReachedThreshold,
     onEndReached,
     rangeInfo,
     stopIndex,
@@ -476,7 +462,9 @@ function MasonryVirtualInner<T = unknown>(
       options: Parameters<MasonryVirtualHandle['scrollToIndex']>[1],
     ): boolean => {
       const container = getScrollContainer();
-      if (!container || viewportHeight === 0) return false;
+      if (!container || viewportHeight === 0) {
+        return false;
+      }
 
       const currentScrollTop = getScrollTop(container);
       const containerOffset = getContainerOffset();
@@ -514,7 +502,9 @@ function MasonryVirtualInner<T = unknown>(
 
   useEffect(() => {
     const pending = pendingReScrollRef.current;
-    if (!pending) return;
+    if (!pending) {
+      return;
+    }
     const item = positioner.get(pending.index);
     if (!item) {
       pendingReScrollRef.current = null;
@@ -534,13 +524,7 @@ function MasonryVirtualInner<T = unknown>(
       ...pending.options,
       smooth: false,
     });
-  }, [
-    isItemAtScrollTarget,
-    positionedItems,
-    positioner,
-    scrollTop,
-    viewportHeight,
-  ]);
+  }, [isItemAtScrollTarget, positionedItems, positioner]);
 
   useImperativeHandle(
     scrollRef,
@@ -559,38 +543,28 @@ function MasonryVirtualInner<T = unknown>(
     [handle, positioner],
   );
 
-  // aria-live announcement on item count changes (filter/add/remove)
-  const [announcement, setAnnouncement] = useState('');
-  const prevItemCountRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (
-      prevItemCountRef.current !== null &&
-      prevItemCountRef.current !== items.length
-    ) {
-      setAnnouncement(
-        `${items.length} ${items.length === 1 ? 'item' : 'items'}`,
-      );
-    }
-    prevItemCountRef.current = items.length;
-  }, [items.length]);
+  const announcement = useMasonryItemCountAnnouncement(
+    items.length,
+    announceItemCountChanges,
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Container: any = as ?? 'div';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ItemWrapper: any = itemAs ?? 'div';
 
-  const containerRole = role === 'none' ? undefined : (role ?? 'list');
+  const containerRole = role === 'none' ? undefined : 'list';
   const itemRole: 'listitem' | undefined =
     containerRole !== undefined ? 'listitem' : undefined;
   const ariaSetSize = totalItemCount;
   const isScrollSeekActive =
     scrollSeek !== undefined &&
-    Math.abs(scrollVelocity) >=
-      (scrollSeek.velocityThreshold ?? DEFAULT_SCROLL_SEEK_VELOCITY);
+    Math.abs(scrollVelocity) >= normalizedScrollSeekVelocity;
 
   const containerStyle: CSSProperties = {
     position: 'relative',
     height: containerHeight,
+    contain: 'layout',
     ...style,
   };
 
@@ -643,9 +617,15 @@ function MasonryVirtualInner<T = unknown>(
           );
         })}
       </Container>
-      <div aria-live="polite" aria-atomic="true" style={VISUALLY_HIDDEN_STYLE}>
-        {announcement}
-      </div>
+      {announceItemCountChanges && (
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          style={VISUALLY_HIDDEN_STYLE}
+        >
+          {announcement}
+        </div>
+      )}
     </>
   );
 }

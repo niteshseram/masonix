@@ -1,12 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { useItemHeights } from '../../hooks/use-item-heights';
 
@@ -17,12 +10,16 @@ describe('useItemHeights', () => {
   let mockUnobserve: ReturnType<typeof vi.fn>;
   let mockDisconnect: ReturnType<typeof vi.fn>;
 
-  function makeEntry(target: Element, blockSize: number): ResizeObserverEntry {
+  function makeEntry(
+    target: Element,
+    contentHeight: number,
+    borderHeight = contentHeight,
+  ): ResizeObserverEntry {
     return {
       target,
-      contentBoxSize: [{ blockSize, inlineSize: 100 }],
-      contentRect: { height: blockSize, width: 100 } as DOMRectReadOnly,
-      borderBoxSize: [],
+      contentBoxSize: [{ blockSize: contentHeight, inlineSize: 100 }],
+      contentRect: { height: contentHeight, width: 100 } as DOMRectReadOnly,
+      borderBoxSize: [{ blockSize: borderHeight, inlineSize: 100 }],
       devicePixelContentBoxSize: [],
     } as unknown as ResizeObserverEntry;
   }
@@ -74,6 +71,35 @@ describe('useItemHeights', () => {
     });
 
     expect(result.current.measuredHeights.get(0)).toBe(200);
+  });
+
+  it('records the border-box height when padding or borders are present', () => {
+    const { result } = renderHook(() => useItemHeights());
+    const node = document.createElement('div');
+
+    act(() => {
+      result.current.setItemRef(node, 0);
+      notifyResize!([makeEntry(node, 200, 224)]);
+    });
+
+    expect(result.current.measuredHeights.get(0)).toBe(224);
+  });
+
+  it('preserves map identity when a measurement is unchanged', () => {
+    const { result } = renderHook(() => useItemHeights());
+    const node = document.createElement('div');
+
+    act(() => {
+      result.current.setItemRef(node, 0);
+      notifyResize!([makeEntry(node, 200)]);
+    });
+    const firstMeasurements = result.current.measuredHeights;
+
+    act(() => {
+      notifyResize!([makeEntry(node, 200)]);
+    });
+
+    expect(result.current.measuredHeights).toBe(firstMeasurements);
   });
 
   it('batches multiple entries from a single ResizeObserver callback', () => {

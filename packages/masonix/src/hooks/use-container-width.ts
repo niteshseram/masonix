@@ -1,6 +1,21 @@
 import { type RefCallback, useCallback, useRef, useState } from 'react';
 
+import { normalizeNonNegativeFinite } from '../core/utils';
 import { isServer } from '../utils/ssr';
+
+function getObservedBorderBoxWidth(entry: ResizeObserverEntry): number {
+  const borderBoxWidth = entry.borderBoxSize?.[0]?.inlineSize;
+  if (borderBoxWidth !== undefined) {
+    return borderBoxWidth;
+  }
+
+  const boundingWidth = entry.target.getBoundingClientRect().width;
+  if (boundingWidth > 0) {
+    return boundingWidth;
+  }
+
+  return entry.contentRect.width;
+}
 
 /**
  * Tracks the inline size of a DOM element via ResizeObserver.
@@ -13,7 +28,9 @@ export function useContainerWidth(defaultWidth?: number): {
   ref: RefCallback<HTMLElement>;
   width: number;
 } {
-  const [width, setWidth] = useState<number>(defaultWidth ?? 0);
+  const [width, setWidth] = useState<number>(() =>
+    normalizeNonNegativeFinite(defaultWidth ?? 0),
+  );
   const observerRef = useRef<ResizeObserver | null>(null);
 
   const ref = useCallback<RefCallback<HTMLElement>>(
@@ -23,20 +40,27 @@ export function useContainerWidth(defaultWidth?: number): {
         observerRef.current = null;
       }
 
-      if (!node || isServer) return;
+      if (!node || isServer) {
+        return;
+      }
 
       // Measure immediately to avoid a blank-to-layout flash
       const immediate = node.getBoundingClientRect().width;
-      if (immediate > 0) setWidth(immediate);
+      if (immediate > 0) {
+        setWidth(immediate);
+      }
 
       const ro = new ResizeObserver((entries) => {
         const entry = entries[0];
-        if (!entry) return;
-        const measuredWidth = entry.contentBoxSize
-          ? entry.contentBoxSize[0].inlineSize
-          : entry.contentRect.width;
-        // Ignore 0-width: element is hidden or detached
-        if (measuredWidth > 0) setWidth(measuredWidth);
+        if (!entry) {
+          return;
+        }
+        const measuredWidth = getObservedBorderBoxWidth(entry);
+        if (measuredWidth > 0) {
+          setWidth((previousWidth) =>
+            previousWidth === measuredWidth ? previousWidth : measuredWidth,
+          );
+        }
       });
 
       ro.observe(node);

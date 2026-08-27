@@ -154,6 +154,30 @@ describe('createPositioner', () => {
       expect(p.all()).toHaveLength(2);
     });
 
+    it('returns sparse indexes from all()', () => {
+      const positioner = createPositioner({
+        columnCount: 2,
+        columnWidth: 100,
+      });
+      positioner.set(100, 50);
+
+      expect(positioner.all().map((item) => item.index)).toEqual([100]);
+      expect(positioner.size()).toBe(1);
+    });
+
+    it('updates an existing index without duplicating it', () => {
+      const positioner = createPositioner({
+        columnCount: 1,
+        columnWidth: 100,
+      });
+      positioner.set(0, 50);
+      positioner.set(0, 80);
+
+      expect(positioner.size()).toBe(1);
+      expect(positioner.all()).toHaveLength(1);
+      expect(positioner.get(0)?.height).toBe(80);
+    });
+
     it('get returns undefined for unplaced index', () => {
       const p = createPositioner({ columnCount: 3, columnWidth: 100 });
       expect(p.get(42)).toBeUndefined();
@@ -184,6 +208,20 @@ describe('createPositioner', () => {
       const p = createPositioner({ columnCount: 3, columnWidth: 100 });
       // 9 items, 3 cols → 3 rows of 200 = 600
       expect(p.estimateHeight(9, 200)).toBe(600);
+    });
+
+    it('does not include a trailing row gap', () => {
+      const positioner = createPositioner({
+        columnCount: 1,
+        columnWidth: 100,
+        rowGap: 16,
+      });
+      positioner.set(0, 50);
+
+      expect(positioner.tallestColumnHeight()).toBe(50);
+      expect(positioner.getColumnHeights()).toEqual([50]);
+      expect(positioner.estimateHeight(1, 50)).toBe(50);
+      expect(positioner.estimateHeight(2, 50)).toBe(116);
     });
 
     it('returns at least tallestColumnHeight when all items placed', () => {

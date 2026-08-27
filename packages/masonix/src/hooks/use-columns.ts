@@ -4,6 +4,7 @@ import {
   applyBreakpoints,
   computeColumns,
   effectiveColumnCount,
+  normalizeNonNegativeFinite,
   parseBreakpoints,
 } from '../core/utils';
 import type { ResponsiveValue } from '../types';
@@ -56,12 +57,13 @@ export function useColumns({
   );
 
   return useMemo(() => {
-    const gap =
+    const resolvedGap =
       gapOption === undefined
         ? 0
         : typeof gapOption === 'number'
           ? gapOption
           : applyBreakpoints(parsedGap!, containerWidth);
+    const gap = normalizeNonNegativeFinite(resolvedGap);
 
     const resolvedColumns: number | undefined =
       columns === undefined || typeof columns === 'number'

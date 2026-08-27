@@ -32,24 +32,35 @@ export function useScrollToIndex({
   viewportHeightRef.current = viewportHeight;
 
   const prefersReducedMotion = useCallback((): boolean => {
-    if (typeof window === 'undefined') return false;
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function'
+    ) {
+      return false;
+    }
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }, []);
 
   const getContainerOffset = useCallback((): number => {
     const el = containerRef.current;
     const container = getScrollContainerRef.current();
-    if (!el || !container) return 0;
+    if (!el || !container) {
+      return 0;
+    }
     return getScrollOffset(el, container);
   }, [containerRef]);
 
   const scrollToIndex: MasonryVirtualHandle['scrollToIndex'] = useCallback(
     (index, options) => {
       const item = positionerRef.current.get(index);
-      if (!item) return;
+      if (!item) {
+        return;
+      }
 
       const container = getScrollContainerRef.current();
-      if (!container) return;
+      if (!container) {
+        return;
+      }
 
       const containerOffset = getContainerOffset();
       const align = options?.align ?? 'start';

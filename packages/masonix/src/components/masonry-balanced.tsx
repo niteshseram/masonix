@@ -3,17 +3,20 @@ import React, {
   type ReactElement,
   memo,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
-  useState,
   type RefCallback,
 } from 'react';
 
 import { createPositioner } from '../core/positioner';
+import {
+  normalizeNonNegativeFinite,
+  normalizePositiveFinite,
+} from '../core/utils';
 import { useColumns } from '../hooks/use-columns';
 import { useContainerWidth } from '../hooks/use-container-width';
 import { useItemHeights } from '../hooks/use-item-heights';
+import { useMasonryItemCountAnnouncement } from '../hooks/use-masonry-item-count-announcement';
 import { useMeasurementIndexes } from '../hooks/use-measurement-indexes';
 import type { MasonryBalancedProps, MasonryRenderProps } from '../types';
 
@@ -117,6 +120,7 @@ function MasonryBalancedInner<T = unknown>(
     minItemHeight,
     role,
     'aria-label': ariaLabel,
+    announceItemCountChanges = true,
     className,
     style,
     itemClassName,
@@ -131,7 +135,9 @@ function MasonryBalancedInner<T = unknown>(
   const mergedRef = useCallback(
     (node: HTMLElement | null) => {
       internalRef(node);
-      if (!externalRef) return;
+      if (!externalRef) {
+        return;
+      }
       if (typeof externalRef === 'function') {
         externalRef(node);
       } else {
@@ -140,6 +146,11 @@ function MasonryBalancedInner<T = unknown>(
       }
     },
     [internalRef, externalRef],
+  );
+
+  const normalizedEstimatedItemHeight = normalizePositiveFinite(
+    estimatedItemHeight,
+    DEFAULT_ESTIMATED_HEIGHT,
   );
 
   const {
@@ -163,7 +174,9 @@ function MasonryBalancedInner<T = unknown>(
   // A fresh positioner is cheaper than incremental update because React's useMemo
   // already batches renders — we won't rebuild more often than truly necessary.
   const { positionedItems, containerHeight } = useMemo(() => {
-    if (columnCount === 0) return { positionedItems: [], containerHeight: 0 };
+    if (columnCount === 0) {
+      return { positionedItems: [], containerHeight: 0 };
+    }
 
     const positioner = createPositioner({
       columnCount,
@@ -179,17 +192,22 @@ function MasonryBalancedInner<T = unknown>(
       let measured: boolean;
 
       if (getItemHeight) {
-        height = Math.max(0, getItemHeight(data, index, columnWidth));
+        height = normalizeNonNegativeFinite(
+          getItemHeight(data, index, columnWidth),
+          normalizedEstimatedItemHeight,
+        );
         measured = true;
       } else {
         const measuredHeight = measuredHeights.get(measurementIndexes[index]);
         measured = measuredHeight !== undefined;
-        height = measuredHeight ?? estimatedItemHeight;
+        height = measuredHeight ?? normalizedEstimatedItemHeight;
       }
 
       const item = positioner.set(index, height);
       const bottom = item.top + item.height;
-      if (bottom > maxBottom) maxBottom = bottom;
+      if (bottom > maxBottom) {
+        maxBottom = bottom;
+      }
 
       return { ...item, measured };
     });
@@ -203,30 +221,20 @@ function MasonryBalancedInner<T = unknown>(
     getItemHeight,
     measuredHeights,
     measurementIndexes,
-    estimatedItemHeight,
+    normalizedEstimatedItemHeight,
   ]);
 
-  // aria-live announcement on item count changes (filter/add/remove)
-  const [announcement, setAnnouncement] = useState('');
-  const prevItemCountRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (
-      prevItemCountRef.current !== null &&
-      prevItemCountRef.current !== items.length
-    ) {
-      setAnnouncement(
-        `${items.length} ${items.length === 1 ? 'item' : 'items'}`,
-      );
-    }
-    prevItemCountRef.current = items.length;
-  }, [items.length]);
+  const announcement = useMasonryItemCountAnnouncement(
+    items.length,
+    announceItemCountChanges,
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Container: any = as ?? 'div';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ItemWrapper: any = itemAs ?? 'div';
 
-  const containerRole = role === 'none' ? undefined : (role ?? 'list');
+  const containerRole = role === 'none' ? undefined : 'list';
   const itemRole: 'listitem' | undefined =
     containerRole !== undefined ? 'listitem' : undefined;
   const ariaSetSize = items.length;
@@ -283,9 +291,15 @@ function MasonryBalancedInner<T = unknown>(
           );
         })}
       </Container>
-      <div aria-live="polite" aria-atomic="true" style={VISUALLY_HIDDEN_STYLE}>
-        {announcement}
-      </div>
+      {announceItemCountChanges && (
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          style={VISUALLY_HIDDEN_STYLE}
+        >
+          {announcement}
+        </div>
+      )}
     </>
   );
 }

@@ -1,5 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { normalizeNonNegativeFinite } from '../core/utils';
+
+function getObservedBorderBoxHeight(entry: ResizeObserverEntry): number {
+  const borderBoxHeight = entry.borderBoxSize?.[0]?.blockSize;
+  if (borderBoxHeight !== undefined) {
+    return borderBoxHeight;
+  }
+
+  const boundingHeight = entry.target.getBoundingClientRect().height;
+  if (boundingHeight > 0) {
+    return boundingHeight;
+  }
+
+  return entry.contentRect.height;
+}
+
 export interface UseItemHeightsResult {
   /** Map of item index → measured height in px */
   measuredHeights: Map<number, number>;
@@ -38,7 +54,6 @@ export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
   }, []);
 
   const setItemRef = useCallback((node: HTMLElement | null, index: number) => {
-    // Detach any previous element registered for this index
     const prev = indexToElement.current.get(index);
     if (prev) {
       observerRef.current?.unobserve(prev);
@@ -46,7 +61,9 @@ export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
       indexToElement.current.delete(index);
     }
 
-    if (!node) return;
+    if (!node) {
+      return;
+    }
 
     // Create the observer on first use (lazy — avoids SSR issues)
     if (!observerRef.current) {
@@ -55,27 +72,35 @@ export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
 
         for (const entry of entries) {
           const itemIndex = elementToIndex.current.get(entry.target);
-          if (itemIndex === undefined) continue;
+          if (itemIndex === undefined) {
+            continue;
+          }
 
-          const rawHeight = entry.contentBoxSize
-            ? entry.contentBoxSize[0].blockSize
-            : entry.contentRect.height;
+          const rawHeight = getObservedBorderBoxHeight(entry);
 
           const minHeight = minItemHeightRef.current;
           const clamped =
-            minHeight !== undefined
-              ? Math.max(minHeight, rawHeight)
+            minHeight !== undefined && Number.isFinite(minHeight)
+              ? Math.max(normalizeNonNegativeFinite(minHeight), rawHeight)
               : rawHeight;
-          if (clamped > 0) updates.push([itemIndex, clamped]);
+          if (Number.isFinite(clamped) && clamped > 0) {
+            updates.push([itemIndex, clamped]);
+          }
         }
 
-        if (updates.length === 0) return;
+        if (updates.length === 0) {
+          return;
+        }
 
         setMeasuredHeights((prev) => {
-          const next = new Map(prev);
-          for (const [itemIndex, height] of updates)
-            next.set(itemIndex, height);
-          return next;
+          let next: Map<number, number> | undefined;
+          for (const [itemIndex, height] of updates) {
+            if (prev.get(itemIndex) !== height) {
+              next ??= new Map(prev);
+              next.set(itemIndex, height);
+            }
+          }
+          return next ?? prev;
         });
       });
     }
@@ -83,7 +108,7 @@ export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
     elementToIndex.current.set(node, index);
     indexToElement.current.set(index, node);
     observerRef.current.observe(node);
-  }, []); // stable: all mutable state accessed via refs
+  }, []);
 
   return { measuredHeights, setItemRef };
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 
 import { getScrollTop, getViewportHeight } from '../core/scroll';
+import { normalizePositiveFinite } from '../core/utils';
 import { isServer } from '../utils/ssr';
 
 export interface ScrollerState {
@@ -20,6 +21,10 @@ const SERVER_SNAPSHOT: ScrollerState = {
   viewportHeight: 0,
   scrollVelocity: 0,
 };
+
+function isWindow(container: HTMLElement | Window): container is Window {
+  return container === window || 'scrollY' in container;
+}
 
 /**
  * Tear-free scroll tracking via `useSyncExternalStore`.
@@ -43,6 +48,7 @@ export function useScroller(
   const getContainer = useCallback((): HTMLElement | Window => {
     return scrollContainer?.current ?? window;
   }, [scrollContainer]);
+  const normalizedFps = normalizePositiveFinite(fps, 12);
 
   // Build a stable store — the identity must not change between renders
   if (!storeRef.current) {
@@ -67,10 +73,12 @@ export function useScroller(
 
   // Attach / detach scroll listener
   useEffect(() => {
-    if (isServer) return;
+    if (isServer) {
+      return;
+    }
 
     const container = getContainer();
-    const interval = 1000 / fps;
+    const interval = 1000 / normalizedFps;
     const settleDelay = Math.max(120, interval * 2);
 
     const clearScrollEndTimeout = (): void => {
@@ -84,7 +92,9 @@ export function useScroller(
       clearScrollEndTimeout();
       scrollEndTimeoutRef.current = setTimeout(() => {
         scrollEndTimeoutRef.current = null;
-        if (stateRef.current.scrollVelocity === 0) return;
+        if (stateRef.current.scrollVelocity === 0) {
+          return;
+        }
         stateRef.current = {
           ...stateRef.current,
           scrollVelocity: 0,
@@ -140,20 +150,29 @@ export function useScroller(
       }
     };
 
-    const target = container instanceof Window ? window : container;
+    const target = isWindow(container) ? window : container;
+    let resizeObserver: ResizeObserver | null = null;
     target.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleResize, { passive: true });
+    if (isWindow(container)) {
+      window.addEventListener('resize', handleResize, { passive: true });
+    } else if (typeof ResizeObserver === 'function') {
+      resizeObserver = new ResizeObserver(handleResize);
+      resizeObserver.observe(container);
+    } else {
+      window.addEventListener('resize', handleResize, { passive: true });
+    }
 
     return () => {
       target.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
+      resizeObserver?.disconnect();
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
         rafIdRef.current = null;
       }
       clearScrollEndTimeout();
     };
-  }, [getContainer, fps, notify]);
+  }, [getContainer, normalizedFps, notify]);
 
   return useSyncExternalStore(
     storeRef.current.subscribe,

@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vite-plus/test';
+import { renderToString } from 'react-dom/server';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { Masonry } from '../../components/masonry';
 import type { MasonryRenderProps } from '../../types';
@@ -18,6 +19,10 @@ function attr(el: Element | null, name: string) {
 }
 
 describe('Masonry', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   describe('item rendering', () => {
     it('renders all items', () => {
       render(
@@ -104,13 +109,6 @@ describe('Masonry', () => {
       expect(attr(container.firstElementChild, 'role')).toBe('list');
     });
 
-    it('applies role="grid"', () => {
-      const { container } = render(
-        <Masonry items={['a']} render={Card} defaultWidth={900} role="grid" />,
-      );
-      expect(attr(container.firstElementChild, 'role')).toBe('grid');
-    });
-
     it('omits role attribute when role="none"', () => {
       const { container } = render(
         <Masonry items={['a']} render={Card} defaultWidth={900} role="none" />,
@@ -176,13 +174,103 @@ describe('Masonry', () => {
       }
     });
 
-    it('includes an aria-live polite region for announcements', () => {
+    it('does not include a live region when announcements are disabled', () => {
       const { container } = render(
-        <Masonry items={['a', 'b']} render={Card} defaultWidth={900} />,
+        <Masonry
+          items={['a', 'b']}
+          render={Card}
+          defaultWidth={900}
+          announceItemCountChanges={false}
+        />,
       );
+      expect(container.querySelector('[aria-live="polite"]')).toBeNull();
+    });
+
+    it('announces item-count changes by default', () => {
+      const { container, rerender } = render(
+        <Masonry
+          items={['a', 'b']}
+          render={Card}
+          defaultWidth={900}
+        />,
+      );
+
+      rerender(
+        <Masonry
+          items={['a']}
+          render={Card}
+          defaultWidth={900}
+        />,
+      );
+
       const liveRegion = container.querySelector('[aria-live="polite"]');
-      expect(liveRegion).toBeTruthy();
+      expect(liveRegion?.textContent).toBe('1 item');
       expect(attr(liveRegion, 'aria-atomic')).toBe('true');
+    });
+
+    it('normalizes the legacy grid role to list semantics', () => {
+      const { container } = render(
+        <Masonry
+          items={['a', 'b']}
+          render={Card}
+          defaultWidth={900}
+          role="grid"
+        />,
+      );
+
+      expect(attr(container.firstElementChild, 'role')).toBe('list');
+      expect(container.querySelectorAll('[role="listitem"]')).toHaveLength(2);
+    });
+  });
+
+  describe('native Grid Lanes', () => {
+    it('uses Grid Lanes only when the current syntax is supported', () => {
+      const supports = vi.fn((property: string, value: string) => {
+        return property === 'display' && value === 'grid-lanes';
+      });
+      vi.stubGlobal('CSS', { supports });
+
+      const { container } = render(
+        <Masonry
+          items={['a', 'b']}
+          render={Card}
+          defaultWidth={400}
+          columns={2}
+          enableNative
+        />,
+      );
+
+      const masonry = container.firstElementChild as HTMLElement;
+      expect(masonry.style.display).toBe('grid-lanes');
+      expect(masonry.style.gridTemplateColumns).toBe('repeat(2, 200px)');
+      expect(supports).toHaveBeenCalledWith('display', 'grid-lanes');
+    });
+
+    it('does not enable the obsolete grid-template masonry syntax', () => {
+      vi.stubGlobal('CSS', {
+        supports: vi.fn((property: string, value: string) => {
+          return property === 'grid-template-rows' && value === 'masonry';
+        }),
+      });
+
+      const { container } = render(
+        <Masonry items={['a']} render={Card} defaultWidth={400} enableNative />,
+      );
+
+      expect((container.firstElementChild as HTMLElement).style.display).toBe(
+        'flex',
+      );
+    });
+
+    it('keeps the flex structure during server rendering', () => {
+      vi.stubGlobal('CSS', { supports: vi.fn(() => true) });
+
+      const html = renderToString(
+        <Masonry items={['a']} render={Card} defaultWidth={400} enableNative />,
+      );
+
+      expect(html).toContain('display:flex');
+      expect(html).not.toContain('grid-lanes');
     });
   });
 

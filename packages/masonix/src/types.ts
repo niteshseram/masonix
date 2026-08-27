@@ -28,13 +28,13 @@ export interface PositionedItem {
 export interface Positioner {
   readonly columnCount: number;
   readonly columnWidth: number;
-  /** Place an item, returns its computed PositionedItem. */
+  /** Place an item, or update its height when the index already exists. */
   set(index: number, height: number): PositionedItem;
   /** Get a placed item by index */
   get(index: number): PositionedItem | undefined;
   /** Batch-update heights; recomputes only affected columns */
   update(updates: Array<[index: number, height: number]>): PositionedItem[];
-  /** All current column heights */
+  /** Current column content heights, excluding trailing row gaps. */
   getColumnHeights(): number[];
   /** Index of the shortest column */
   shortestColumn(): number;
@@ -88,8 +88,11 @@ export interface MasonryProps<T = unknown> {
   enableNative?: boolean;
 
   // --- Accessibility ---
+  /** `"grid"` is retained for compatibility and rendered with list semantics. */
   role?: 'grid' | 'list' | 'none';
   'aria-label'?: string;
+  /** Announce item-count changes through a polite live region. Defaults to true. */
+  announceItemCountChanges?: boolean;
 
   // --- Styling ---
   className?: string;

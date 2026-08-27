@@ -3,14 +3,12 @@ import React, {
   type ReactElement,
   memo,
   useCallback,
-  useEffect,
   useMemo,
-  useRef,
-  useState,
 } from 'react';
 
 import { useColumns } from '../hooks/use-columns';
 import { useContainerWidth } from '../hooks/use-container-width';
+import { useMasonryItemCountAnnouncement } from '../hooks/use-masonry-item-count-announcement';
 import { useNativeMasonry } from '../hooks/use-native-masonry';
 import type { MasonryProps } from '../types';
 
@@ -90,6 +88,7 @@ function MasonryInner<T = unknown>(
     enableNative,
     role,
     'aria-label': ariaLabel,
+    announceItemCountChanges = true,
     className,
     style,
     columnClassName,
@@ -106,7 +105,9 @@ function MasonryInner<T = unknown>(
   const mergedRef = useCallback(
     (node: HTMLElement | null) => {
       internalRef(node);
-      if (!externalRef) return;
+      if (!externalRef) {
+        return;
+      }
       if (typeof externalRef === 'function') {
         externalRef(node);
       } else {
@@ -142,27 +143,17 @@ function MasonryInner<T = unknown>(
     return cols;
   }, [items.length, columnCount]);
 
-  // aria-live announcement on item count changes (filter/add/remove)
-  const [announcement, setAnnouncement] = useState('');
-  const prevItemCountRef = useRef<number | null>(null);
-  useEffect(() => {
-    if (
-      prevItemCountRef.current !== null &&
-      prevItemCountRef.current !== items.length
-    ) {
-      setAnnouncement(
-        `${items.length} ${items.length === 1 ? 'item' : 'items'}`,
-      );
-    }
-    prevItemCountRef.current = items.length;
-  }, [items.length]);
+  const announcement = useMasonryItemCountAnnouncement(
+    items.length,
+    announceItemCountChanges,
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Container: any = as ?? 'div';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ItemWrapper: any = itemAs ?? 'div';
 
-  const containerRole = role === 'none' ? undefined : (role ?? 'list');
+  const containerRole = role === 'none' ? undefined : 'list';
   const itemRole: 'listitem' | undefined =
     containerRole !== undefined ? 'listitem' : undefined;
   const ariaSetSize = items.length;
@@ -170,9 +161,8 @@ function MasonryInner<T = unknown>(
   // Native CSS masonry path
   if (isNative) {
     const nativeStyle: CSSProperties = {
-      display: 'grid',
-      gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
-      gridTemplateRows: 'masonry',
+      display: 'grid-lanes',
+      gridTemplateColumns: `repeat(${columnCount}, ${columnWidth}px)`,
       ...(resolvedGap > 0 ? { gap: resolvedGap } : {}),
       ...style,
     };
@@ -204,13 +194,15 @@ function MasonryInner<T = unknown>(
             );
           })}
         </Container>
-        <div
-          aria-live="polite"
-          aria-atomic="true"
-          style={VISUALLY_HIDDEN_STYLE}
-        >
-          {announcement}
-        </div>
+        {announceItemCountChanges && (
+          <div
+            aria-live="polite"
+            aria-atomic="true"
+            style={VISUALLY_HIDDEN_STYLE}
+          >
+            {announcement}
+          </div>
+        )}
       </>
     );
   }
@@ -267,9 +259,15 @@ function MasonryInner<T = unknown>(
           </div>
         ))}
       </Container>
-      <div aria-live="polite" aria-atomic="true" style={VISUALLY_HIDDEN_STYLE}>
-        {announcement}
-      </div>
+      {announceItemCountChanges && (
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          style={VISUALLY_HIDDEN_STYLE}
+        >
+          {announcement}
+        </div>
+      )}
     </>
   );
 }

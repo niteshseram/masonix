@@ -1,13 +1,6 @@
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { MasonryBalanced } from '../../components/masonry-balanced';
 import type { MasonryRenderProps } from '../../types';
@@ -319,7 +312,7 @@ describe('MasonryBalanced', () => {
       expect(listItems[2].getAttribute('aria-posinset')).toBe('3');
     });
 
-    it('includes an aria-live polite region', () => {
+    it('includes an aria-live polite region when announcements are enabled', () => {
       const { container } = render(
         <MasonryBalanced
           items={makeItems(2)}
@@ -327,6 +320,7 @@ describe('MasonryBalanced', () => {
           columns={2}
           gap={0}
           getItemHeight={() => 100}
+          announceItemCountChanges
         />,
       );
       const liveRegion = container.querySelector('[aria-live="polite"]');

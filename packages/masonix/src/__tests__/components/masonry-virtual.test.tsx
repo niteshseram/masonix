@@ -1,16 +1,9 @@
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { MasonryVirtual } from '../../components/masonry-virtual';
-import type { MasonryRenderProps } from '../../types';
+import type { MasonryRenderProps, MasonryVirtualHandle } from '../../types';
 
 // ---------------------------------------------------------------------------
 // ResizeObserver mock
@@ -281,10 +274,10 @@ describe('MasonryVirtual', () => {
       expect(screen.queryByTestId('item-5')).toBeNull();
     });
 
-    it('contains custom scroll containers so virtual spacer height stays local', () => {
+    it('does not mutate custom scroll container containment', () => {
       const scrollEl = document.createElement('div');
 
-      const { unmount } = render(
+      const { container } = render(
         <MasonryVirtual
           items={makeItems(20)}
           render={ItemRender}
@@ -296,10 +289,10 @@ describe('MasonryVirtual', () => {
         />,
       );
 
-      expect(scrollEl.style.contain).toBe('layout paint');
-
-      unmount();
       expect(scrollEl.style.contain).toBe('');
+      expect((container.firstElementChild as HTMLElement).style.contain).toBe(
+        'layout',
+      );
     });
 
     it('preserves custom scroll container containment when already provided', () => {
@@ -319,6 +312,43 @@ describe('MasonryVirtual', () => {
       );
 
       expect(scrollEl.style.contain).toBe('strict');
+    });
+
+    it('does not cancel smooth scrollToIndex during scroll events', () => {
+      let scrollY = 0;
+      Object.defineProperty(window, 'scrollY', {
+        get: () => scrollY,
+        configurable: true,
+      });
+      Object.defineProperty(window, 'innerHeight', {
+        value: 300,
+        configurable: true,
+      });
+      const scrollRef = React.createRef<MasonryVirtualHandle>();
+
+      render(
+        <MasonryVirtual
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          scrollRef={scrollRef}
+        />,
+      );
+
+      act(() => {
+        scrollRef.current?.scrollToIndex(5, { smooth: true });
+      });
+      expect(window.scrollTo).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        scrollY = 100;
+        window.dispatchEvent(new Event('scroll'));
+      });
+
+      expect(window.scrollTo).toHaveBeenCalledTimes(1);
     });
 
     it('calls onEndReached when the visible range reaches the threshold', () => {
