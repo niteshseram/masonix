@@ -1,6 +1,6 @@
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MasonryVirtual } from '../../components/masonry-virtual';
 import type { MasonryRenderProps, MasonryVirtualHandle } from '../../types';

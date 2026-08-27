@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useScroller } from '../../hooks/use-scroller';
 

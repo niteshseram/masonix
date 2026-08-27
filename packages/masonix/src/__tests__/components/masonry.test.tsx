@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Masonry } from '../../components/masonry';
 import type { MasonryRenderProps } from '../../types';

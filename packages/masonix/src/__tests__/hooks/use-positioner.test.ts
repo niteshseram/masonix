@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { describe, it, expect } from 'vite-plus/test';
+import { describe, it, expect } from 'vitest';
 
 import { usePositioner } from '../../hooks/use-positioner';
 
