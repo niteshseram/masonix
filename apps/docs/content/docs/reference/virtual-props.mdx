@@ -56,3 +56,6 @@ interface MasonryVirtualHandle {
 ```
 
 When `velocityThreshold` is omitted, Masonix uses `1200` px/s.
+
+Negative and non-finite overscan, threshold, count, and velocity values are
+normalized to safe defaults. `totalItems` is never allowed below `items.length`.

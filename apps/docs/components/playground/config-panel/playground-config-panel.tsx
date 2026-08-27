@@ -316,7 +316,6 @@ export function ConfigPanel({
               value={config.role}
               options={[
                 { label: 'List', value: 'list' },
-                { label: 'Grid', value: 'grid' },
                 { label: 'None', value: 'none' },
               ]}
               onChange={(nextValue) => set('role', nextValue)}

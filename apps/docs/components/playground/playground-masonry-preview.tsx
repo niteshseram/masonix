@@ -110,7 +110,7 @@ export function MasonryPreview({
     columnWidth,
     maxColumns,
     gap,
-    role: config.role as 'list' | 'grid' | 'none',
+    role: config.role as 'list' | 'none',
     as: config.as as 'div' | 'ul' | 'section' | 'main',
     itemAs: config.itemAs as 'div' | 'li' | 'article',
     'aria-label': config.ariaLabel || undefined,

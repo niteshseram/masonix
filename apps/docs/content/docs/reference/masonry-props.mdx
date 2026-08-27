@@ -6,10 +6,10 @@ description: Props specific to the lightweight Masonry component.
 `Masonry` accepts all [Common Props](/docs/reference/common-props) plus these
 props.
 
-| Prop              | Type      | Default | Notes                                                             |
-| ----------------- | --------- | ------- | ----------------------------------------------------------------- |
-| `enableNative`    | `boolean` | `false` | Uses native CSS masonry when supported by the browser.            |
-| `columnClassName` | `string`  | -       | Class applied to each internal column wrapper in CSS-mode layout. |
+| Prop              | Type      | Default | Notes                                                                |
+| ----------------- | --------- | ------- | -------------------------------------------------------------------- |
+| `enableNative`    | `boolean` | `false` | Progressively enables CSS Grid Lanes after hydration when supported. |
+| `columnClassName` | `string`  | -       | Class applied to each internal column wrapper in CSS-mode layout.    |
 
 ## Native CSS masonry
 
@@ -23,8 +23,14 @@ props.
 />
 ```
 
-`enableNative` is progressive. Browsers without native support use the regular
-Masonix layout.
+`enableNative` is experimental and progressive. Masonix detects the current
+[`display: grid-lanes`](https://drafts.csswg.org/css-grid-3/) syntax after
+hydration. Browsers without support continue using the regular flex layout.
+Native mode preserves the same fixed track width passed to each renderer.
+
+Because browser support is still limited, do not depend on native mode for
+layout correctness. Treat it as an enhancement and test it in every browser
+you support.
 
 ## Column classes
 

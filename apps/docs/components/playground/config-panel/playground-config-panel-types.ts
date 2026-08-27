@@ -30,7 +30,7 @@ export interface Config {
   fixedGap: number;
   customGapBps: BpEntry[];
 
-  role: 'list' | 'grid' | 'none';
+  role: 'list' | 'none';
   enableNative: boolean;
 
   as: 'div' | 'ul' | 'section' | 'main';

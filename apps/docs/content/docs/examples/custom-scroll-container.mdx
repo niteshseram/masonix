@@ -28,3 +28,7 @@ surfaces.
 - The ref should point to the element that actually scrolls.
 - Keep the scroll container height constrained.
 - Use `min-h-0` in CSS grid/flex layouts so the panel can scroll.
+- Masonix observes the panel itself, so splitter and flex/grid size changes
+  update the virtual viewport without a window resize.
+- Masonix applies layout containment to its own virtual spacer and does not
+  modify the scroll container's `contain` style.

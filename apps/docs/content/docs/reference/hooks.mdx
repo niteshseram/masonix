@@ -20,7 +20,9 @@ const positioner = usePositioner({
 
 Creates a shortest-column positioner for a known column count, column width,
 and gap. Use this only when building custom layout primitives around Masonix
-placement behavior.
+placement behavior. `set(index, height)` accepts sparse indexes and updates an
+existing index instead of inserting it twice. Reported column heights exclude
+the trailing row gap.
 
 ## useItemHeights
 
@@ -32,7 +34,8 @@ const { measuredHeights, setItemRef } = useItemHeights(120);
 
 Tracks measured item heights with `ResizeObserver`. `MasonryBalanced` and
 `MasonryVirtual` use this internally. `setItemRef(node, index)` is stable and
-stores measured heights in a `Map<number, number>`.
+stores border-box heights in a `Map<number, number>`. Repeated unchanged
+measurements preserve the map identity.
 
 ## useScroller
 
@@ -47,7 +50,8 @@ const { scrollTop, viewportHeight, scrollVelocity } = useScroller(
 
 Tracks scroll position, viewport height, and scroll velocity for either the
 window or a custom scroll container. The second argument is the sampling FPS
-and defaults to `12`.
+and defaults to `12`. Custom container height changes are tracked with
+`ResizeObserver`.
 
 ## useScrollToIndex
 
