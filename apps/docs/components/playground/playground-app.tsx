@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import type { MasonryLayoutMode } from 'masonix';
 import {
   useScroller,
   type MasonryVirtualHandle,
@@ -207,6 +208,8 @@ export default function App() {
   const [shuffleKey, setShuffleKey] = useState(0);
   const [virtualDiagnostics, setVirtualDiagnostics] =
     useState<VirtualDiagnostics>(EMPTY_VIRTUAL_DIAGNOSTICS);
+  const [masonryLayoutMode, setMasonryLayoutMode] =
+    useState<MasonryLayoutMode>('fallback');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollHandleRef = useRef<MasonryVirtualHandle>(null);
   const { scrollVelocity } = useScroller(scrollContainerRef);
@@ -414,7 +417,11 @@ export default function App() {
       </header>
 
       <div className="relative flex min-h-0 flex-1">
-        <Sidebar config={config} setConfig={setConfig} />
+        <Sidebar
+          config={config}
+          setConfig={setConfig}
+          masonryLayoutMode={masonryLayoutMode}
+        />
 
         <ScrollArea
           className="min-w-0 flex-1"
@@ -452,6 +459,7 @@ export default function App() {
               }
               onVirtualRangeChange={handleVirtualRangeChange}
               onVirtualEndReached={handleVirtualEndReached}
+              onLayoutModeChange={setMasonryLayoutMode}
             />
           </div>
         </ScrollArea>

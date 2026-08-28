@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import type { MasonryLayoutMode } from 'masonix';
 import type React from 'react';
 
 import { BpEditor } from '@/components/playground/config-panel/playground-config-panel-bp-editor';
@@ -32,9 +33,11 @@ export { DEFAULT_CONFIG } from '@/components/playground/config-panel/playground-
 export function ConfigPanel({
   config,
   setConfig,
+  masonryLayoutMode,
 }: {
   config: Config;
   setConfig: React.Dispatch<React.SetStateAction<Config>>;
+  masonryLayoutMode: MasonryLayoutMode;
 }) {
   function set<K extends keyof Config>(key: K, value: Config[K]) {
     setConfig((prevConfig) => ({ ...prevConfig, [key]: value }));
@@ -323,11 +326,30 @@ export function ConfigPanel({
           </Field>
           {config.component === 'masonry' && (
             <Row label="Native CSS">
-              <Toggle
-                ariaLabel="Enable native CSS"
-                value={config.enableNative}
-                onChange={(nextValue) => set('enableNative', nextValue)}
-              />
+              <div className="flex items-center gap-2">
+                <span
+                  aria-live="polite"
+                  className={clsx(
+                    'px-1.5 py-0.5',
+                    'rounded-full',
+                    'text-[10px] font-semibold tracking-wide uppercase',
+                    config.enableNative && masonryLayoutMode === 'native'
+                      ? 'bg-emerald-500/15 text-emerald-400'
+                      : 'bg-zinc-800 text-zinc-500',
+                  )}
+                >
+                  {!config.enableNative
+                    ? 'Off'
+                    : masonryLayoutMode === 'native'
+                      ? 'Active'
+                      : 'Fallback'}
+                </span>
+                <Toggle
+                  ariaLabel="Enable native CSS"
+                  value={config.enableNative}
+                  onChange={(nextValue) => set('enableNative', nextValue)}
+                />
+              </div>
             </Row>
           )}
           <Field label="Container">

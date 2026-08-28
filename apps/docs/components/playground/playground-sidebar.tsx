@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import type { MasonryLayoutMode } from 'masonix';
 import { useState, useCallback, useEffect } from 'react';
 
 import {
@@ -53,9 +54,14 @@ const DEFAULT_WIDTH = 264;
 interface SidebarProps {
   config: Config;
   setConfig: React.Dispatch<React.SetStateAction<Config>>;
+  masonryLayoutMode: MasonryLayoutMode;
 }
 
-export function Sidebar({ config, setConfig }: SidebarProps) {
+export function Sidebar({
+  config,
+  setConfig,
+  masonryLayoutMode,
+}: SidebarProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [viewportWidth, setViewportWidth] = useState(1024);
@@ -195,7 +201,13 @@ export function Sidebar({ config, setConfig }: SidebarProps) {
               isOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
             )}
           >
-            {isOpen && <ConfigPanel config={config} setConfig={setConfig} />}
+            {isOpen && (
+              <ConfigPanel
+                config={config}
+                setConfig={setConfig}
+                masonryLayoutMode={masonryLayoutMode}
+              />
+            )}
           </div>
 
           {isOpen && !isMobile && (

@@ -9,6 +9,8 @@ description: TypeScript types exported from masonix and masonix/virtual.
 import type {
   MasonryProps,
   MasonryBalancedProps,
+  MasonryCommonProps,
+  MasonryLayoutMode,
   MasonryRenderProps,
   ResponsiveValue,
   PositionedItem,
@@ -44,6 +46,15 @@ type Photo = {
   render={({ data }) => <img src={data.src} alt="" />}
 />;
 ```
+
+## MasonryLayoutMode
+
+```ts
+type MasonryLayoutMode = 'fallback' | 'native';
+```
+
+`MasonryLayoutMode` reports the engine currently used by the lightweight
+`Masonry` component.
 
 ## PositionedItem
 

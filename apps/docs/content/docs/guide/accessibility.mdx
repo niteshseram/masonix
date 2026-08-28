@@ -67,19 +67,18 @@ the needed semantics.
 
 When `role="none"` is used, Masonix omits item roles and ARIA item metadata.
 
-For backward compatibility, Masonix still accepts `role="grid"` but normalizes
-it to list semantics. ARIA grids require row and gridcell ownership plus managed
-keyboard navigation; a visual masonry layout alone does not satisfy that
-interaction pattern. Prefer `role="list"` in new code.
+Masonix does not accept `role="grid"`. ARIA grids require row and gridcell
+ownership plus managed keyboard navigation; a visual masonry layout alone does
+not satisfy that interaction pattern.
 
 ## Item-count announcements
 
-Count announcements remain enabled by default for backward compatibility. Turn
-them off when filtering or pagination would create noisy screen reader output.
+Count announcements are opt-in so filtering and pagination do not create noisy
+screen reader output by default.
 
 ```tsx
 <MasonryVirtual
-  announceItemCountChanges={false}
+  announceItemCountChanges
   items={articles}
   render={({ data }) => <ArticleCard article={data} />}
 />

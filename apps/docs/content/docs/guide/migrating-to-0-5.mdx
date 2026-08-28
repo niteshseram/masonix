@@ -1,0 +1,57 @@
+---
+title: Migrating to 0.5
+description: Update accessibility defaults and native-layout diagnostics when moving from Masonix 0.4.
+---
+
+Masonix 0.5 removes legacy compatibility behavior and makes the active layout
+engine observable. Most applications only need to review accessibility props.
+
+## Remove the grid role
+
+The `role="grid"` compatibility value has been removed. Use the default list
+semantics, specify `role="list"`, or use `role="none"` when the surrounding
+markup already provides suitable semantics.
+
+```tsx
+<Masonry role="list" items={items} render={Card} />
+```
+
+ARIA grids require gridcell ownership and managed keyboard interaction, which
+a visual masonry layout does not provide.
+
+## Enable count announcements explicitly
+
+Item-count announcements now default to off. Enable them only when count
+changes provide useful context and will not create repetitive screen reader
+output.
+
+```tsx
+<MasonryVirtual
+  announceItemCountChanges
+  items={items}
+  render={Card}
+/>
+```
+
+## Observe native layout mode
+
+`enableNative` still progressively activates CSS Grid Lanes. Use the new
+callback or container data attribute to distinguish native layout from the
+fallback.
+
+```tsx
+<Masonry
+  enableNative
+  onLayoutModeChange={(mode) => setLayoutMode(mode)}
+  items={items}
+  render={Card}
+/>
+```
+
+The outer container exposes `data-masonix-layout="native"` while Grid Lanes is
+active and `data-masonix-layout="fallback"` otherwise.
+
+## Remove ignored component props
+
+`enableNative` and `columnClassName` are now typed only on `Masonry`. They were
+previously accepted but ignored by `MasonryBalanced` and `MasonryVirtual`.

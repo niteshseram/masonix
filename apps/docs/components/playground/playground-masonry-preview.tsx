@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
 import { Masonry, MasonryBalanced } from 'masonix';
-import type { MasonryRenderProps } from 'masonix';
+import type { MasonryLayoutMode, MasonryRenderProps } from 'masonix';
 import { MasonryVirtual } from 'masonix/virtual';
 import type {
   MasonryVirtualHandle,
@@ -51,6 +51,7 @@ interface MasonryPreviewProps {
   scrollHandleRef?: React.RefObject<MasonryVirtualHandle | null>;
   onVirtualRangeChange?: (range: MasonryVirtualRange) => void;
   onVirtualEndReached?: (range: MasonryVirtualRange) => void;
+  onLayoutModeChange?: (mode: MasonryLayoutMode) => void;
 }
 
 function ScrollSeekPlaceholder({
@@ -83,6 +84,7 @@ export function MasonryPreview({
   scrollHandleRef,
   onVirtualRangeChange,
   onVirtualEndReached,
+  onLayoutModeChange,
 }: MasonryPreviewProps) {
   const { columns, columnWidth, maxColumns, gap } = deriveLayoutProps(config);
 
@@ -156,6 +158,7 @@ export function MasonryPreview({
         items={items}
         render={Render}
         enableNative={config.enableNative}
+        onLayoutModeChange={onLayoutModeChange}
       />
     );
   }

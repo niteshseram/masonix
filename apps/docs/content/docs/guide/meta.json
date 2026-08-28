@@ -2,6 +2,7 @@
   "title": "Guide",
   "pages": [
     "getting-started",
+    "migrating-to-0-5",
     "concepts",
     "choosing-a-component",
     "responsive-layouts",

@@ -92,7 +92,9 @@ should keep a minimum width and Masonix can decide how many columns fit.
 ## Native CSS masonry
 
 `enableNative` lets Masonix use native CSS masonry when the browser supports
-it. Unsupported browsers continue using the regular Masonix layout.
+it. Unsupported browsers continue using the regular Masonix layout. The
+container's `data-masonix-layout` attribute always reports `native` or
+`fallback`.
 
 ```tsx
 <Masonry
@@ -100,6 +102,7 @@ it. Unsupported browsers continue using the regular Masonix layout.
   items={items}
   columns={3}
   gap={16}
+  onLayoutModeChange={(mode) => setLayoutMode(mode)}
   render={({ data }) => <Card item={data} />}
 />
 ```

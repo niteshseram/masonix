@@ -21,9 +21,9 @@ These props are available on all three components unless noted otherwise.
 | `as`                       | `ElementType`                                  | `"div"`        | All        | Outer container element.                                   |
 | `itemAs`                   | `ElementType`                                  | `"div"`        | All        | Item wrapper element.                                      |
 | `itemKey`                  | `(data: T, index: number) => string \| number` | index fallback | All        | Stable identity for React keys and measurements.           |
-| `role`                     | `"grid" \| "list" \| "none"`                  | `"list"`       | All        | `"grid"` is retained for compatibility and maps to list semantics. |
+| `role`                     | `"list" \| "none"`                             | `"list"`       | All        | ARIA role for the outer container.                         |
 | `aria-label`               | `string`                                       | -              | All        | Accessible label for the layout.                           |
-| `announceItemCountChanges` | `boolean`                                      | `true`         | All        | Announces item-count changes through a polite live region. |
+| `announceItemCountChanges` | `boolean`                                      | `false`        | All        | Announces item-count changes through a polite live region. |
 | `ref`                      | `Ref<HTMLElement>`                             | -              | All        | Ref for the outer container.                               |
 
 ## Render props

@@ -6,10 +6,11 @@ description: Props specific to the lightweight Masonry component.
 `Masonry` accepts all [Common Props](/docs/reference/common-props) plus these
 props.
 
-| Prop              | Type      | Default | Notes                                                                |
-| ----------------- | --------- | ------- | -------------------------------------------------------------------- |
-| `enableNative`    | `boolean` | `false` | Progressively enables CSS Grid Lanes after hydration when supported. |
-| `columnClassName` | `string`  | -       | Class applied to each internal column wrapper in CSS-mode layout.    |
+| Prop                 | Type                                     | Default | Notes                                                                |
+| -------------------- | ---------------------------------------- | ------- | -------------------------------------------------------------------- |
+| `enableNative`       | `boolean`                                | `false` | Progressively enables CSS Grid Lanes after hydration when supported. |
+| `onLayoutModeChange` | `(mode: MasonryLayoutMode) => void`      | -       | Reports whether native or fallback layout is active.                 |
+| `columnClassName`    | `string`                                 | -       | Class applied to each internal column wrapper in fallback layout.    |
 
 ## Native CSS masonry
 
@@ -27,6 +28,19 @@ props.
 [`display: grid-lanes`](https://drafts.csswg.org/css-grid-3/) syntax after
 hydration. Browsers without support continue using the regular flex layout.
 Native mode preserves the same fixed track width passed to each renderer.
+
+Use `onLayoutModeChange` when the interface needs to show which engine is
+active. The container also exposes the active mode through
+`data-masonix-layout="native"` or `data-masonix-layout="fallback"`.
+
+```tsx
+<Masonry
+  enableNative
+  onLayoutModeChange={(mode) => setLayoutMode(mode)}
+  items={items}
+  render={({ data }) => <Card item={data} />}
+/>
+```
 
 Because browser support is still limited, do not depend on native mode for
 layout correctness. Treat it as an enhancement and test it in every browser
