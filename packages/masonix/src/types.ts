@@ -60,6 +60,8 @@ export interface MasonryRenderProps<T> {
   width: number;
 }
 
+export type MasonryLayoutMode = 'fallback' | 'native';
+
 export interface MasonryVirtualRange {
   startIndex: number;
   stopIndex: number;
@@ -67,7 +69,7 @@ export interface MasonryVirtualRange {
   totalItems: number;
 }
 
-export interface MasonryProps<T = unknown> {
+export interface MasonryCommonProps<T = unknown> {
   // --- Data ---
   items: T[];
   render: React.ComponentType<MasonryRenderProps<T>>;
@@ -84,20 +86,15 @@ export interface MasonryProps<T = unknown> {
   defaultColumns?: number;
   defaultWidth?: number;
 
-  // --- Native CSS masonry ---
-  enableNative?: boolean;
-
   // --- Accessibility ---
-  /** `"grid"` is retained for compatibility and rendered with list semantics. */
-  role?: 'grid' | 'list' | 'none';
+  role?: 'list' | 'none';
   'aria-label'?: string;
-  /** Announce item-count changes through a polite live region. Defaults to true. */
+  /** Announce item-count changes through a polite live region. Defaults to false. */
   announceItemCountChanges?: boolean;
 
   // --- Styling ---
   className?: string;
   style?: React.CSSProperties;
-  columnClassName?: string;
   itemClassName?: string;
 
   // --- Container element ---
@@ -109,7 +106,15 @@ export interface MasonryProps<T = unknown> {
   itemKey?: (data: T, index: number) => string | number;
 }
 
-export interface MasonryBalancedProps<T = unknown> extends MasonryProps<T> {
+export interface MasonryProps<T = unknown> extends MasonryCommonProps<T> {
+  enableNative?: boolean;
+  onLayoutModeChange?: (mode: MasonryLayoutMode) => void;
+  columnClassName?: string;
+}
+
+export interface MasonryBalancedProps<
+  T = unknown,
+> extends MasonryCommonProps<T> {
   /** Pre-known height — skips two-phase measurement, enables zero-CLS SSR */
   getItemHeight?: (data: T, index: number, columnWidth: number) => number;
   estimatedItemHeight?: number;

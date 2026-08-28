@@ -120,7 +120,7 @@ function MasonryBalancedInner<T = unknown>(
     minItemHeight,
     role,
     'aria-label': ariaLabel,
-    announceItemCountChanges = true,
+    announceItemCountChanges = false,
     className,
     style,
     itemClassName,

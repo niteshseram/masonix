@@ -3,6 +3,7 @@ import React, {
   type ReactElement,
   memo,
   useCallback,
+  useEffect,
   useMemo,
 } from 'react';
 
@@ -86,9 +87,10 @@ function MasonryInner<T = unknown>(
     defaultColumns = 3,
     defaultWidth,
     enableNative,
+    onLayoutModeChange,
     role,
     'aria-label': ariaLabel,
-    announceItemCountChanges = true,
+    announceItemCountChanges = false,
     className,
     style,
     columnClassName,
@@ -132,7 +134,12 @@ function MasonryInner<T = unknown>(
     itemCount: items.length,
   });
 
-  const isNative = useNativeMasonry(enableNative);
+  const layoutMode = useNativeMasonry(enableNative);
+  const isNative = layoutMode === 'native';
+
+  useEffect(() => {
+    onLayoutModeChange?.(layoutMode);
+  }, [layoutMode, onLayoutModeChange]);
 
   // Round-robin distribution: item itemIndex → column itemIndex % columnCount
   const columnIndices = useMemo(() => {
@@ -173,6 +180,7 @@ function MasonryInner<T = unknown>(
           ref={mergedRef}
           className={className}
           style={nativeStyle}
+          data-masonix-layout={layoutMode}
           role={containerRole}
           aria-label={ariaLabel}
         >
@@ -222,6 +230,7 @@ function MasonryInner<T = unknown>(
         ref={mergedRef}
         className={className}
         style={containerStyle}
+        data-masonix-layout={layoutMode}
         role={containerRole}
         aria-label={ariaLabel}
       >

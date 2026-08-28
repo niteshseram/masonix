@@ -174,24 +174,20 @@ describe('Masonry', () => {
       }
     });
 
-    it('does not include a live region when announcements are disabled', () => {
+    it('does not include a live region by default', () => {
       const { container } = render(
-        <Masonry
-          items={['a', 'b']}
-          render={Card}
-          defaultWidth={900}
-          announceItemCountChanges={false}
-        />,
+        <Masonry items={['a', 'b']} render={Card} defaultWidth={900} />,
       );
       expect(container.querySelector('[aria-live="polite"]')).toBeNull();
     });
 
-    it('announces item-count changes by default', () => {
+    it('announces item-count changes when enabled', () => {
       const { container, rerender } = render(
         <Masonry
           items={['a', 'b']}
           render={Card}
           defaultWidth={900}
+          announceItemCountChanges
         />,
       );
 
@@ -200,26 +196,13 @@ describe('Masonry', () => {
           items={['a']}
           render={Card}
           defaultWidth={900}
+          announceItemCountChanges
         />,
       );
 
       const liveRegion = container.querySelector('[aria-live="polite"]');
       expect(liveRegion?.textContent).toBe('1 item');
       expect(attr(liveRegion, 'aria-atomic')).toBe('true');
-    });
-
-    it('normalizes the legacy grid role to list semantics', () => {
-      const { container } = render(
-        <Masonry
-          items={['a', 'b']}
-          render={Card}
-          defaultWidth={900}
-          role="grid"
-        />,
-      );
-
-      expect(attr(container.firstElementChild, 'role')).toBe('list');
-      expect(container.querySelectorAll('[role="listitem"]')).toHaveLength(2);
     });
   });
 
@@ -228,6 +211,7 @@ describe('Masonry', () => {
       const supports = vi.fn((property: string, value: string) => {
         return property === 'display' && value === 'grid-lanes';
       });
+      const onLayoutModeChange = vi.fn();
       vi.stubGlobal('CSS', { supports });
 
       const { container } = render(
@@ -237,13 +221,16 @@ describe('Masonry', () => {
           defaultWidth={400}
           columns={2}
           enableNative
+          onLayoutModeChange={onLayoutModeChange}
         />,
       );
 
       const masonry = container.firstElementChild as HTMLElement;
       expect(masonry.style.display).toBe('grid-lanes');
       expect(masonry.style.gridTemplateColumns).toBe('repeat(2, 200px)');
+      expect(masonry.dataset.masonixLayout).toBe('native');
       expect(supports).toHaveBeenCalledWith('display', 'grid-lanes');
+      expect(onLayoutModeChange).toHaveBeenLastCalledWith('native');
     });
 
     it('does not enable the obsolete grid-template masonry syntax', () => {
@@ -260,6 +247,9 @@ describe('Masonry', () => {
       expect((container.firstElementChild as HTMLElement).style.display).toBe(
         'flex',
       );
+      expect(
+        (container.firstElementChild as HTMLElement).dataset.masonixLayout,
+      ).toBe('fallback');
     });
 
     it('keeps the flex structure during server rendering', () => {
@@ -270,6 +260,7 @@ describe('Masonry', () => {
       );
 
       expect(html).toContain('display:flex');
+      expect(html).toContain('data-masonix-layout="fallback"');
       expect(html).not.toContain('grid-lanes');
     });
   });

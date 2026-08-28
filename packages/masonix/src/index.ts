@@ -10,6 +10,8 @@ export { useItemHeights } from './hooks/use-item-heights';
 export type {
   MasonryProps,
   MasonryBalancedProps,
+  MasonryCommonProps,
+  MasonryLayoutMode,
   MasonryRenderProps,
   ResponsiveValue,
   PositionedItem,

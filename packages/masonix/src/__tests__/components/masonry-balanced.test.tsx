@@ -327,6 +327,20 @@ describe('MasonryBalanced', () => {
       expect(liveRegion).toBeTruthy();
       expect(liveRegion?.getAttribute('aria-atomic')).toBe('true');
     });
+
+    it('does not include an aria-live region by default', () => {
+      const { container } = render(
+        <MasonryBalanced
+          items={makeItems(2)}
+          render={ItemRender}
+          columns={2}
+          gap={0}
+          getItemHeight={() => 100}
+        />,
+      );
+
+      expect(container.querySelector('[aria-live="polite"]')).toBeNull();
+    });
   });
 
   describe('shortest-first placement', () => {

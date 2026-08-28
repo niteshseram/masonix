@@ -611,6 +611,21 @@ describe('MasonryVirtual', () => {
       expect(container.querySelectorAll('[aria-posinset]')).toHaveLength(0);
       expect(screen.getByTestId('item-0')).toBeTruthy();
     });
+
+    it('does not include an aria-live region by default', () => {
+      const { container } = render(
+        <MasonryVirtual
+          items={makeItems(2)}
+          render={ItemRender}
+          columns={2}
+          gap={0}
+          defaultWidth={400}
+          getItemHeight={() => 100}
+        />,
+      );
+
+      expect(container.querySelector('[aria-live="polite"]')).toBeNull();
+    });
   });
 
   describe('measurement path', () => {
