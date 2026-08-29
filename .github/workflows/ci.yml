@@ -1,15 +1,15 @@
-name: Release
+name: CI
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  release:
-    name: Release
+  validate:
+    name: Validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -45,12 +45,3 @@ jobs:
 
       - name: Build documentation
         run: pnpm docs:build
-
-      - name: Create Release PR or Publish
-        uses: changesets/action@v1
-        with:
-          publish: pnpm release
-          createGithubReleases: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
