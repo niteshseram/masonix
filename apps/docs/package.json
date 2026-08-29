@@ -5,8 +5,9 @@
   "scripts": {
     "build": "next build --webpack",
     "dev": "next dev",
+    "generate": "fumadocs-mdx",
     "start": "next start",
-    "tc": "tsc --noEmit"
+    "tc": "pnpm generate && tsc --noEmit"
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-rc.0",
