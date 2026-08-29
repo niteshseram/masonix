@@ -314,7 +314,7 @@ describe('MasonryVirtual', () => {
       expect(scrollEl.style.contain).toBe('strict');
     });
 
-    it('does not cancel smooth scrollToIndex during scroll events', () => {
+    it('does not cancel smooth scrollToIndex during layout rerenders', () => {
       let scrollY = 0;
       Object.defineProperty(window, 'scrollY', {
         get: () => scrollY,
@@ -326,7 +326,7 @@ describe('MasonryVirtual', () => {
       });
       const scrollRef = React.createRef<MasonryVirtualHandle>();
 
-      render(
+      const { rerender } = render(
         <MasonryVirtual
           items={makeItems(20)}
           render={ItemRender}
@@ -343,12 +343,72 @@ describe('MasonryVirtual', () => {
       });
       expect(window.scrollTo).toHaveBeenCalledTimes(1);
 
+      rerender(
+        <MasonryVirtual
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          scrollRef={scrollRef}
+        />,
+      );
+
+      expect(window.scrollTo).toHaveBeenCalledTimes(1);
+
       act(() => {
         scrollY = 100;
         window.dispatchEvent(new Event('scroll'));
       });
 
       expect(window.scrollTo).toHaveBeenCalledTimes(1);
+    });
+
+    it('corrects scroll alignment when target height changes', () => {
+      Object.defineProperty(window, 'innerHeight', {
+        value: 300,
+        configurable: true,
+      });
+      const scrollRef = React.createRef<MasonryVirtualHandle>();
+      const items = makeItems(20);
+
+      const { rerender } = render(
+        <MasonryVirtual
+          items={items}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          scrollRef={scrollRef}
+        />,
+      );
+
+      act(() => {
+        scrollRef.current?.scrollToIndex(5, { align: 'center' });
+      });
+      expect(window.scrollTo).toHaveBeenLastCalledWith({
+        top: 400,
+        behavior: 'instant',
+      });
+
+      rerender(
+        <MasonryVirtual
+          items={items}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={(_item, index) => (index === 5 ? 200 : 100)}
+          scrollRef={scrollRef}
+        />,
+      );
+
+      expect(window.scrollTo).toHaveBeenLastCalledWith({
+        top: 450,
+        behavior: 'instant',
+      });
     });
 
     it('applies an initial scroll index after the viewport is ready', () => {

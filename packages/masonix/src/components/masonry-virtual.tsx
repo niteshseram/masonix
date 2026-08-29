@@ -512,6 +512,7 @@ function MasonryVirtualInner<T = unknown>(
     index: number;
     options?: Parameters<MasonryVirtualHandle['scrollToIndex']>[1];
     prevTop: number;
+    prevHeight: number;
   } | null>(null);
   const handleRef = useRef(handle);
   handleRef.current = handle;
@@ -527,15 +528,15 @@ function MasonryVirtualInner<T = unknown>(
       return;
     }
 
-    if (
-      item.top === pending.prevTop &&
-      isItemAtScrollTarget(item, pending.options)
-    ) {
-      pendingReScrollRef.current = null;
+    if (item.top === pending.prevTop && item.height === pending.prevHeight) {
+      if (isItemAtScrollTarget(item, pending.options)) {
+        pendingReScrollRef.current = null;
+      }
       return;
     }
 
     pending.prevTop = item.top;
+    pending.prevHeight = item.height;
     handleRef.current.scrollToIndex(pending.index, {
       ...pending.options,
       smooth: false,
@@ -552,6 +553,7 @@ function MasonryVirtualInner<T = unknown>(
         index,
         options,
         prevTop: item?.top ?? -1,
+        prevHeight: item?.height ?? -1,
       };
       handle.scrollToIndex(index, options);
     },
