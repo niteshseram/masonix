@@ -70,11 +70,25 @@ function getTargetScrollTop(
   item: PositionedItem,
   containerOffset: number,
   viewportHeight: number,
+  currentScrollTop: number,
   align: NonNullable<
     Parameters<MasonryVirtualHandle['scrollToIndex']>[1]
   >['align'],
 ): number {
+  const itemTop = containerOffset + item.top;
+  const itemBottom = itemTop + item.height;
+
   switch (align) {
+    case 'auto':
+      if (
+        itemTop >= currentScrollTop &&
+        itemBottom <= currentScrollTop + viewportHeight
+      ) {
+        return currentScrollTop;
+      }
+      return item.height > viewportHeight || itemTop < currentScrollTop
+        ? itemTop
+        : itemBottom - viewportHeight;
     case 'center':
       return containerOffset + item.top - (viewportHeight - item.height) / 2;
     case 'end':
@@ -197,6 +211,7 @@ function MasonryVirtualInner<T = unknown>(
     overscanBy = DEFAULT_OVERSCAN,
     scrollContainer,
     totalItems,
+    initialScrollIndex,
     scrollRef,
     onRangeChange,
     onEndReached,
@@ -473,6 +488,7 @@ function MasonryVirtualInner<T = unknown>(
         item,
         containerOffset,
         viewportHeight,
+        currentScrollTop,
         align,
       );
       const maxScrollTop = getMaxScrollTop(container);
@@ -526,22 +542,62 @@ function MasonryVirtualInner<T = unknown>(
     });
   }, [isItemAtScrollTarget, positionedItems, positioner]);
 
+  const scrollToIndex = useCallback(
+    (
+      index: number,
+      options?: Parameters<MasonryVirtualHandle['scrollToIndex']>[1],
+    ) => {
+      const item = positioner.get(index);
+      pendingReScrollRef.current = {
+        index,
+        options,
+        prevTop: item?.top ?? -1,
+      };
+      handle.scrollToIndex(index, options);
+    },
+    [handle, positioner],
+  );
+
   useImperativeHandle(
     scrollRef,
     () => ({
       ...handle,
-      scrollToIndex: (index, options) => {
-        const item = positioner.get(index);
-        pendingReScrollRef.current = {
-          index,
-          options,
-          prevTop: item?.top ?? -1,
-        };
-        handle.scrollToIndex(index, options);
-      },
+      scrollToIndex,
     }),
-    [handle, positioner],
+    [handle, scrollToIndex],
   );
+
+  const initialScrollIndexRef = useRef(initialScrollIndex);
+  const hasAppliedInitialScrollRef = useRef(false);
+  useEffect(() => {
+    if (
+      hasAppliedInitialScrollRef.current ||
+      initialScrollIndexRef.current === undefined ||
+      viewportHeight === 0
+    ) {
+      return;
+    }
+
+    const initialPosition = initialScrollIndexRef.current;
+    const rawIndex =
+      typeof initialPosition === 'number'
+        ? initialPosition
+        : initialPosition.index;
+    if (!Number.isFinite(rawIndex) || rawIndex < 0) {
+      hasAppliedInitialScrollRef.current = true;
+      return;
+    }
+
+    const index = Math.floor(rawIndex);
+    if (!positioner.get(index)) {
+      return;
+    }
+
+    const align =
+      typeof initialPosition === 'number' ? undefined : initialPosition.align;
+    hasAppliedInitialScrollRef.current = true;
+    scrollToIndex(index, { align });
+  }, [positioner, scrollToIndex, viewportHeight]);
 
   const announcement = useMasonryItemCountAnnouncement(
     items.length,

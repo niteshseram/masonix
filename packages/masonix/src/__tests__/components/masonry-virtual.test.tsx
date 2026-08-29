@@ -351,6 +351,131 @@ describe('MasonryVirtual', () => {
       expect(window.scrollTo).toHaveBeenCalledTimes(1);
     });
 
+    it('applies an initial scroll index after the viewport is ready', () => {
+      Object.defineProperty(window, 'innerHeight', {
+        value: 300,
+        configurable: true,
+      });
+
+      render(
+        <MasonryVirtual
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          initialScrollIndex={{ index: 5, align: 'center' }}
+        />,
+      );
+
+      expect(window.scrollTo).toHaveBeenCalledWith({
+        top: 400,
+        behavior: 'instant',
+      });
+    });
+
+    it('waits for an asynchronously loaded initial scroll item', () => {
+      Object.defineProperty(window, 'innerHeight', {
+        value: 300,
+        configurable: true,
+      });
+
+      const { rerender } = render(
+        <MasonryVirtual
+          items={makeItems(2)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          initialScrollIndex={5}
+        />,
+      );
+
+      expect(window.scrollTo).not.toHaveBeenCalled();
+
+      rerender(
+        <MasonryVirtual
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          initialScrollIndex={5}
+        />,
+      );
+
+      expect(window.scrollTo).toHaveBeenCalledWith({
+        top: 500,
+        behavior: 'instant',
+      });
+    });
+
+    it('does not treat initial scroll index updates as navigation', () => {
+      Object.defineProperty(window, 'innerHeight', {
+        value: 300,
+        configurable: true,
+      });
+
+      const { rerender } = render(
+        <MasonryVirtual
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          initialScrollIndex={2}
+        />,
+      );
+
+      expect(window.scrollTo).toHaveBeenCalledTimes(1);
+
+      rerender(
+        <MasonryVirtual
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          initialScrollIndex={8}
+        />,
+      );
+
+      expect(window.scrollTo).toHaveBeenLastCalledWith({
+        top: 200,
+        behavior: 'instant',
+      });
+      expect(window.scrollTo).not.toHaveBeenCalledWith({
+        top: 800,
+        behavior: 'instant',
+      });
+    });
+
+    it('ignores an invalid initial scroll index', () => {
+      Object.defineProperty(window, 'innerHeight', {
+        value: 300,
+        configurable: true,
+      });
+
+      render(
+        <MasonryVirtual
+          items={makeItems(20)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          initialScrollIndex={Number.NaN}
+        />,
+      );
+
+      expect(window.scrollTo).not.toHaveBeenCalled();
+    });
+
     it('calls onEndReached when the visible range reaches the threshold', () => {
       const onEndReached = vi.fn();
       Object.defineProperty(window, 'innerHeight', {

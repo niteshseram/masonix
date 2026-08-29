@@ -127,6 +127,7 @@ export interface MasonryVirtualProps<
   overscanBy?: number;
   scrollContainer?: React.RefObject<HTMLElement | null>;
   totalItems?: number;
+  initialScrollIndex?: number | MasonryInitialScrollPosition;
   scrollRef?: React.Ref<MasonryVirtualHandle>;
   onRangeChange?: (startIndex: number, stopIndex: number) => void;
   onEndReached?: (info: MasonryVirtualRange) => void;
@@ -139,9 +140,23 @@ export interface MasonryVirtualProps<
   };
 }
 
+export type MasonryScrollAlign = 'start' | 'center' | 'end' | 'auto';
+
+export interface MasonryScrollOptions {
+  smooth?: boolean;
+}
+
+export interface MasonryScrollToIndexOptions extends MasonryScrollOptions {
+  align?: MasonryScrollAlign;
+}
+
+export interface MasonryInitialScrollPosition {
+  index: number;
+  align?: MasonryScrollAlign;
+}
+
 export interface MasonryVirtualHandle {
-  scrollToIndex(
-    index: number,
-    options?: { align?: 'start' | 'center' | 'end'; smooth?: boolean },
-  ): void;
+  scrollToIndex(index: number, options?: MasonryScrollToIndexOptions): void;
+  scrollToOffset(offset: number, options?: MasonryScrollOptions): void;
+  scrollBy(delta: number, options?: MasonryScrollOptions): void;
 }

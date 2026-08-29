@@ -7,6 +7,10 @@ export { useScrollToIndex } from './hooks/use-scroll-to-index';
 
 // Types
 export type {
+  MasonryInitialScrollPosition,
+  MasonryScrollAlign,
+  MasonryScrollOptions,
+  MasonryScrollToIndexOptions,
   MasonryVirtualProps,
   MasonryVirtualHandle,
   MasonryVirtualRange,

@@ -10,6 +10,10 @@ import { useScrollToIndex } from '../../hooks/use-scroll-to-index';
 
 let lastScrollToArgs: { top: number; behavior: string } | null = null;
 const originalScrollTo = window.scrollTo;
+const originalScrollYDescriptor = Object.getOwnPropertyDescriptor(
+  window,
+  'scrollY',
+);
 
 beforeEach(() => {
   lastScrollToArgs = null;
@@ -47,6 +51,9 @@ afterEach(() => {
     writable: true,
     configurable: true,
   });
+  if (originalScrollYDescriptor) {
+    Object.defineProperty(window, 'scrollY', originalScrollYDescriptor);
+  }
   vi.restoreAllMocks();
 });
 
@@ -148,6 +155,43 @@ describe('useScrollToIndex', () => {
     expect(lastScrollToArgs!.top).toBe(Math.max(0, expected));
   });
 
+  it("scrollToIndex with align='auto' does not move a fully visible item", () => {
+    const positioner = makePositionerWithItems();
+    const containerRef = createContainerRef();
+
+    const { result } = renderHook(() =>
+      useScrollToIndex({
+        positioner,
+        containerRef,
+        getScrollContainer: () => window,
+        viewportHeight: 800,
+      }),
+    );
+
+    result.current.scrollToIndex(0, { align: 'auto' });
+
+    expect(lastScrollToArgs).toBeNull();
+  });
+
+  it("scrollToIndex with align='auto' reveals an item below the viewport", () => {
+    const positioner = makePositionerWithItems();
+    const containerRef = createContainerRef();
+
+    const { result } = renderHook(() =>
+      useScrollToIndex({
+        positioner,
+        containerRef,
+        getScrollContainer: () => window,
+        viewportHeight: 100,
+      }),
+    );
+
+    const item = positioner.get(3)!;
+    result.current.scrollToIndex(3, { align: 'auto' });
+
+    expect(lastScrollToArgs!.top).toBe(50 + item.top + item.height - 100);
+  });
+
   it('scrollToIndex with smooth=true uses smooth scrolling', () => {
     const positioner = makePositionerWithItems();
     const containerRef = createContainerRef();
@@ -208,6 +252,65 @@ describe('useScrollToIndex', () => {
     );
 
     result.current.scrollToIndex(999);
+    expect(lastScrollToArgs).toBeNull();
+  });
+
+  it('scrollToOffset scrolls to an absolute container offset', () => {
+    const positioner = makePositionerWithItems();
+    const containerRef = createContainerRef();
+
+    const { result } = renderHook(() =>
+      useScrollToIndex({
+        positioner,
+        containerRef,
+        getScrollContainer: () => window,
+        viewportHeight: 800,
+      }),
+    );
+
+    result.current.scrollToOffset(420, { smooth: true });
+
+    expect(lastScrollToArgs).toEqual({ top: 420, behavior: 'smooth' });
+  });
+
+  it('scrollBy scrolls relative to the current container offset', () => {
+    Object.defineProperty(window, 'scrollY', {
+      value: 300,
+      configurable: true,
+    });
+    const positioner = makePositionerWithItems();
+    const containerRef = createContainerRef();
+
+    const { result } = renderHook(() =>
+      useScrollToIndex({
+        positioner,
+        containerRef,
+        getScrollContainer: () => window,
+        viewportHeight: 800,
+      }),
+    );
+
+    result.current.scrollBy(-125);
+
+    expect(lastScrollToArgs).toEqual({ top: 175, behavior: 'instant' });
+  });
+
+  it('ignores non-finite offsets', () => {
+    const positioner = makePositionerWithItems();
+    const containerRef = createContainerRef();
+
+    const { result } = renderHook(() =>
+      useScrollToIndex({
+        positioner,
+        containerRef,
+        getScrollContainer: () => window,
+        viewportHeight: 800,
+      }),
+    );
+
+    result.current.scrollToOffset(Number.NaN);
+    result.current.scrollBy(Number.POSITIVE_INFINITY);
+
     expect(lastScrollToArgs).toBeNull();
   });
 

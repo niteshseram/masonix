@@ -5,7 +5,6 @@
 ### Minor Changes
 
 - 05a9ec7: Prepare Masonix 0.5 with explicit accessibility defaults and observable native layout mode.
-
   - Remove the legacy `role="grid"` compatibility value.
   - Make item-count announcements opt-in.
   - Restrict `enableNative` and `columnClassName` to the `Masonry` prop type where they are implemented.
@@ -16,7 +15,6 @@
 ### Patch Changes
 
 - b1aaab4: Harden masonry layout correctness and browser behavior.
-
   - Use the current CSS Grid Lanes syntax and enable it only after hydration.
   - Normalize the legacy ARIA grid role to list semantics and allow item-count announcements to be disabled.
   - Measure item and container border boxes without updating unchanged heights.
