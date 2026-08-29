@@ -98,6 +98,7 @@ function MasonryInner<T = unknown>(
     as,
     itemAs,
     itemKey,
+    ...containerProps
   } = props;
 
   const { ref: internalRef, width: containerWidth } =
@@ -177,6 +178,7 @@ function MasonryInner<T = unknown>(
     return (
       <>
         <Container
+          {...containerProps}
           ref={mergedRef}
           className={className}
           style={nativeStyle}
@@ -227,6 +229,7 @@ function MasonryInner<T = unknown>(
   return (
     <>
       <Container
+        {...containerProps}
         ref={mergedRef}
         className={className}
         style={containerStyle}

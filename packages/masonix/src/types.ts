@@ -69,7 +69,10 @@ export interface MasonryVirtualRange {
   totalItems: number;
 }
 
-export interface MasonryCommonProps<T = unknown> {
+export interface MasonryCommonProps<T = unknown> extends Omit<
+  React.HTMLAttributes<HTMLElement>,
+  'children' | 'dangerouslySetInnerHTML' | 'role'
+> {
   // --- Data ---
   items: T[];
   render: React.ComponentType<MasonryRenderProps<T>>;

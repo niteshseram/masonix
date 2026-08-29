@@ -5,6 +5,8 @@ export { MasonryBalanced } from './components/masonry-balanced';
 // Hooks
 export { usePositioner } from './hooks/use-positioner';
 export { useItemHeights } from './hooks/use-item-heights';
+export type { UsePositionerOptions } from './hooks/use-positioner';
+export type { UseItemHeightsResult } from './hooks/use-item-heights';
 
 // Types
 export type {

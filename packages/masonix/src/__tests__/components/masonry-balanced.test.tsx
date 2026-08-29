@@ -101,6 +101,28 @@ describe('MasonryBalanced', () => {
       );
       expect(container.querySelector('section')).toBeTruthy();
     });
+
+    it('forwards standard HTML attributes to the container', () => {
+      const { container } = render(
+        <MasonryBalanced
+          id="balanced-results"
+          aria-describedby="balanced-description"
+          data-layout-owner="search"
+          items={makeItems(2)}
+          render={ItemRender}
+          columns={2}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+        />,
+      );
+      const masonry = container.firstElementChild as HTMLElement;
+
+      expect(masonry.id).toBe('balanced-results');
+      expect(masonry.getAttribute('aria-describedby')).toBe(
+        'balanced-description',
+      );
+      expect(masonry.dataset.layoutOwner).toBe('search');
+    });
   });
 
   describe('getItemHeight fast path', () => {

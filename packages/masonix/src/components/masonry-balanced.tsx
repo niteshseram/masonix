@@ -127,6 +127,7 @@ function MasonryBalancedInner<T = unknown>(
     as,
     itemAs,
     itemKey,
+    ...containerProps
   } = props;
 
   const { ref: internalRef, width: containerWidth } =
@@ -248,6 +249,7 @@ function MasonryBalancedInner<T = unknown>(
   return (
     <>
       <Container
+        {...containerProps}
         ref={mergedRef}
         className={className}
         style={containerStyle}

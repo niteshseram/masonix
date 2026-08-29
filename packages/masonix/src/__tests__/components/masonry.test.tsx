@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -34,6 +34,26 @@ describe('Masonry', () => {
         />,
       );
       expect(screen.getAllByTestId('card')).toHaveLength(4);
+    });
+
+    it('forwards standard HTML attributes to the container', () => {
+      const onClick = vi.fn();
+      const { container } = render(
+        <Masonry
+          id="featured-products"
+          data-layout-owner="catalog"
+          onClick={onClick}
+          items={['a']}
+          render={Card}
+          defaultWidth={300}
+        />,
+      );
+      const masonry = container.firstElementChild as HTMLElement;
+
+      expect(masonry.id).toBe('featured-products');
+      expect(masonry.dataset.layoutOwner).toBe('catalog');
+      fireEvent.click(masonry);
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
     it('distributes items round-robin: item i → column i % columnCount', () => {

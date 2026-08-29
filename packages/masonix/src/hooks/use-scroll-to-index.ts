@@ -3,7 +3,7 @@ import { useCallback, useRef } from 'react';
 import { getScrollOffset, getScrollTop, scrollTo } from '../core/scroll';
 import type { MasonryVirtualHandle, Positioner } from '../types';
 
-interface UseScrollToIndexOptions {
+export interface UseScrollToIndexOptions {
   positioner: Positioner;
   containerRef: React.RefObject<HTMLElement | null>;
   getScrollContainer: () => HTMLElement | Window | null;

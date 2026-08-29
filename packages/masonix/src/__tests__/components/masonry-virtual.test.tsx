@@ -156,6 +156,26 @@ describe('MasonryVirtual', () => {
       );
       expect(container.querySelector('section')).toBeTruthy();
     });
+
+    it('forwards standard HTML attributes to the container', () => {
+      const { container } = render(
+        <MasonryVirtual
+          id="virtual-feed"
+          aria-describedby="feed-description"
+          data-layout-owner="activity"
+          items={makeItems(2)}
+          render={ItemRender}
+          columns={1}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+        />,
+      );
+      const masonry = container.firstElementChild as HTMLElement;
+
+      expect(masonry.id).toBe('virtual-feed');
+      expect(masonry.getAttribute('aria-describedby')).toBe('feed-description');
+      expect(masonry.dataset.layoutOwner).toBe('activity');
+    });
   });
 
   describe('virtualization', () => {
@@ -626,6 +646,30 @@ describe('MasonryVirtual', () => {
       );
 
       expect(onRangeChange).toHaveBeenCalledWith(0, 7);
+    });
+
+    it('reports an initial single-item range', () => {
+      const onRangeChange = vi.fn();
+      Object.defineProperty(window, 'innerHeight', {
+        get: () => 100,
+        configurable: true,
+      });
+
+      render(
+        <MasonryVirtual
+          items={makeItems(1)}
+          render={ItemRender}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={() => 100}
+          overscanBy={0}
+          onRangeChange={onRangeChange}
+        />,
+      );
+
+      expect(onRangeChange).toHaveBeenCalledTimes(1);
+      expect(onRangeChange).toHaveBeenCalledWith(0, 0);
     });
 
     it('renders scroll-seek placeholders when velocity is above threshold', () => {

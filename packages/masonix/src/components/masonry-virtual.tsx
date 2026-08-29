@@ -217,6 +217,7 @@ function MasonryVirtualInner<T = unknown>(
     onEndReached,
     endReachedThreshold = 0,
     scrollSeek,
+    ...containerProps
   } = props;
 
   const containerElRef = useRef<HTMLElement | null>(null);
@@ -415,17 +416,19 @@ function MasonryVirtualInner<T = unknown>(
   ]);
 
   // Notify range changes
-  const prevRangeRef = useRef<[number, number]>([0, 0]);
+  const prevRangeRef = useRef<[number, number] | null>(null);
   useEffect(() => {
     if (
+      visibleItems.length > 0 &&
       onRangeChange &&
-      (prevRangeRef.current[0] !== startIndex ||
+      (prevRangeRef.current === null ||
+        prevRangeRef.current[0] !== startIndex ||
         prevRangeRef.current[1] !== stopIndex)
     ) {
       prevRangeRef.current = [startIndex, stopIndex];
       onRangeChange(startIndex, stopIndex);
     }
-  }, [onRangeChange, startIndex, stopIndex]);
+  }, [onRangeChange, startIndex, stopIndex, visibleItems.length]);
 
   const totalItemCount =
     totalItems === undefined || !Number.isFinite(totalItems)
@@ -629,6 +632,7 @@ function MasonryVirtualInner<T = unknown>(
   return (
     <>
       <Container
+        {...containerProps}
         ref={mergedRef}
         className={className}
         style={containerStyle}
