@@ -1,6 +1,6 @@
 {
   "name": "masonix",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "React masonry components for responsive grids, measured layouts, and virtualized feeds",
   "keywords": [
     "grid",
