@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import type { MasonryVirtualHandle } from 'masonix/virtual';
+import type { MasonryScrollAlign, MasonryVirtualHandle } from 'masonix/virtual';
 import { useEffect, useState } from 'react';
 
 interface ScrollToIndexBarProps {
@@ -7,7 +7,7 @@ interface ScrollToIndexBarProps {
   scrollHandleRef: React.RefObject<MasonryVirtualHandle | null>;
 }
 
-const ALIGN_OPTIONS = ['start', 'center', 'end'] as const;
+const ALIGN_OPTIONS = ['start', 'center', 'end', 'auto'] as const;
 
 const inputCls = clsx(
   'px-1.5 py-1',
@@ -25,7 +25,7 @@ export function ScrollToIndexBar({
   const [itemNumber, setItemNumber] = useState(() =>
     Math.max(1, Math.ceil(itemCount / 2)),
   );
-  const [align, setAlign] = useState<'start' | 'center' | 'end'>('start');
+  const [align, setAlign] = useState<MasonryScrollAlign>('start');
   const [smooth, setSmooth] = useState(false);
 
   useEffect(() => {

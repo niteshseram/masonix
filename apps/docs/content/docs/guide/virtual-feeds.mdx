@@ -54,6 +54,21 @@ prefetching.
 scroll velocity is above the threshold. Placeholders receive the same width and
 height budget, so the layout does not collapse.
 
+## Restore an initial position
+
+Use `initialScrollIndex` to restore a feed without waiting for a ref effect.
+
+```tsx
+<MasonryVirtual
+  items={items}
+  initialScrollIndex={{ index: savedIndex, align: 'auto' }}
+  render={({ data }) => <FeedCard item={data} />}
+/>
+```
+
+The initial jump runs once after the requested item is loaded. Use
+`scrollRef.current.scrollToIndex()` for navigation after mount.
+
 ## Practical notes
 
 - Use realistic `estimatedItemHeight` values.

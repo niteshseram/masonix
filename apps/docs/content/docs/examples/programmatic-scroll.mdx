@@ -7,7 +7,7 @@ import { ProgrammaticScrollDemo } from '@/components/docs/docs-live-examples';
 import { DocsSourceCode } from '@/components/docs/docs-source-code';
 
 Use `scrollRef` when a product needs jump controls, search results, keyboard
-navigation, or a "back to top" action.
+navigation, relative movement, or a "back to top" action.
 
 Each card in this demo shows its item number, and the most recent jump target is
 highlighted after the control runs.
@@ -28,6 +28,9 @@ timeline jumps, and admin tools.
 
 ## Notes
 
-- `align` can be `start`, `center`, or `end`.
+- `align` can be `start`, `center`, `end`, or `auto`. `auto` does not move an
+  item that is already fully visible.
 - `smooth` uses browser smooth scrolling.
+- `scrollToOffset()` uses an absolute scroll-container offset, while
+  `scrollBy()` moves relative to the current offset.
 - For custom panels, also pass `scrollContainer`.

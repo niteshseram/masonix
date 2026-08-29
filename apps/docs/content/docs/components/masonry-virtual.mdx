@@ -75,9 +75,29 @@ scrollRef.current?.scrollToIndex(42, {
   align: 'center',
   smooth: true,
 });
+
+scrollRef.current?.scrollBy(320, { smooth: true });
+scrollRef.current?.scrollToOffset(0, { smooth: true });
 ```
 
-Pass the ref with `scrollRef={scrollRef}`.
+Pass the ref with `scrollRef={scrollRef}`. Use `align: 'auto'` to leave an
+already visible item in place and otherwise reveal it with the smallest useful
+scroll.
+
+## Initial position
+
+```tsx
+<MasonryVirtual
+  items={items}
+  initialScrollIndex={{ index: 42, align: 'center' }}
+  render={({ data }) => <FeedCard item={data} />}
+/>
+```
+
+`initialScrollIndex` accepts an index or an index-and-alignment object. It is
+applied once, without animation, after the viewport and requested item are
+available. This lets an asynchronously loaded first batch restore a saved
+location without turning later prop updates into unexpected jumps.
 
 ## Common mistakes
 

@@ -66,9 +66,10 @@ const handle = useScrollToIndex({
 });
 ```
 
-Builds a `MasonryVirtualHandle` from positioned items and scroll container
-state. `MasonryVirtual` exposes the result through `scrollRef`; most apps
-should use that component prop instead of calling this hook directly.
+Builds a `MasonryVirtualHandle` with `scrollToIndex()`, `scrollToOffset()`, and
+`scrollBy()` from positioned items and scroll container state.
+`MasonryVirtual` exposes the result through `scrollRef`; most apps should use
+that component prop instead of calling this hook directly.
 
 ## Recommendation
 
