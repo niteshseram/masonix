@@ -49,3 +49,24 @@ other column-aware rendering.
 ```
 
 Breakpoint keys are minimum container widths in pixels.
+
+## Container attributes
+
+Standard HTML attributes not listed above are forwarded to the outer
+container. This includes `id`, `title`, additional `aria-*` attributes,
+`data-*` attributes, and event handlers.
+
+```tsx
+<Masonry
+  id="search-results"
+  data-layout-owner="search"
+  aria-describedby="search-results-description"
+  onKeyDown={handleLayoutKeyDown}
+  items={results}
+  render={ResultCard}
+/>
+```
+
+Masonix owns the container children and does not accept
+`dangerouslySetInnerHTML`. The `role` prop remains limited to `list` and
+`none` so the generated item semantics stay valid.

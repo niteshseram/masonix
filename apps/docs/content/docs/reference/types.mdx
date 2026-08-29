@@ -15,6 +15,8 @@ import type {
   ResponsiveValue,
   PositionedItem,
   Positioner,
+  UseItemHeightsResult,
+  UsePositionerOptions,
 } from 'masonix';
 ```
 
@@ -29,8 +31,13 @@ import type {
   MasonryVirtualProps,
   MasonryVirtualHandle,
   MasonryVirtualRange,
+  ScrollerState,
+  UseScrollToIndexOptions,
 } from 'masonix/virtual';
 ```
+
+The option and result interfaces for every exported hook are public so wrapper
+libraries do not need to duplicate Masonix signatures.
 
 ## Generic components
 

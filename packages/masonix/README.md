@@ -32,6 +32,8 @@ yarn add masonix
 ```
 
 Masonix supports React 18 and React 19. It does not require a stylesheet.
+Standard HTML, ARIA, data, and event attributes are forwarded to each
+component's outer container.
 
 ## Quick start
 
@@ -115,10 +117,17 @@ Components are generic over your item type, and common prop/handle types are
 exported from the package entry points.
 
 ```ts
-import type { MasonryRenderProps, MasonryBalancedProps } from 'masonix';
+import type {
+  MasonryRenderProps,
+  MasonryBalancedProps,
+  UseItemHeightsResult,
+  UsePositionerOptions,
+} from 'masonix';
 
 import type {
   MasonryVirtualHandle,
   MasonryVirtualRange,
+  ScrollerState,
+  UseScrollToIndexOptions,
 } from 'masonix/virtual';
 ```

@@ -13,7 +13,7 @@ all [Balanced Props](/docs/reference/balanced-props), plus these virtual props.
 | `totalItems`          | `number`                                                  | `items.length` | Total count for accessibility metadata when not every item is loaded. |
 | `initialScrollIndex`  | `number \| { index: number; align?: MasonryScrollAlign }` | -              | Initial item position, applied once when the item is available.       |
 | `scrollRef`           | `Ref<MasonryVirtualHandle>`                               | -              | Imperative scroll handle.                                             |
-| `onRangeChange`       | `(startIndex: number, stopIndex: number) => void`         | -              | Called when rendered range changes after overscan.                    |
+| `onRangeChange`       | `(startIndex: number, stopIndex: number) => void`         | -              | Called for the initial non-empty range and later range changes.       |
 | `onEndReached`        | `(info: MasonryVirtualRange) => void`                     | -              | Called when the rendered range reaches the end threshold.             |
 | `endReachedThreshold` | `number`                                                  | `0`            | Remaining loaded item count before `onEndReached` fires.              |
 | `scrollSeek`          | `{ velocityThreshold?, placeholder? }`                    | -              | Renders placeholders during fast scrolling.                           |

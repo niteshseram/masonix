@@ -1,0 +1,67 @@
+---
+title: Migrating to 1.0
+description: Adopt the stable Masonix 1.0 API from a 0.6 application.
+---
+
+Masonix 1.0 stabilizes the component and hook contracts introduced throughout
+the 0.x releases. Applications using 0.6 do not need to rename components,
+props, imports, or refs.
+
+## Existing component usage remains valid
+
+The three component entry points are unchanged:
+
+```tsx
+import { Masonry, MasonryBalanced } from 'masonix';
+import { MasonryVirtual } from 'masonix/virtual';
+```
+
+React 18 and React 19 remain supported. The native Grid Lanes path remains
+opt-in through `enableNative`, with the fallback used whenever the browser does
+not support `display: grid-lanes`.
+
+## Pass container attributes directly
+
+All components now forward standard HTML, ARIA, data, and event attributes to
+their outer container.
+
+```tsx
+<Masonry
+  id="featured-products"
+  data-layout-owner="catalog"
+  aria-describedby="featured-products-description"
+  onClick={handleLayoutClick}
+  items={products}
+  render={ProductCard}
+/>
+```
+
+Masonix still owns `children`, `dangerouslySetInnerHTML`, and the narrowed
+`role` contract.
+
+## Import public hook types
+
+The existing hooks are unchanged, but their option and result types can now be
+imported by name.
+
+```ts
+import type { UseItemHeightsResult, UsePositionerOptions } from 'masonix';
+import type { ScrollerState, UseScrollToIndexOptions } from 'masonix/virtual';
+```
+
+## Review the initial virtual range callback
+
+`onRangeChange` now reports the initial `0–0` range when a single item is
+rendered. In 0.6, that range matched the internal sentinel and was accidentally
+skipped. Empty layouts still do not emit a rendered range.
+
+If your callback assumed it would not run for a one-item feed, remove that
+workaround.
+
+## Release checklist
+
+- Keep `itemKey` stable for data that can reorder or filter.
+- Keep `estimatedItemHeight` representative for virtual feeds.
+- Treat `data-masonix-layout` as the authoritative native/fallback diagnostic.
+- Test keyboard and screen-reader flow when visual packing changes item
+  placement.

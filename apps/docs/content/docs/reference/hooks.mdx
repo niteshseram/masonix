@@ -9,7 +9,7 @@ integrations, custom diagnostics, and specialized layout surfaces.
 ## usePositioner
 
 ```ts
-import { usePositioner } from 'masonix';
+import { usePositioner, type UsePositionerOptions } from 'masonix';
 
 const positioner = usePositioner({
   columnCount: 3,
@@ -27,7 +27,7 @@ the trailing row gap.
 ## useItemHeights
 
 ```ts
-import { useItemHeights } from 'masonix';
+import { useItemHeights, type UseItemHeightsResult } from 'masonix';
 
 const { measuredHeights, setItemRef } = useItemHeights(120);
 ```
@@ -40,7 +40,7 @@ measurements preserve the map identity.
 ## useScroller
 
 ```ts
-import { useScroller } from 'masonix/virtual';
+import { useScroller, type ScrollerState } from 'masonix/virtual';
 
 const { scrollTop, viewportHeight, scrollVelocity } = useScroller(
   scrollContainerRef,
@@ -56,7 +56,10 @@ and defaults to `12`. Custom container height changes are tracked with
 ## useScrollToIndex
 
 ```ts
-import { useScrollToIndex } from 'masonix/virtual';
+import {
+  useScrollToIndex,
+  type UseScrollToIndexOptions,
+} from 'masonix/virtual';
 
 const handle = useScrollToIndex({
   positioner,
