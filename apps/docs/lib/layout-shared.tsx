@@ -14,11 +14,6 @@ export function baseOptions(): BaseLayoutProps {
     },
     links: [
       {
-        text: 'Docs',
-        url: '/docs/guide/getting-started',
-        active: 'nested-url',
-      },
-      {
         text: 'Playground',
         url: '/playground',
         active: 'url',
