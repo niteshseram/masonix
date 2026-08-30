@@ -1,6 +1,7 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
 
+import { DocsSidebarAccessibility } from '@/components/docs/docs-sidebar-accessibility';
 import { source } from '@/lib/docs-source';
 import { baseOptions } from '@/lib/layout-shared';
 
@@ -14,6 +15,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         prefetch: false,
       }}
     >
+      <DocsSidebarAccessibility />
       {children}
     </DocsLayout>
   );

@@ -6,6 +6,7 @@ dist/
 apps/*/dist/
 apps/*/.next/
 apps/*/.source/
+next-env.d.ts
 
 # Vite
 .vite/

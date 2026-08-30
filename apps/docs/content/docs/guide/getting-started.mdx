@@ -4,6 +4,7 @@ description: Install Masonix and render a responsive masonry layout with real ca
 ---
 
 import { BasicLayoutDemo } from '@/components/docs/docs-live-examples';
+import { DocsSourceCode } from '@/components/docs/docs-source-code';
 
 Masonix 1.0 gives you three stable React components for masonry layouts: a
 lightweight CSS-first grid, a measured balanced layout, and a virtualized feed
@@ -21,52 +22,11 @@ owns card markup, imagery, styling, and data loading.
 
 ## First layout
 
-```tsx
-import { Masonry } from 'masonix';
-
-type Task = {
-  id: string;
-  title: string;
-  detail: string;
-  area: string;
-  status: string;
-  accent: string;
-};
-
-function TaskCard({ task }: { task: Task }) {
-  return (
-    <article className="relative overflow-hidden rounded-xl border bg-white p-4 shadow-sm">
-      <div
-        className="absolute inset-y-0 left-0 w-1"
-        style={{ background: task.accent }}
-      />
-      <div className="flex items-center justify-between gap-3 pl-2">
-        <span className="text-xs font-medium text-zinc-500">{task.area}</span>
-        <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs">
-          {task.status}
-        </span>
-      </div>
-      <div className="pl-2 pt-2">
-        <h3 className="text-sm font-semibold">{task.title}</h3>
-        <p className="mt-2 text-sm leading-6 text-zinc-500">{task.detail}</p>
-      </div>
-    </article>
-  );
-}
-
-export function TaskGrid({ tasks }: { tasks: Task[] }) {
-  return (
-    <Masonry
-      items={tasks}
-      columnWidth={190}
-      maxColumns={3}
-      gap={14}
-      itemKey={(task) => task.id}
-      render={({ data }) => <TaskCard task={data} />}
-    />
-  );
-}
-```
+<DocsSourceCode
+  file="components/docs/examples/docs-example-basic-layout.tsx"
+  snippet="basic-layout"
+  title="TaskGrid.tsx"
+/>
 
 <BasicLayoutDemo />
 

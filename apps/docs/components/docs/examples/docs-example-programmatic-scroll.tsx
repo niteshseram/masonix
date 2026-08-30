@@ -1,8 +1,8 @@
 'use client';
 
+// docs:start programmatic-scroll
 import { clsx } from 'clsx';
 import { MasonryVirtual, type MasonryVirtualHandle } from 'masonix/virtual';
-// docs:start programmatic-scroll
 import { useRef, useState } from 'react';
 // docs:end programmatic-scroll
 

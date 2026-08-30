@@ -27,8 +27,8 @@ export const PRESETS: {
   config: Partial<Config>;
 }[] = [
   {
-    name: 'Tall gallery',
-    description: 'Two columns with varied heights',
+    name: 'Editorial stack',
+    description: 'Two columns with varied cover heights',
     config: {
       component: 'masonry',
       columnMode: 'fixed',
@@ -43,8 +43,8 @@ export const PRESETS: {
     },
   },
   {
-    name: 'Photo wall',
-    description: 'Auto-fit columns with even cards',
+    name: 'Cover index',
+    description: 'Auto-fit columns with even covers',
     config: {
       component: 'masonry',
       columnMode: 'columnWidth',
@@ -58,8 +58,8 @@ export const PRESETS: {
     },
   },
   {
-    name: 'Note cards',
-    description: 'Measured cards with mixed heights',
+    name: 'Studio board',
+    description: 'Measured project notes with mixed heights',
     config: {
       component: 'masonry-balanced',
       columnMode: 'fixed',
@@ -72,8 +72,8 @@ export const PRESETS: {
     },
   },
   {
-    name: 'Large feed',
-    description: 'Virtualized 10,000-item layout',
+    name: 'Virtual archive',
+    description: 'Virtualized 10,000-record collection',
     config: {
       component: 'masonry-virtual',
       columnMode: 'custom',

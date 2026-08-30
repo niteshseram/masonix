@@ -1,27 +1,21 @@
 import type { MetadataRoute } from 'next';
 
 import { source } from '@/lib/docs-source';
+import { toAbsoluteUrl } from '@/lib/seo/seo-config';
 
-const SITE_URL = 'https://masonix.vercel.app';
-
-function toAbsoluteUrl(pathname: string) {
-  return new URL(pathname, SITE_URL).toString();
-}
+const fallbackLastModified = new Date('2026-08-30');
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: toAbsoluteUrl('/'),
+      lastModified: fallbackLastModified,
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
-      url: toAbsoluteUrl('/docs'),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
       url: toAbsoluteUrl('/playground'),
+      lastModified: fallbackLastModified,
       changeFrequency: 'weekly',
       priority: 0.8,
     },
@@ -29,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const docsRoutes: MetadataRoute.Sitemap = source.getPages().map((page) => ({
     url: toAbsoluteUrl(page.url),
+    lastModified: page.data.lastModified ?? fallbackLastModified,
     changeFrequency: 'weekly',
     priority: 0.7,
   }));

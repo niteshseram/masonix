@@ -1,9 +1,15 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import type { ReactNode } from 'react';
 
 import './globals.css';
-import type { ReactNode } from 'react';
+import {
+  seoDefaultDescription,
+  seoHomeTitle,
+  seoSiteName,
+  seoSiteUrl,
+} from '@/lib/seo/seo-config';
 
 const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 const umamiScriptUrl =
@@ -12,13 +18,26 @@ const umamiScriptUrl =
 const isProduction = process.env.VERCEL_ENV === 'production';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://masonix.vercel.app'),
+  metadataBase: seoSiteUrl,
   title: {
-    default: 'masonix',
-    template: '%s | masonix',
+    default: seoHomeTitle,
+    template: `%s — ${seoSiteName}`,
   },
-  description:
-    'React masonry components for responsive grids, measured layouts, and virtualized feeds.',
+  description: seoDefaultDescription,
+  applicationName: seoSiteName,
+  authors: [{ name: 'Nitesh Seram' }],
+  creator: 'Nitesh Seram',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },

@@ -18,7 +18,7 @@ import { ScrollToIndexBar } from '@/components/playground/playground-scroll-to-i
 import { Sidebar } from '@/components/playground/playground-sidebar';
 import { ScrollArea } from '@/components/playground/ui/playground-scroll-area';
 import { TABS, PRESETS } from '@/lib/playground/playground-config';
-import { makePhotos } from '@/lib/playground/playground-demo-data';
+import { makePlaygroundItems } from '@/lib/playground/playground-demo-data';
 
 interface VirtualDiagnostics extends MasonryVirtualRange {
   endReachedCount: number;
@@ -215,7 +215,7 @@ export default function App() {
   const { scrollVelocity } = useScroller(scrollContainerRef);
 
   const items = useMemo(
-    () => makePhotos(config.itemCount, shuffleKey, config),
+    () => makePlaygroundItems(config.itemCount, shuffleKey, config),
     [config, shuffleKey],
   );
   const activeTab = TABS.find((tab) => tab.value === config.component)!;
@@ -429,13 +429,61 @@ export default function App() {
           viewportClassName="h-full overflow-x-hidden"
         >
           <div
-            className={clsx('min-h-full', 'p-6')}
+            className={clsx('min-h-full', 'p-4 md:p-5')}
             style={{
               backgroundImage:
-                'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
+                'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
+              backgroundSize: '32px 32px',
             }}
           >
+            <div
+              className={clsx(
+                'flex min-w-0 items-center gap-3',
+                'mb-4 pb-3',
+                'border-b',
+                'border-zinc-800/80',
+              )}
+            >
+              <h1
+                className={clsx(
+                  'shrink-0',
+                  'text-sm font-semibold tracking-[-0.01em]',
+                  'text-zinc-100',
+                )}
+              >
+                Masonix Playground
+              </h1>
+              <span
+                aria-hidden
+                className={clsx(
+                  'hidden h-3 w-px shrink-0 sm:block',
+                  'bg-zinc-800',
+                )}
+              />
+              <p
+                className={clsx(
+                  'hidden min-w-0 truncate md:block',
+                  'text-xs',
+                  'text-zinc-500',
+                )}
+              >
+                Tune placement, measurement, and windowing against real content
+                hierarchy.
+              </p>
+              <div
+                className={clsx(
+                  'flex shrink-0 items-center gap-2',
+                  'ml-auto',
+                  'font-mono text-[10px]',
+                  'text-zinc-500',
+                )}
+              >
+                <span
+                  className={clsx('size-1.5', 'rounded-full', 'bg-emerald-400')}
+                />
+                {items.length.toLocaleString()} records
+              </div>
+            </div>
             {config.component === 'masonry-virtual' && (
               <>
                 <ScrollToIndexBar

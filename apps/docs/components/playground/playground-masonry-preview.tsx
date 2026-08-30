@@ -12,8 +12,11 @@ import type {
   Config,
   BpEntry,
 } from '@/components/playground/config-panel/playground-config-panel';
-import { ColorBlock, TextCard } from '@/components/playground/playground-cards';
-import type { Photo } from '@/lib/playground/playground-demo-data';
+import {
+  EditorialCard,
+  ProjectNoteCard,
+} from '@/components/playground/playground-cards';
+import type { PlaygroundItem } from '@/lib/playground/playground-demo-data';
 
 function bpsToRecord(breakpoints: BpEntry[]): Record<number, number> {
   const breakpointRecord: Record<number, number> = {};
@@ -45,7 +48,7 @@ function deriveLayoutProps(config: Config) {
 }
 
 interface MasonryPreviewProps {
-  items: Photo[];
+  items: PlaygroundItem[];
   config: Config;
   scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
   scrollHandleRef?: React.RefObject<MasonryVirtualHandle | null>;
@@ -56,20 +59,38 @@ interface MasonryPreviewProps {
 
 function ScrollSeekPlaceholder({
   height,
-}: MasonryRenderProps<Photo> & { height: number }) {
+}: MasonryRenderProps<PlaygroundItem> & { height: number }) {
   return (
     <div
       className={clsx(
-        'overflow-hidden',
-        'rounded-2xl border',
-        'border-zinc-800 bg-zinc-900',
+        'flex flex-col overflow-hidden',
+        'p-4',
+        'rounded-xl border',
+        'border-zinc-800 bg-zinc-950',
       )}
       style={{ height }}
     >
       <div
         className={clsx(
-          'h-full',
-          'bg-gradient-to-br from-zinc-800 via-zinc-900 to-zinc-800',
+          'h-2 w-20',
+          'rounded-full',
+          'bg-zinc-800',
+          'animate-pulse',
+        )}
+      />
+      <div
+        className={clsx(
+          'mt-auto h-4 w-3/4',
+          'rounded-sm',
+          'bg-zinc-800',
+          'animate-pulse',
+        )}
+      />
+      <div
+        className={clsx(
+          'mt-2 h-2 w-1/2',
+          'rounded-full',
+          'bg-zinc-900',
           'animate-pulse',
         )}
       />
@@ -88,7 +109,8 @@ export function MasonryPreview({
 }: MasonryPreviewProps) {
   const { columns, columnWidth, maxColumns, gap } = deriveLayoutProps(config);
 
-  const Render = config.cardStyle === 'text-card' ? TextCard : ColorBlock;
+  const Render =
+    config.cardStyle === 'text-card' ? ProjectNoteCard : EditorialCard;
 
   const handleRangeChange = React.useCallback(
     (startIndex: number, stopIndex: number) => {
@@ -104,7 +126,7 @@ export function MasonryPreview({
 
   const getItemHeight =
     config.useKnownHeights && config.cardStyle === 'color-block'
-      ? (photo: unknown) => (photo as Photo).height
+      ? (item: unknown) => (item as PlaygroundItem).height
       : undefined;
 
   const commonProps = {
@@ -116,7 +138,7 @@ export function MasonryPreview({
     as: config.as as 'div' | 'ul' | 'section' | 'main',
     itemAs: config.itemAs as 'div' | 'li' | 'article',
     'aria-label': config.ariaLabel || undefined,
-    itemKey: (photo: unknown) => (photo as Photo).id,
+    itemKey: (item: unknown) => (item as PlaygroundItem).id,
   };
 
   const minItemHeight = config.useMinItemHeight

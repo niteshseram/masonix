@@ -1,9 +1,9 @@
 'use client';
 
+// docs:start scroll-seek-placeholders
 import { clsx } from 'clsx';
 import type { MasonryRenderProps } from 'masonix';
 import { MasonryVirtual } from 'masonix/virtual';
-// docs:start scroll-seek-placeholders
 import { useRef } from 'react';
 // docs:end scroll-seek-placeholders
 

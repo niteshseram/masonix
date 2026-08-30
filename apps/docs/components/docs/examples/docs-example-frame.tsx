@@ -11,9 +11,9 @@ export function DemoFrame({ children, className }: DemoFrameProps) {
     <div
       className={clsx(
         'not-prose min-w-0 max-w-full overflow-hidden',
-        'p-4',
-        'rounded-xl border shadow-sm',
-        'border-fd-border bg-fd-muted/20 shadow-fd-foreground/5',
+        'p-3 sm:p-4',
+        'rounded-lg border',
+        'border-fd-border bg-fd-muted/25',
         className,
       )}
     >

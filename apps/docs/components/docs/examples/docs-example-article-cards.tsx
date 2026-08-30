@@ -14,36 +14,49 @@ type Article = {
   section: string;
   excerpt: string;
   readTime: string;
-  accent: string;
 };
 
 function ArticleCard({ article }: { article: Article }) {
   return (
     <article
       className={clsx(
-        'overflow-hidden',
+        'min-w-0',
         'p-5',
-        'rounded-xl border',
-        'border-zinc-200 bg-white text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50',
+        'rounded-lg border',
+        'border-zinc-200/80 bg-white text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50',
       )}
     >
-      <div className="flex items-center gap-2">
+      <div
+        className={clsx(
+          'flex items-center justify-between gap-3',
+          'pb-4',
+          'border-b',
+          'border-zinc-200/70 dark:border-zinc-800',
+        )}
+      >
         <span
-          className="size-2 rounded-full"
-          style={{ background: article.accent }}
-        />
-        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          className={clsx(
+            'font-mono text-[11px] font-medium uppercase tracking-[0.14em]',
+            'text-zinc-500 dark:text-zinc-400',
+          )}
+        >
           {article.section}
-        </p>
+        </span>
+        <span className={clsx('text-xs', 'text-zinc-500 dark:text-zinc-400')}>
+          {article.readTime} read
+        </span>
       </div>
-      <h3 className="mt-4 text-base font-semibold leading-6">
+      <h3 className={clsx('mt-4', 'text-base font-semibold leading-6')}>
         {article.title}
       </h3>
-      <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+      <p
+        className={clsx(
+          'mt-3',
+          'text-sm leading-6',
+          'text-zinc-600 dark:text-zinc-400',
+        )}
+      >
         {article.excerpt}
-      </p>
-      <p className="mt-5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-        {article.readTime} read
       </p>
     </article>
   );
@@ -71,7 +84,6 @@ const articleItems: Article[] = [
     excerpt:
       'A practical guide to windowing, measurement, and when placeholders improve the scroll experience.',
     readTime: '7 min',
-    accent: '#60a5fa',
   },
   {
     id: 'image-geometry',
@@ -80,7 +92,6 @@ const articleItems: Article[] = [
     excerpt:
       'Known width and height values let the layout settle before media finishes loading.',
     readTime: '4 min',
-    accent: '#34d399',
   },
   {
     id: 'semantic-grids',
@@ -89,7 +100,6 @@ const articleItems: Article[] = [
     excerpt:
       'Source order, list roles, and item metadata matter more than the visual column a card lands in.',
     readTime: '5 min',
-    accent: '#f472b6',
   },
   {
     id: 'responsive-breakpoints',
@@ -98,7 +108,6 @@ const articleItems: Article[] = [
     excerpt:
       'Use breakpoint maps when the component lives inside panels, sidebars, or resizable workspaces.',
     readTime: '6 min',
-    accent: '#fbbf24',
   },
   {
     id: 'card-composition',
@@ -107,7 +116,6 @@ const articleItems: Article[] = [
     excerpt:
       'Small differences in copy, badges, and media ratios add up. Balanced placement keeps the page calm.',
     readTime: '8 min',
-    accent: '#a78bfa',
   },
 ];
 

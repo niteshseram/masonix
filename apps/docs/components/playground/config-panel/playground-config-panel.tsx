@@ -75,8 +75,8 @@ export function ConfigPanel({
             <Seg
               value={config.cardStyle}
               options={[
-                { label: 'Color block', value: 'color-block' },
-                { label: 'Text card', value: 'text-card' },
+                { label: 'Editorial', value: 'color-block' },
+                { label: 'Project note', value: 'text-card' },
               ]}
               onChange={(nextValue) => set('cardStyle', nextValue)}
             />

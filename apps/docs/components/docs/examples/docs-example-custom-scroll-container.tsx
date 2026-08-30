@@ -1,8 +1,8 @@
 'use client';
 
+// docs:start custom-scroll-container
 import { clsx } from 'clsx';
 import { MasonryVirtual } from 'masonix/virtual';
-// docs:start custom-scroll-container
 import { useRef } from 'react';
 // docs:end custom-scroll-container
 

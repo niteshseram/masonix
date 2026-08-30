@@ -1,28 +1,64 @@
+import { clsx } from 'clsx';
+
 export function Logo({
   size,
 }: Readonly<{
   size?: number;
 }>) {
+  const logoHeight = size ?? 20;
+
   return (
-    <div className="flex items-center gap-2">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 32 32"
-        fill="none"
-        width={size ?? 20}
-        height={size ?? 20}
-        aria-hidden="true"
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 164 36"
+      fill="none"
+      width={logoHeight * (164 / 36)}
+      height={logoHeight}
+      role="img"
+      aria-label="Masonix"
+      className={clsx(
+        'masonix-logo-text',
+        'block shrink-0',
+        'text-zinc-950 dark:text-zinc-100',
+      )}
+    >
+      <g
+        transform="translate(1 2)"
+        className="fill-blue-600 dark:fill-blue-400"
       >
-        <rect x="1" y="2" width="8" height="15" rx="2" fill="#2563eb" />
-        <rect x="1" y="19" width="8" height="9" rx="2" fill="#60a5fa" />
-        <rect x="12" y="2" width="8" height="8" rx="2" fill="#93c5fd" />
-        <rect x="12" y="12" width="8" height="16" rx="2" fill="#3b82f6" />
-        <rect x="23" y="2" width="8" height="11" rx="2" fill="#60a5fa" />
-        <rect x="23" y="15" width="8" height="13" rx="2" fill="#bfdbfe" />
-      </svg>
-      <span className="masonix-logo-text font-mono text-sm font-bold text-zinc-950 dark:text-zinc-100">
-        masonix
-      </span>
-    </div>
+        <rect x="2" y="2" width="8" height="11" rx="2" />
+        <rect x="2" y="15" width="8" height="15" rx="2" />
+        <rect x="12" y="2" width="8" height="24" rx="2" />
+        <rect x="22" y="2" width="8" height="8" rx="2" />
+        <rect x="22" y="12" width="8" height="18" rx="2" />
+      </g>
+      <g
+        stroke="currentColor"
+        strokeWidth="3.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M43 27V17C43 13.9 44.9 12 47.6 12C50.3 12 52 14 52 17V27" />
+        <path d="M52 17C52 14.2 53.8 12.5 56.4 12.5C59.2 12.5 61 14.5 61 17.3V27" />
+        <path d="M78 14.5C76.6 12.9 74.8 12 72.7 12C68.8 12 66 15.3 66 19.5C66 23.7 68.8 27 72.7 27C74.8 27 76.6 26.1 78 24.5" />
+        <path d="M78 12V27" />
+        <path d="M94 13.6C92.6 12.6 90.9 12 89.1 12C86.5 12 84.8 13.4 84.8 15.3C84.8 17.8 87.3 18.5 89.7 19.2C92.1 19.9 94.4 20.8 94.4 23.3C94.4 25.7 92.1 27.2 89.1 27.2C87.2 27.2 85.2 26.5 83.8 25.3" />
+        <ellipse cx="106.5" cy="19.5" rx="6.5" ry="7.5" />
+        <path d="M118 27V12" />
+        <path d="M118 16.7C119.3 13.7 121.6 12 124.4 12C128 12 130 14.4 130 18V27" />
+        <path d="M140 13V27" />
+        <path d="M148 12.8L160 27" />
+        <path d="M160 12.8L155.7 17.9" />
+        <path d="M152.3 21.9L148 27" />
+      </g>
+      <rect
+        x="138.3"
+        y="7.8"
+        width="3.4"
+        height="3.4"
+        rx="1"
+        fill="currentColor"
+      />
+    </svg>
   );
 }

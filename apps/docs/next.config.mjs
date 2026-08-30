@@ -6,6 +6,15 @@ const withMDX = createMDX();
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['masonix'],
+  async redirects() {
+    return [
+      {
+        source: '/docs',
+        destination: '/docs/guide/getting-started',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withMDX(nextConfig);

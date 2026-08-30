@@ -5,8 +5,9 @@
   "scripts": {
     "build": "vp run --filter './packages/*' build",
     "dev": "vp run --filter masonix dev",
-    "docs": "vp run --filter masonix-docs dev",
+    "docs": "pnpm -F masonix build && vp run --parallel --filter masonix-docs... dev",
     "docs:build": "vp run --filter masonix-docs... build",
+    "docs:dev": "pnpm run docs",
     "format": "vp fmt . --write",
     "format:check": "vp fmt . --check",
     "gh-release": "gh release create \"v$(node -p \"require('./packages/masonix/package.json').version\")\" --generate-notes",

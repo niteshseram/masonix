@@ -5,9 +5,11 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { source } from '@/lib/docs-source';
+import { createSeoMetadata, seoDefaultDescription } from '@/lib/seo/seo-config';
 
 interface PageProps {
   params: Promise<{
@@ -16,20 +18,24 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  return [{ slug: [] }, ...source.generateParams()];
+  return source.generateParams();
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const page = source.getPage(slug ?? ['guide', 'getting-started']);
   if (!page) {
     notFound();
   }
 
-  return {
+  return createSeoMetadata({
     title: page.data.title,
-    description: page.data.description,
-  };
+    description: page.data.description ?? seoDefaultDescription,
+    pathname: page.url,
+    type: 'article',
+  });
 }
 
 export default async function Page({ params }: PageProps) {

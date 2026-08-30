@@ -50,6 +50,7 @@ function IconChevronRight() {
 const MIN_WIDTH = 220;
 const MAX_WIDTH = 480;
 const DEFAULT_WIDTH = 264;
+const RESIZE_STEP = 16;
 
 interface SidebarProps {
   config: Config;
@@ -124,11 +125,33 @@ export function Sidebar({
     [width],
   );
 
+  function handleResizeKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    let nextWidth = width;
+
+    if (event.key === 'ArrowLeft') {
+      nextWidth = Math.max(MIN_WIDTH, width - RESIZE_STEP);
+    } else if (event.key === 'ArrowRight') {
+      nextWidth = Math.min(MAX_WIDTH, width + RESIZE_STEP);
+    } else if (event.key === 'Home') {
+      nextWidth = MIN_WIDTH;
+    } else if (event.key === 'End') {
+      nextWidth = MAX_WIDTH;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    setWidth(nextWidth);
+  }
+
   return (
     <>
       {!isOpen && (
         <button
           type="button"
+          aria-label="Open config panel"
+          aria-controls="playground-config-panel"
+          aria-expanded={false}
           onClick={() => setIsOpen(true)}
           title="Open config"
           className={clsx(
@@ -146,7 +169,9 @@ export function Sidebar({
       {isMobile && isOpen && (
         <button
           type="button"
-          aria-label="Close config"
+          aria-label="Close config panel"
+          aria-controls="playground-config-panel"
+          aria-expanded={true}
           className={clsx(
             'absolute inset-0 z-10',
             'p-0',
@@ -159,6 +184,7 @@ export function Sidebar({
 
       {isOpen && (
         <div
+          id="playground-config-panel"
           className={clsx(
             'relative flex shrink-0 flex-col',
             'border-r',
@@ -180,6 +206,9 @@ export function Sidebar({
           >
             <button
               type="button"
+              aria-label="Collapse config panel"
+              aria-controls="playground-config-panel"
+              aria-expanded={true}
               onClick={() => setIsOpen((prevOpen) => !prevOpen)}
               title={isOpen ? 'Collapse' : 'Expand config'}
               className={clsx(
@@ -211,18 +240,26 @@ export function Sidebar({
           </div>
 
           {isOpen && !isMobile && (
-            <button
-              type="button"
+            <div
+              role="separator"
+              tabIndex={0}
               aria-label="Resize config panel"
+              aria-controls="playground-config-panel"
+              aria-orientation="vertical"
+              aria-valuemin={MIN_WIDTH}
+              aria-valuemax={MAX_WIDTH}
+              aria-valuenow={width}
+              aria-valuetext={`${width} pixels`}
               onMouseDown={handleResizeStart}
+              onKeyDown={handleResizeKeyDown}
               className={clsx(
                 'absolute top-0 right-0 h-full w-1',
                 'p-0',
                 'border-0',
                 'bg-transparent',
-                'cursor-col-resize',
+                'cursor-col-resize outline-none',
                 'transition-colors',
-                'hover:bg-blue-500/30 active:bg-blue-500/50',
+                'hover:bg-blue-500/30 focus-visible:bg-blue-500/40 focus-visible:ring-2 focus-visible:ring-blue-400 active:bg-blue-500/50',
               )}
             />
           )}

@@ -14,6 +14,31 @@ body {
   background: var(--color-fd-background);
 }
 
+.masonix-home-lab-grid {
+  scrollbar-color: color-mix(
+      in srgb,
+      var(--color-fd-foreground) 18%,
+      transparent
+    )
+    transparent;
+  scrollbar-width: thin;
+}
+
+.masonix-home-lab-grid::-webkit-scrollbar {
+  width: 7px;
+}
+
+.masonix-home-lab-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.masonix-home-lab-grid::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-fd-foreground) 18%, transparent);
+  background-clip: padding-box;
+}
+
 .masonix-hero-content {
   min-height: min(720px, calc(100dvh - 7rem));
 }

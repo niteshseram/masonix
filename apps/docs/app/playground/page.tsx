@@ -1,12 +1,16 @@
 import type { Metadata } from 'next';
 
 import PlaygroundApp from '@/components/playground/playground-app';
+import { createSeoMetadata } from '@/lib/seo/seo-config';
 
-export const metadata: Metadata = {
+const playgroundDescription =
+  'Tune Masonix layouts, virtual scrolling, measured heights, and responsive masonry options.';
+
+export const metadata: Metadata = createSeoMetadata({
   title: 'Playground',
-  description:
-    'Tune Masonix layouts, virtual scrolling, measured heights, and responsive masonry options.',
-};
+  description: playgroundDescription,
+  pathname: '/playground',
+});
 
 export default function PlaygroundPage() {
   return (

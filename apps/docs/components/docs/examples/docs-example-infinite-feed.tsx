@@ -1,8 +1,8 @@
 'use client';
 
+// docs:start infinite-feed
 import { clsx } from 'clsx';
 import { MasonryVirtual } from 'masonix/virtual';
-// docs:start infinite-feed
 import { useCallback, useRef } from 'react';
 // docs:end infinite-feed
 import { useState } from 'react';

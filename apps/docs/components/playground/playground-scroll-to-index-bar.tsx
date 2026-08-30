@@ -39,7 +39,7 @@ export function ScrollToIndexBar({
   return (
     <div
       className={clsx(
-        'flex items-center gap-2',
+        'flex flex-wrap items-center gap-2',
         'mb-5 px-3 py-2',
         'rounded-lg',
         'bg-zinc-900/50',
