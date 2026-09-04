@@ -35,6 +35,7 @@ function isWindow(container: HTMLElement | Window): container is Window {
 export function useScroller(
   scrollContainer?: React.RefObject<HTMLElement | null>,
   fps = 12,
+  trackVelocity = true,
 ): ScrollerState {
   const storeRef = useRef<ScrollStore | null>(null);
   const stateRef = useRef<ScrollerState>(SERVER_SNAPSHOT);
@@ -89,6 +90,9 @@ export function useScroller(
     };
 
     const scheduleScrollEnd = (): void => {
+      if (!trackVelocity) {
+        return;
+      }
       clearScrollEndTimeout();
       scrollEndTimeoutRef.current = setTimeout(() => {
         scrollEndTimeoutRef.current = null;
@@ -130,8 +134,9 @@ export function useScroller(
       stateRef.current = {
         scrollTop: nextScrollTop,
         viewportHeight: getViewportHeight(container),
-        scrollVelocity:
-          ((nextScrollTop - stateRef.current.scrollTop) / elapsed) * 1000,
+        scrollVelocity: trackVelocity
+          ? ((nextScrollTop - stateRef.current.scrollTop) / elapsed) * 1000
+          : 0,
       };
       scheduleScrollEnd();
       notify();
@@ -172,7 +177,7 @@ export function useScroller(
       }
       clearScrollEndTimeout();
     };
-  }, [getContainer, normalizedFps, notify]);
+  }, [getContainer, normalizedFps, notify, trackVelocity]);
 
   return useSyncExternalStore(
     storeRef.current.subscribe,

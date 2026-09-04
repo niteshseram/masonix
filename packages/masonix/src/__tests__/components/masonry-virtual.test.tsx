@@ -97,6 +97,10 @@ function ItemRender({ data }: MasonryRenderProps<Item>) {
   return <div data-testid={`item-${data.id}`}>{data.label}</div>;
 }
 
+function getFixedItemHeight(): number {
+  return 100;
+}
+
 function PlaceholderRender({
   index,
   height,
@@ -140,6 +144,35 @@ describe('MasonryVirtual', () => {
         />,
       );
       expect(screen.getByTestId('item-0')).toBeTruthy();
+    });
+
+    it('does not rerender unchanged visible items with its parent', () => {
+      const items = makeItems(50);
+      const renderSpy = vi.fn(ItemRender);
+      const { rerender } = render(
+        <MasonryVirtual
+          items={items}
+          render={renderSpy}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={getFixedItemHeight}
+        />,
+      );
+      const initialRenderCount = renderSpy.mock.calls.length;
+
+      rerender(
+        <MasonryVirtual
+          items={items}
+          render={renderSpy}
+          columns={1}
+          gap={0}
+          defaultWidth={200}
+          getItemHeight={getFixedItemHeight}
+        />,
+      );
+
+      expect(renderSpy).toHaveBeenCalledTimes(initialRenderCount);
     });
 
     it("uses custom container element via 'as' prop", () => {

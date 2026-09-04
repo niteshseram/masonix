@@ -135,4 +135,34 @@ describe('useScroller', () => {
 
     expect(result.current.scrollVelocity).toBe(0);
   });
+
+  it('does not publish a velocity-settle update when tracking is disabled', () => {
+    vi.useFakeTimers();
+
+    let now = 1000;
+    vi.spyOn(performance, 'now').mockImplementation(() => now);
+
+    let scrollY = 0;
+    Object.defineProperty(window, 'scrollY', {
+      get: () => scrollY,
+      configurable: true,
+    });
+
+    const { result } = renderHook(() => useScroller(undefined, 60, false));
+
+    act(() => {
+      now = 1100;
+      scrollY = 300;
+      window.dispatchEvent(new Event('scroll'));
+    });
+
+    const afterScroll = result.current;
+    expect(afterScroll.scrollVelocity).toBe(0);
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(result.current).toBe(afterScroll);
+  });
 });

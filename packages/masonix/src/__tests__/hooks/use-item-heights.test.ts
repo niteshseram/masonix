@@ -179,6 +179,27 @@ describe('useItemHeights', () => {
     expect(mockUnobserve).toHaveBeenCalledWith(node);
   });
 
+  it('releases measurements that are no longer active', () => {
+    const { result, rerender } = renderHook(
+      ({ activeIndexes }: { activeIndexes: number[] }) =>
+        useItemHeights(undefined, activeIndexes),
+      { initialProps: { activeIndexes: [0, 1] } },
+    );
+    const firstNode = document.createElement('div');
+    const secondNode = document.createElement('div');
+
+    act(() => {
+      result.current.setItemRef(firstNode, 0);
+      result.current.setItemRef(secondNode, 1);
+      notifyResize!([makeEntry(firstNode, 100), makeEntry(secondNode, 200)]);
+    });
+
+    rerender({ activeIndexes: [1] });
+
+    expect(result.current.measuredHeights.has(0)).toBe(false);
+    expect(result.current.measuredHeights.get(1)).toBe(200);
+  });
+
   it('disconnects observer on unmount', () => {
     const { unmount, result } = renderHook(() => useItemHeights());
     const node = document.createElement('div');

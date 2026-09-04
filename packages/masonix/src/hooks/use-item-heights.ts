@@ -31,8 +31,12 @@ export interface UseItemHeightsResult {
  * ResizeObserver. Uses WeakMap<Element, index> for O(1) reverse lookup.
  *
  * @param minItemHeight - Optional lower bound; heights below this are clamped.
+ * @param activeMeasurementIndexes - Optional identities to retain in the cache.
  */
-export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
+export function useItemHeights(
+  minItemHeight?: number,
+  activeMeasurementIndexes?: number[],
+): UseItemHeightsResult {
   const [measuredHeights, setMeasuredHeights] = useState<Map<number, number>>(
     () => new Map(),
   );
@@ -52,6 +56,24 @@ export function useItemHeights(minItemHeight?: number): UseItemHeightsResult {
       observerRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (!activeMeasurementIndexes) {
+      return;
+    }
+
+    const activeIndexes = new Set(activeMeasurementIndexes);
+    setMeasuredHeights((previousHeights) => {
+      let nextHeights: Map<number, number> | undefined;
+      for (const measurementIndex of previousHeights.keys()) {
+        if (!activeIndexes.has(measurementIndex)) {
+          nextHeights ??= new Map(previousHeights);
+          nextHeights.delete(measurementIndex);
+        }
+      }
+      return nextHeights ?? previousHeights;
+    });
+  }, [activeMeasurementIndexes]);
 
   const setItemRef = useCallback((node: HTMLElement | null, index: number) => {
     const prev = indexToElement.current.get(index);

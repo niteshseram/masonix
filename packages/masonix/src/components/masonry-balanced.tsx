@@ -47,10 +47,12 @@ interface BalancedItemProps {
   data: any;
   index: number;
   measureIndex: number;
+  top: number;
+  left: number;
   width: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Render: React.ComponentType<any>;
-  style: CSSProperties;
+  visibility: CSSProperties['visibility'];
   setItemRef?: (node: HTMLElement | null, index: number) => void;
   itemRole: 'listitem' | undefined;
   ariaSetSize: number;
@@ -63,9 +65,11 @@ const BalancedItem = memo(function BalancedItem({
   data,
   index,
   measureIndex,
+  top,
+  left,
   width,
   Render,
-  style,
+  visibility,
   setItemRef,
   itemRole,
   ariaSetSize,
@@ -88,7 +92,13 @@ const BalancedItem = memo(function BalancedItem({
     <ItemWrapper
       ref={setItemRef ? refCallback : undefined}
       className={itemClassName}
-      style={style}
+      style={{
+        position: 'absolute',
+        top,
+        insetInlineStart: left,
+        width,
+        visibility,
+      }}
       role={itemRole}
       aria-setsize={itemRole ? ariaSetSize : undefined}
       aria-posinset={itemRole ? ariaPosInSet : undefined}
@@ -168,8 +178,11 @@ function MasonryBalancedInner<T = unknown>(
     itemCount: items.length,
   });
 
-  const { measuredHeights, setItemRef } = useItemHeights(minItemHeight);
   const measurementIndexes = useMeasurementIndexes(items, itemKey);
+  const { measuredHeights, setItemRef } = useItemHeights(
+    minItemHeight,
+    measurementIndexes,
+  );
 
   // Build positioned items from a fresh positioner every time layout inputs change.
   // A fresh positioner is cheaper than incremental update because React's useMemo
@@ -260,18 +273,6 @@ function MasonryBalancedInner<T = unknown>(
           const data = items[index];
           const key = itemKey ? itemKey(data as T, index) : index;
 
-          const itemStyle: CSSProperties = {
-            position: 'absolute',
-            top,
-            insetInlineStart: left,
-            width,
-            // Hide unmeasured items so they don't flash at the wrong size.
-            // Once measured, they snap to their final position.
-            ...(getItemHeight
-              ? {}
-              : { visibility: measured ? 'visible' : ('hidden' as const) }),
-          };
-
           return (
             <BalancedItem
               key={key}
@@ -280,11 +281,15 @@ function MasonryBalancedInner<T = unknown>(
               data={data}
               index={index}
               measureIndex={measurementIndexes[index]}
+              top={top}
+              left={left}
               width={width}
               Render={
                 Render as React.ComponentType<MasonryRenderProps<unknown>>
               }
-              style={itemStyle}
+              visibility={
+                getItemHeight ? undefined : measured ? 'visible' : 'hidden'
+              }
               setItemRef={getItemHeight ? undefined : setItemRef}
               itemRole={itemRole}
               ariaSetSize={ariaSetSize}

@@ -37,6 +37,10 @@ Tracks measured item heights with `ResizeObserver`. `MasonryBalanced` and
 stores border-box heights in a `Map<number, number>`. Repeated unchanged
 measurements preserve the map identity.
 
+Pass active measurement identities as the optional second argument when a
+custom integration continuously replaces items. Measurements outside that set
+are released instead of remaining cached for the lifetime of the component.
+
 ## useScroller
 
 ```ts
@@ -51,7 +55,8 @@ const { scrollTop, viewportHeight, scrollVelocity } = useScroller(
 Tracks scroll position, viewport height, and scroll velocity for either the
 window or a custom scroll container. The second argument is the sampling FPS
 and defaults to `12`. Custom container height changes are tracked with
-`ResizeObserver`.
+`ResizeObserver`. Pass `false` as the optional third argument when velocity is
+not consumed; this skips the velocity-settle notification after scrolling.
 
 ## useScrollToIndex
 

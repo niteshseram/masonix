@@ -67,6 +67,10 @@ function ItemRender({ data }: MasonryRenderProps<Item>) {
   return <div data-testid={`item-${data.id}`}>{data.label}</div>;
 }
 
+function getFixedItemHeight(): number {
+  return 100;
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -86,6 +90,34 @@ describe('MasonryBalanced', () => {
       for (let i = 0; i < 5; i++) {
         expect(screen.getByTestId(`item-${i}`)).toBeTruthy();
       }
+    });
+
+    it('does not rerender unchanged items with its parent', () => {
+      const items = makeItems(50);
+      const renderSpy = vi.fn(ItemRender);
+      const { rerender } = render(
+        <MasonryBalanced
+          items={items}
+          render={renderSpy}
+          columns={3}
+          gap={0}
+          defaultWidth={600}
+          getItemHeight={getFixedItemHeight}
+        />,
+      );
+
+      rerender(
+        <MasonryBalanced
+          items={items}
+          render={renderSpy}
+          columns={3}
+          gap={0}
+          defaultWidth={600}
+          getItemHeight={getFixedItemHeight}
+        />,
+      );
+
+      expect(renderSpy).toHaveBeenCalledTimes(items.length);
     });
 
     it("uses custom container element via 'as' prop", () => {
