@@ -1,5 +1,12 @@
 # masonix
 
+## 1.1.0
+
+### Minor Changes
+
+- cc39c5d: Reduce virtual and balanced item rerenders, skip unused scroll-velocity updates,
+  and release stale measurement cache entries in long-lived collections.
+
 ## 1.0.0
 
 ### Major Changes
