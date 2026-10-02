@@ -13,7 +13,8 @@ describe('createIntervalTree', () => {
     tree.search(0, 100, (index) => matches.push(index));
     const visitedNodes = popSpy.mock.calls.length;
     popSpy.mockRestore();
-    expect(matches.sort((first, second) => first - second)).toEqual([0, 1, 2]);
+    matches.sort((first, second) => first - second);
+    expect(matches).toEqual([0, 1, 2]);
     expect(visitedNodes).toBeLessThan(50);
   });
 

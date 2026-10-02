@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { normalizeNonNegativeFinite } from '../core/utils';
 
@@ -37,16 +37,17 @@ export function useItemHeights(
   minItemHeight?: number,
   activeMeasurementIndexes?: number[],
   measurementWidth?: number,
+  initialMeasurements?: { width: number; heights: Map<number, number> },
 ): UseItemHeightsResult {
   const [measuredHeights, setMeasuredHeights] = useState<Map<number, number>>(
-    () => new Map(),
+    () =>
+      initialMeasurements && measurementWidth === initialMeasurements.width
+        ? new Map(initialMeasurements.heights)
+        : new Map(),
   );
 
   const widthRef = useRef(measurementWidth);
-  const emptyHeights = useMemo(
-    () => new Map<number, number>(),
-    [measurementWidth],
-  );
+  const emptyHeights = useRef(new Map<number, number>()).current;
   const widthChanged = widthRef.current !== measurementWidth;
   useEffect(() => {
     if (widthRef.current === measurementWidth) {

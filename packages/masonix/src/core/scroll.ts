@@ -28,7 +28,9 @@ export function getScrollOffset(
  * Get the current scroll top of a scroll container.
  */
 export function getScrollTop(container: HTMLElement | Window): number {
-  if (isWindow(container)) return window.scrollY;
+  if (isWindow(container)) {
+    return window.scrollY;
+  }
   return container.scrollTop;
 }
 
@@ -36,7 +38,9 @@ export function getScrollTop(container: HTMLElement | Window): number {
  * Get the viewport height of a scroll container.
  */
 export function getViewportHeight(container: HTMLElement | Window): number {
-  if (isWindow(container)) return window.innerHeight;
+  if (isWindow(container)) {
+    return window.innerHeight;
+  }
   return container.clientHeight;
 }
 
@@ -49,9 +53,5 @@ export function scrollTo(
   smooth: boolean,
 ): void {
   const behavior = smooth ? 'smooth' : 'instant';
-  if (isWindow(container)) {
-    window.scrollTo({ top, behavior });
-  } else {
-    container.scrollTo({ top, behavior });
-  }
+  container.scrollTo({ top, behavior });
 }

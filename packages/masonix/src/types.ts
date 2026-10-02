@@ -84,6 +84,8 @@ export interface MasonryCommonProps<T = unknown> extends Omit<
 
   // --- Spacing ---
   gap?: ResponsiveValue<number>;
+  rowGap?: ResponsiveValue<number>;
+  columnGap?: ResponsiveValue<number>;
 
   // --- SSR ---
   defaultColumns?: number;
@@ -113,6 +115,8 @@ export interface MasonryProps<T = unknown> extends MasonryCommonProps<T> {
   enableNative?: boolean;
   onLayoutModeChange?: (mode: MasonryLayoutMode) => void;
   columnClassName?: string;
+  /** Use the measured flat layout to preserve keyed card state across column changes. */
+  preserveItemState?: boolean;
 }
 
 export interface MasonryBalancedProps<
@@ -120,7 +124,13 @@ export interface MasonryBalancedProps<
 > extends MasonryCommonProps<T> {
   /** Pre-known height — skips two-phase measurement, enables zero-CLS SSR */
   getItemHeight?: (data: T, index: number, columnWidth: number) => number;
-  estimatedItemHeight?: number;
+  estimatedItemHeight?:
+    | number
+    | ((data: T, index: number, columnWidth: number) => number);
+  /** Keep column assignments on height changes; balanced reflows the changed suffix. */
+  layoutUpdates?: 'balanced' | 'stable';
+  preserveScrollPosition?: boolean;
+  scrollContainer?: React.RefObject<HTMLElement | null>;
   minItemHeight?: number;
 }
 
@@ -128,7 +138,14 @@ export interface MasonryVirtualProps<
   T = unknown,
 > extends MasonryBalancedProps<T> {
   overscanBy?: number;
-  scrollContainer?: React.RefObject<HTMLElement | null>;
+  /** Number of cards included in server output before a viewport is available. */
+  initialItemCount?: number;
+  initialSnapshot?: MasonryVirtualSnapshot;
+  pinnedIndices?: readonly number[];
+  rangeExtractor?: (
+    visibleIndices: readonly number[],
+    itemCount: number,
+  ) => readonly number[];
   totalItems?: number;
   initialScrollIndex?: number | MasonryInitialScrollPosition;
   scrollRef?: React.Ref<MasonryVirtualHandle>;
@@ -141,6 +158,18 @@ export interface MasonryVirtualProps<
       MasonryRenderProps<T> & { height: number }
     >;
   };
+}
+
+export interface MasonryScrollAnchor {
+  key: string | number;
+  offset: number;
+}
+
+export interface MasonryVirtualSnapshot {
+  version: 1;
+  columnWidth: number;
+  measurements: Array<{ key: string | number; height: number }>;
+  anchor: MasonryScrollAnchor | null;
 }
 
 export type MasonryScrollAlign = 'start' | 'center' | 'end' | 'auto';
@@ -159,6 +188,7 @@ export interface MasonryInitialScrollPosition {
 }
 
 export interface MasonryVirtualHandle {
+  getSnapshot?(): MasonryVirtualSnapshot;
   scrollToIndex(index: number, options?: MasonryScrollToIndexOptions): void;
   scrollToOffset(offset: number, options?: MasonryScrollOptions): void;
   scrollBy(delta: number, options?: MasonryScrollOptions): void;

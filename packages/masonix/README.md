@@ -46,6 +46,16 @@ type Photo = {
   alt: string;
 };
 
+function PhotoCard({ data }: { data: Photo }) {
+  return (
+    <img
+      src={data.src}
+      alt={data.alt}
+      style={{ width: '100%', borderRadius: 8 }}
+    />
+  );
+}
+
 export function Gallery({ photos }: { photos: Photo[] }) {
   return (
     <Masonry
@@ -53,9 +63,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
       columns={{ 0: 1, 640: 2, 1024: 3, 1280: 4 }}
       gap={16}
       itemKey={(photo) => photo.id}
-      render={({ data }) => (
-        <img src={data.src} alt={data.alt} className="w-full rounded-lg" />
-      )}
+      render={PhotoCard}
     />
   );
 }
@@ -98,9 +106,13 @@ export function Feed({
       endReachedThreshold={8}
       onEndReached={loadMore}
       itemKey={(item) => item.id}
-      render={({ data }) => <article>{data.title}</article>}
+      render={MasonryCard}
     />
   );
+}
+
+function MasonryCard({ data }: { data: { title: string } }) {
+  return <article>{data.title}</article>;
 }
 ```
 
@@ -131,3 +143,18 @@ import type {
   UseScrollToIndexOptions,
 } from 'masonix/virtual';
 ```
+
+## Stateful and changing feeds
+
+Declare render components at module scope and pass `render={Card}`. Inline render
+functions create new component types and reset local card state on parent renders.
+
+- `rowGap` / `columnGap` override the corresponding axis of `gap`.
+- Balanced and virtual layouts accept per-item `estimatedItemHeight` callbacks,
+  `layoutUpdates="stable"`, and `preserveScrollPosition` with stable item keys.
+- `Masonry` supports `preserveItemState` for a flat measured layout that retains
+  card state across column changes. This mode ignores column-wrapper styling.
+- Virtual feeds support `initialItemCount` for SSR, `pinnedIndices`,
+  `rangeExtractor`, and `initialSnapshot` from `scrollRef.current?.getSnapshot?.()`.
+
+See the API reference for defaults, restoration, and measurement tradeoffs.

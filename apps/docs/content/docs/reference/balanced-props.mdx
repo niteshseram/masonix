@@ -6,11 +6,11 @@ description: Props for MasonryBalanced measurement and shortest-column placement
 `MasonryBalanced` accepts all [Common Props](/docs/reference/common-props) plus
 these measurement props.
 
-| Prop                  | Type                                                      | Default | Notes                                                        |
-| --------------------- | --------------------------------------------------------- | ------- | ------------------------------------------------------------ |
-| `getItemHeight`       | `(data: T, index: number, columnWidth: number) => number` | -       | Provides known height and skips waiting for DOM measurement. |
-| `estimatedItemHeight` | `number`                                                  | `150`   | Initial height before a card is measured.                    |
-| `minItemHeight`       | `number`                                                  | -       | Clamps measured heights to at least this value.              |
+| Prop                  | Type                                                                  | Default | Notes                                                        |
+| --------------------- | --------------------------------------------------------------------- | ------- | ------------------------------------------------------------ |
+| `getItemHeight`       | `(data: T, index: number, columnWidth: number) => number`             | -       | Provides known height and skips waiting for DOM measurement. |
+| `estimatedItemHeight` | `number \| ((data: T, index: number, columnWidth: number) => number)` | `150`   | Initial height before a card is measured.                    |
+| `minItemHeight`       | `number`                                                              | -       | Clamps measured heights to at least this value.              |
 
 ## Known height function
 
@@ -20,8 +20,16 @@ these measurement props.
   getItemHeight={(photo, _index, columnWidth) =>
     Math.round(columnWidth * (photo.height / photo.width))
   }
-  render={({ data }) => <PhotoCard photo={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof PhotoCard>['photo'];
+}) {
+  return <PhotoCard photo={data} />;
+}
 ```
 
 Return the rendered height in pixels for the current column width.
@@ -35,3 +43,15 @@ estimate makes the initial layout closer to the measured layout.
 
 Use `minItemHeight` when a card can briefly measure too small while fonts,
 media, or async content settle.
+
+## Incremental updates and anchoring
+
+- `estimatedItemHeight`: a number or `(data, index, columnWidth) => number`.
+- `layoutUpdates`: `"balanced"` (default) rebalances a changed suffix;
+  `"stable"` retains columns during height updates. Width and column-count changes
+  rebuild positions in either mode.
+- `preserveScrollPosition`: `false` by default. Retains a visible keyed card's
+  pixel offset across prepends, height updates, and responsive layout changes.
+- `scrollContainer`: optional element ref; defaults to window scrolling.
+
+Use stable, unique `itemKey` values for anchoring and immutable item updates.

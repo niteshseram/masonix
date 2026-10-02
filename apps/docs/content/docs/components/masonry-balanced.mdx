@@ -32,9 +32,17 @@ export function ArticleGrid({ articles }: { articles: Article[] }) {
       gap={16}
       estimatedItemHeight={220}
       itemKey={(article) => article.id}
-      render={({ data }) => <ArticleCard article={data} />}
+      render={MasonryCard}
     />
   );
+}
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ArticleCard>['article'];
+}) {
+  return <ArticleCard article={data} />;
 }
 ```
 
@@ -55,8 +63,18 @@ measurement wait.
   getItemHeight={(photo, _index, columnWidth) =>
     Math.round(columnWidth * (photo.height / photo.width))
   }
-  render={({ data, width }) => <PhotoCard photo={data} width={width} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+  width,
+}: {
+  data: React.ComponentProps<typeof PhotoCard>['photo'];
+  width: number;
+}) {
+  return <PhotoCard photo={data} width={width} />;
+}
 ```
 
 ## Common mistakes

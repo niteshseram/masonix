@@ -16,8 +16,16 @@ client measurement.
   defaultColumns={3}
   defaultWidth={1200}
   gap={24}
-  render={({ data }) => <PostCard post={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof PostCard>['post'];
+}) {
+  return <PostCard post={data} />;
+}
 ```
 
 `defaultColumns` controls the first server-rendered column count. `defaultWidth`
@@ -36,8 +44,16 @@ When image dimensions are known, compute height from the future column width.
   getItemHeight={(photo, _index, columnWidth) =>
     Math.round(columnWidth * (photo.height / photo.width))
   }
-  render={({ data }) => <PhotoCard photo={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof PhotoCard>['photo'];
+}) {
+  return <PhotoCard photo={data} />;
+}
 ```
 
 This makes the server layout closer to the hydrated browser layout and reduces
@@ -51,3 +67,12 @@ visible movement.
   stays out of non-virtual bundles.
 - Keep data loading outside Masonix; pass the final array through `items`.
 - Prefer known media dimensions for image-heavy routes.
+
+## Initial virtual content
+
+`MasonryVirtual` renders no cards on the server by default. Set
+`initialItemCount={8}` (or a count appropriate for your page) to include an initial
+slice. Supply `defaultWidth`, `defaultColumns`, and known item heights for visible
+server content. The first hydration render uses the same slice; normal windowing
+starts when the viewport is available. Unmeasured cards retain the normal hidden
+measurement phase.

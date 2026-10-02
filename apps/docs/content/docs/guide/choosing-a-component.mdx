@@ -20,8 +20,16 @@ adding work your page does not need.
   columnWidth={180}
   maxColumns={3}
   gap={16}
-  render={({ data }) => <ProductCard product={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ProductCard>['product'];
+}) {
+  return <ProductCard product={data} />;
+}
 ```
 
 Choose `Masonry` when every item can render up front and visual balance is not
@@ -35,8 +43,16 @@ the primary problem.
   columns={{ 0: 1, 640: 2 }}
   gap={16}
   estimatedItemHeight={220}
-  render={({ data }) => <ArticleCard article={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ArticleCard>['article'];
+}) {
+  return <ArticleCard article={data} />;
+}
 ```
 
 Choose `MasonryBalanced` when items have mixed copy length, badges, images, or
@@ -50,8 +66,16 @@ lazy content that makes columns look uneven.
   columns={{ 0: 1, 600: 2 }}
   gap={12}
   estimatedItemHeight={280}
-  render={({ data }) => <FeedCard item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof FeedCard>['item'];
+}) {
+  return <FeedCard item={data} />;
+}
 ```
 
 Choose `MasonryVirtual` when rendering every item would make scrolling,

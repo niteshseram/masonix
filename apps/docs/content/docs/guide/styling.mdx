@@ -20,9 +20,21 @@ Use `className` and `style` on the outer Masonix container.
   columnWidth={180}
   maxColumns={3}
   gap={16}
-  className="mx-auto max-w-6xl px-4"
-  render={({ data }) => <ProductCard product={data} />}
-/>
+  className={cn('max-w-6xl', 'mx-auto px-4')}
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ProductCard>['product'];
+}) {
+  return <ProductCard product={data} />;
+}
+
+function cn(...groups: string[]) {
+  return groups.join(' ');
+}
 ```
 
 ## Style item wrappers
@@ -34,9 +46,21 @@ Use `itemClassName` when every item wrapper needs the same treatment.
   items={articles}
   columns={3}
   gap={16}
-  itemClassName="overflow-hidden rounded-xl"
-  render={({ data }) => <ArticleCard article={data} />}
-/>
+  itemClassName={cn('overflow-hidden', 'rounded-xl')}
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ArticleCard>['article'];
+}) {
+  return <ArticleCard article={data} />;
+}
+
+function cn(...groups: string[]) {
+  return groups.join(' ');
+}
 ```
 
 For `Masonry`, `columnClassName` styles the internal column wrappers in CSS
@@ -51,24 +75,36 @@ import type { MasonryRenderProps } from 'masonix';
 
 function ProductCard({ data, width }: MasonryRenderProps<Product>) {
   return (
-    <article className="overflow-hidden rounded-xl border bg-white">
+    <article className={cn('overflow-hidden', 'rounded-xl border', 'bg-white')}>
       <div
         className="relative"
         style={{ height: data.height, background: data.gradient }}
       >
-        <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2 py-1 text-xs font-medium text-zinc-900">
+        <span
+          className={cn(
+            'absolute left-3 top-3',
+            'px-2 py-1',
+            'rounded-full',
+            'text-xs font-medium',
+            'bg-white/85 text-zinc-900',
+          )}
+        >
           {data.badge}
         </span>
       </div>
       <div className="p-4">
-        <p className="text-xs text-zinc-500">{data.category}</p>
-        <h3 className="mt-1 text-sm font-semibold">{data.name}</h3>
-        <p className="mt-3 text-xs text-zinc-500">
+        <p className={cn('text-xs', 'text-zinc-500')}>{data.category}</p>
+        <h3 className={cn('mt-1', 'text-sm font-semibold')}>{data.name}</h3>
+        <p className={cn('mt-3', 'text-xs', 'text-zinc-500')}>
           {width}px column · {data.price}
         </p>
       </div>
     </article>
   );
+}
+
+function cn(...groups: string[]) {
+  return groups.join(' ');
 }
 ```
 
@@ -86,9 +122,21 @@ semantics.
   itemAs="li"
   role="list"
   aria-label="Featured products"
-  className="m-0 list-none p-0"
-  itemClassName="m-0 list-none p-0"
+  className={cn('m-0 p-0', 'list-none')}
+  itemClassName={cn('m-0 p-0', 'list-none')}
   items={products}
-  render={({ data }) => <ProductCard product={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ProductCard>['product'];
+}) {
+  return <ProductCard product={data} />;
+}
+
+function cn(...groups: string[]) {
+  return groups.join(' ');
+}
 ```

@@ -20,8 +20,16 @@ Use `columns` when design specifies exact counts.
   items={items}
   columns={{ 0: 1, 640: 2, 1024: 3, 1280: 4 }}
   gap={{ 0: 10, 640: 14, 1024: 18 }}
-  render={({ data }) => <Card item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof Card>['item'];
+}) {
+  return <Card item={data} />;
+}
 ```
 
 Breakpoint keys are minimum container widths in pixels. The largest matching
@@ -38,8 +46,16 @@ can decide how many columns fit.
   columnWidth={260}
   maxColumns={5}
   gap={16}
-  render={({ data }) => <Card item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof Card>['item'];
+}) {
+  return <Card item={data} />;
+}
 ```
 
 `maxColumns` prevents very wide containers from creating too many narrow

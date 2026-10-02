@@ -3,37 +3,21 @@ import React, {
   type ReactElement,
   memo,
   useCallback,
-  useMemo,
   useRef,
   type RefCallback,
 } from 'react';
 
-import { createPositioner } from '../core/positioner';
-import {
-  normalizeNonNegativeFinite,
-  normalizePositiveFinite,
-} from '../core/utils';
 import { useColumns } from '../hooks/use-columns';
 import { useContainerWidth } from '../hooks/use-container-width';
 import { useItemHeights } from '../hooks/use-item-heights';
 import { useMasonryItemCountAnnouncement } from '../hooks/use-masonry-item-count-announcement';
+import { useMasonryLayout } from '../hooks/use-masonry-layout';
+import { useMasonryScrollAnchor } from '../hooks/use-masonry-scroll-anchor';
 import { useMeasurementIndexes } from '../hooks/use-measurement-indexes';
 import type { MasonryBalancedProps, MasonryRenderProps } from '../types';
+import { VISUALLY_HIDDEN_STYLE } from '../utils/masonry-styles';
 
 const DEFAULT_ESTIMATED_HEIGHT = 150;
-
-// Visually hidden — present in DOM for screen readers but invisible to sighted users
-const VISUALLY_HIDDEN_STYLE: CSSProperties = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
-  border: 0,
-};
 
 // ---------------------------------------------------------------------------
 // Internal memoized item — prevents re-renders on unrelated layout updates
@@ -123,6 +107,11 @@ function MasonryBalancedInner<T = unknown>(
     columnWidth: columnWidthProp,
     maxColumns,
     gap,
+    rowGap,
+    columnGap,
+    layoutUpdates,
+    preserveScrollPosition = false,
+    scrollContainer,
     defaultColumns = 3,
     defaultWidth,
     getItemHeight,
@@ -140,11 +129,13 @@ function MasonryBalancedInner<T = unknown>(
     ...containerProps
   } = props;
 
+  const containerElRef = useRef<HTMLElement | null>(null);
   const { ref: internalRef, width: containerWidth } =
     useContainerWidth(defaultWidth);
 
   const mergedRef = useCallback(
     (node: HTMLElement | null) => {
+      containerElRef.current = node;
       internalRef(node);
       if (!externalRef) {
         return;
@@ -159,15 +150,11 @@ function MasonryBalancedInner<T = unknown>(
     [internalRef, externalRef],
   );
 
-  const normalizedEstimatedItemHeight = normalizePositiveFinite(
-    estimatedItemHeight,
-    DEFAULT_ESTIMATED_HEIGHT,
-  );
-
   const {
     columnCount,
     columnWidth,
     gap: resolvedGap,
+    rowGap: resolvedRowGap,
   } = useColumns({
     containerWidth,
     columns,
@@ -175,6 +162,8 @@ function MasonryBalancedInner<T = unknown>(
     maxColumns,
     defaultColumns,
     gap,
+    rowGap,
+    columnGap,
     itemCount: items.length,
   });
 
@@ -185,59 +174,28 @@ function MasonryBalancedInner<T = unknown>(
     columnWidth,
   );
 
-  // Build positioned items from a fresh positioner every time layout inputs change.
-  // A fresh positioner is cheaper than incremental update because React's useMemo
-  // already batches renders — we won't rebuild more often than truly necessary.
-  const { positionedItems, containerHeight } = useMemo(() => {
-    if (columnCount === 0) {
-      return { positionedItems: [], containerHeight: 0 };
-    }
-
-    const positioner = createPositioner({
-      columnCount,
-      columnWidth,
-      columnGap: resolvedGap,
-      rowGap: resolvedGap,
-    });
-
-    let maxBottom = 0;
-
-    const positioned = items.map((data, index) => {
-      let height: number;
-      let measured: boolean;
-
-      if (getItemHeight) {
-        height = normalizeNonNegativeFinite(
-          getItemHeight(data, index, columnWidth),
-          normalizedEstimatedItemHeight,
-        );
-        measured = true;
-      } else {
-        const measuredHeight = measuredHeights.get(measurementIndexes[index]);
-        measured = measuredHeight !== undefined;
-        height = measuredHeight ?? normalizedEstimatedItemHeight;
-      }
-
-      const item = positioner.set(index, height);
-      const bottom = item.top + item.height;
-      if (bottom > maxBottom) {
-        maxBottom = bottom;
-      }
-
-      return { ...item, measured };
-    });
-
-    return { positionedItems: positioned, containerHeight: maxBottom };
-  }, [
+  const { positionedItems, containerHeight, positioner } = useMasonryLayout({
     items,
+    measurementIndexes,
+    measuredHeights,
     columnCount,
     columnWidth,
-    resolvedGap,
+    columnGap: resolvedGap,
+    rowGap: resolvedRowGap,
+    estimatedItemHeight,
     getItemHeight,
-    measuredHeights,
-    measurementIndexes,
-    normalizedEstimatedItemHeight,
-  ]);
+    layoutUpdates,
+  });
+
+  useMasonryScrollAnchor({
+    enabled: preserveScrollPosition,
+    search: positioner.search,
+    items,
+    positionedItems,
+    itemKey,
+    containerRef: containerElRef,
+    scrollContainer,
+  });
 
   const announcement = useMasonryItemCountAnnouncement(
     items.length,
@@ -257,6 +215,7 @@ function MasonryBalancedInner<T = unknown>(
   const containerStyle: CSSProperties = {
     position: 'relative',
     height: containerHeight,
+    overflowAnchor: preserveScrollPosition ? 'none' : undefined,
     ...style,
   };
 

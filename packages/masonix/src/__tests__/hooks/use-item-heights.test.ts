@@ -218,6 +218,20 @@ describe('useItemHeights', () => {
     expect(result.current.measuredHeights.get(0)).toBe(100);
   });
 
+  it('restores a matching-width cache once and invalidates it after a resize', () => {
+    const seed = { width: 240, heights: new Map([[0, 210]]) };
+    const { result, rerender } = renderHook(
+      ({ width }) => useItemHeights(undefined, undefined, width, seed),
+      { initialProps: { width: 240 } },
+    );
+    expect(result.current.measuredHeights.get(0)).toBe(210);
+    rerender({ width: 120 });
+    expect(result.current.measuredHeights.size).toBe(0);
+    rerender({ width: 240 });
+    expect(result.current.measuredHeights.size).toBe(0);
+    expect(seed.heights.get(0)).toBe(210);
+  });
+
   it('disconnects observer on unmount', () => {
     const { unmount, result } = renderHook(() => useItemHeights());
     const node = document.createElement('div');

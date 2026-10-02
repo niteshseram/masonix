@@ -14,7 +14,16 @@ export interface PositionerOptions {
  * Each new item is placed in the column with the minimum current height,
  * ensuring visually balanced columns.
  */
-export function createPositioner(options: PositionerOptions): Positioner {
+export function createPositioner(
+  options: PositionerOptions,
+  initialItems: readonly PositionedItem[] = [],
+): Positioner & {
+  search: (
+    low: number,
+    high: number,
+    callback: (index: number) => void,
+  ) => void;
+} {
   const columnCount = normalizePositiveInteger(options.columnCount, 1);
   const columnWidth = normalizeNonNegativeFinite(options.columnWidth);
   const columnGap = normalizeNonNegativeFinite(options.columnGap ?? 0);
@@ -25,6 +34,39 @@ export function createPositioner(options: PositionerOptions): Positioner {
   // columnItems[col] = ordered list of item indices placed in that column
   const columnItems: number[][] = Array.from({ length: columnCount }, () => []);
   let placedCount = 0;
+  for (const item of initialItems) {
+    items[item.index] = item;
+    columnItems[item.column].push(item.index);
+    columnHeights[item.column] = item.top + item.height + rowGap;
+    placedCount++;
+  }
+
+  function search(
+    low: number,
+    high: number,
+    callback: (index: number) => void,
+  ): void {
+    for (const indices of columnItems) {
+      let start = 0;
+      let end = indices.length;
+      while (start < end) {
+        const middle = Math.floor((start + end) / 2);
+        const item = items[indices[middle]]!;
+        if (item.top + item.height < low) {
+          start = middle + 1;
+        } else {
+          end = middle;
+        }
+      }
+      for (let offset = start; offset < indices.length; offset++) {
+        const item = items[indices[offset]]!;
+        if (item.top > high) {
+          break;
+        }
+        callback(item.index);
+      }
+    }
+  }
 
   function computeLeft(column: number): number {
     return column * (columnWidth + columnGap);
@@ -81,36 +123,15 @@ export function createPositioner(options: PositionerOptions): Positioner {
 
     const updated: PositionedItem[] = [];
 
-    for (const col of affectedColumns) {
-      const colItems = columnItems[col];
-      let currentTop = 0;
-
-      for (
-        let colItemIndex = 0;
-        colItemIndex < colItems.length;
-        colItemIndex++
-      ) {
-        const item = items[colItems[colItemIndex]];
-        if (!item) {
-          continue;
-        }
-
-        // Only recompute top for items whose column changed height.
-        if (item.column === col) {
-          let top = 0;
-          if (colItemIndex > 0) {
-            const prevItem = items[colItems[colItemIndex - 1]];
-            top = prevItem ? prevItem.top + prevItem.height + rowGap : 0;
-          }
-          item.top = top;
-          currentTop = item.top;
-          updated.push(item);
-        }
-
-        // Propagate column height
-        currentTop = item.top + item.height + rowGap;
-        columnHeights[item.column] = currentTop;
+    for (const column of affectedColumns) {
+      let top = 0;
+      for (const index of columnItems[column]) {
+        const item = items[index]!;
+        item.top = top;
+        top += item.height + rowGap;
+        updated.push(item);
       }
+      columnHeights[column] = top;
     }
 
     return updated;
@@ -192,7 +213,8 @@ export function createPositioner(options: PositionerOptions): Positioner {
   return {
     columnCount,
     columnWidth,
-    set: (index, height) => set(index, height),
+    search,
+    set,
     get,
     update,
     getColumnHeights,

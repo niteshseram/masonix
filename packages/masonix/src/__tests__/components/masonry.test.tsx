@@ -310,6 +310,15 @@ describe('Masonry', () => {
       );
     });
 
+    it('leaves zero row gaps available for consumer styles', () => {
+      const { container } = render(
+        <Masonry items={['a']} render={Card} defaultWidth={900} gap={0} />,
+      );
+      const column = container.firstElementChild!
+        .firstElementChild as HTMLElement;
+      expect(column.style.rowGap).toBe('');
+    });
+
     it('applies rowGap to column wrappers when gap > 0', () => {
       const { container } = render(
         <Masonry

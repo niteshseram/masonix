@@ -17,10 +17,15 @@ By default, Masonix renders the container with `role="list"` and items with
 list item metadata.
 
 ```tsx
-<Masonry
-  items={articles}
-  render={({ data }) => <ArticleCard article={data} />}
-/>
+<Masonry items={articles} render={MasonryCard} />;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ArticleCard>['article'];
+}) {
+  return <ArticleCard article={data} />;
+}
 ```
 
 Use an accessible label when the list needs a name.
@@ -30,8 +35,16 @@ Use an accessible label when the list needs a name.
   items={articles}
   role="list"
   aria-label="Latest articles"
-  render={({ data }) => <ArticleCard article={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ArticleCard>['article'];
+}) {
+  return <ArticleCard article={data} />;
+}
 ```
 
 ## Semantic elements
@@ -45,11 +58,23 @@ item wrappers are direct children of the container.
   as="ul"
   itemAs="li"
   role="list"
-  className="m-0 list-none p-0"
-  itemClassName="m-0 list-none p-0"
+  className={cn('m-0 p-0', 'list-none')}
+  itemClassName={cn('m-0 p-0', 'list-none')}
   items={articles}
-  render={({ data }) => <ArticleCard article={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ArticleCard>['article'];
+}) {
+  return <ArticleCard article={data} />;
+}
+
+function cn(...groups: string[]) {
+  return groups.join(' ');
+}
 ```
 
 ## Suppressing Masonix semantics
@@ -58,11 +83,15 @@ Use `role="none"` when the surrounding page or card markup already provides
 the needed semantics.
 
 ```tsx
-<Masonry
-  role="none"
-  items={sections}
-  render={({ data }) => <SectionCard section={data} />}
-/>
+<Masonry role="none" items={sections} render={MasonryCard} />;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof SectionCard>['section'];
+}) {
+  return <SectionCard section={data} />;
+}
 ```
 
 When `role="none"` is used, Masonix omits item roles and ARIA item metadata.
@@ -80,8 +109,16 @@ screen reader output by default.
 <MasonryVirtual
   announceItemCountChanges
   items={articles}
-  render={({ data }) => <ArticleCard article={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof ArticleCard>['article'];
+}) {
+  return <ArticleCard article={data} />;
+}
 ```
 
 ## Practical notes

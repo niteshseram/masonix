@@ -16,6 +16,8 @@ export interface UseColumnsOptions {
   maxColumns?: number;
   defaultColumns?: number;
   gap?: ResponsiveValue<number>;
+  rowGap?: ResponsiveValue<number>;
+  columnGap?: ResponsiveValue<number>;
   itemCount: number;
 }
 
@@ -23,6 +25,7 @@ export interface UseColumnsResult {
   columnCount: number;
   columnWidth: number;
   gap: number;
+  rowGap: number;
 }
 
 /**
@@ -35,9 +38,13 @@ export function useColumns({
   columnWidth: columnWidthProp,
   maxColumns,
   defaultColumns,
-  gap: gapOption,
+  gap: sharedGap,
+  columnGap,
+  rowGap,
   itemCount,
 }: UseColumnsOptions): UseColumnsResult {
+  const gapOption = columnGap ?? sharedGap;
+  const rowGapOption = rowGap ?? sharedGap;
   // Parse breakpoints once when the responsive value changes — sorting is O(n log n).
   // The main memo then only does the O(n) scan on each containerWidth change.
   const parsedGap = useMemo(
@@ -82,12 +89,24 @@ export function useColumns({
 
     // Keep the per-column width from the full layout — the effective count only
     // removes empty column wrappers, it doesn't spread items across more space.
-    return { columnCount: effective, columnWidth, gap };
+    const resolvedRowGap =
+      rowGapOption === undefined
+        ? 0
+        : typeof rowGapOption === 'number'
+          ? rowGapOption
+          : applyBreakpoints(parseBreakpoints(rowGapOption), containerWidth);
+    return {
+      columnCount: effective,
+      columnWidth,
+      gap,
+      rowGap: normalizeNonNegativeFinite(resolvedRowGap),
+    };
   }, [
     containerWidth,
     parsedGap,
     parsedColumns,
     gapOption,
+    rowGapOption,
     columns,
     columnWidthProp,
     maxColumns,

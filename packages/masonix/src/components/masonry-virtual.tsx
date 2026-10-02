@@ -7,20 +7,18 @@ import React, {
   useImperativeHandle,
   useMemo,
   useRef,
+  useState,
   type RefCallback,
 } from 'react';
 
-import { createIntervalTree } from '../core/interval-tree';
-import { createPositioner } from '../core/positioner';
 import { getScrollOffset, getScrollTop } from '../core/scroll';
-import {
-  normalizeNonNegativeFinite,
-  normalizePositiveFinite,
-} from '../core/utils';
+import { normalizeNonNegativeFinite } from '../core/utils';
 import { useColumns } from '../hooks/use-columns';
 import { useContainerWidth } from '../hooks/use-container-width';
 import { useItemHeights } from '../hooks/use-item-heights';
 import { useMasonryItemCountAnnouncement } from '../hooks/use-masonry-item-count-announcement';
+import { useMasonryLayout } from '../hooks/use-masonry-layout';
+import { useMasonryScrollAnchor } from '../hooks/use-masonry-scroll-anchor';
 import { useMeasurementIndexes } from '../hooks/use-measurement-indexes';
 import { useScrollToIndex } from '../hooks/use-scroll-to-index';
 import { useScroller } from '../hooks/use-scroller';
@@ -31,24 +29,12 @@ import type {
   MasonryVirtualRange,
   PositionedItem,
 } from '../types';
+import { VISUALLY_HIDDEN_STYLE } from '../utils/masonry-styles';
 
 const DEFAULT_ESTIMATED_HEIGHT = 150;
 const DEFAULT_OVERSCAN = 2;
 const DEFAULT_SCROLL_SEEK_VELOCITY = 1200;
 const SCROLL_ALIGNMENT_TOLERANCE = 2;
-
-// Visually hidden — present in DOM for screen readers but invisible to sighted users
-const VISUALLY_HIDDEN_STYLE: CSSProperties = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
-  border: 0,
-};
 
 function isWindow(container: HTMLElement | Window): container is Window {
   return container === window || 'scrollY' in container;
@@ -166,6 +152,7 @@ const VirtualItem = memo(function VirtualItem({
         width,
         visibility,
       }}
+      data-masonix-index={index}
       role={itemRole}
       aria-setsize={itemRole ? ariaSetSize : undefined}
       aria-posinset={itemRole ? ariaPosInSet : undefined}
@@ -203,6 +190,10 @@ function MasonryVirtualInner<T = unknown>(
     columnWidth: columnWidthProp,
     maxColumns,
     gap,
+    rowGap,
+    columnGap,
+    layoutUpdates,
+    preserveScrollPosition = false,
     defaultColumns = 3,
     defaultWidth,
     getItemHeight,
@@ -219,6 +210,10 @@ function MasonryVirtualInner<T = unknown>(
     itemKey,
     // Virtual-specific props
     overscanBy = DEFAULT_OVERSCAN,
+    initialItemCount = 0,
+    initialSnapshot,
+    pinnedIndices,
+    rangeExtractor,
     scrollContainer,
     totalItems,
     initialScrollIndex,
@@ -230,6 +225,7 @@ function MasonryVirtualInner<T = unknown>(
     ...containerProps
   } = props;
 
+  const [focusedKey, setFocusedKey] = useState<string | number | null>(null);
   const containerElRef = useRef<HTMLElement | null>(null);
   const { ref: widthRef, width: containerWidth } =
     useContainerWidth(defaultWidth);
@@ -255,6 +251,7 @@ function MasonryVirtualInner<T = unknown>(
     columnCount,
     columnWidth,
     gap: resolvedGap,
+    rowGap: resolvedRowGap,
   } = useColumns({
     containerWidth,
     columns,
@@ -262,19 +259,40 @@ function MasonryVirtualInner<T = unknown>(
     maxColumns,
     defaultColumns,
     gap,
+    rowGap,
+    columnGap,
     itemCount: items.length,
   });
 
   const measurementIndexes = useMeasurementIndexes(items, itemKey);
+  const snapshotRef = useRef(initialSnapshot);
+  const restoringSnapshotRef = useRef(initialSnapshot?.anchor != null);
+  const initialMeasurements = useMemo(() => {
+    const snapshot = snapshotRef.current;
+    if (!snapshot || snapshot.version !== 1) {
+      return undefined;
+    }
+    const keyedHeights = new Map(
+      snapshot.measurements
+        .filter((entry) => Number.isFinite(entry.height) && entry.height > 0)
+        .map((entry) => [entry.key, entry.height]),
+    );
+    const heights = new Map<number, number>();
+    items.forEach((data, index) => {
+      const height = keyedHeights.get(itemKey ? itemKey(data, index) : index);
+      if (height !== undefined) {
+        heights.set(measurementIndexes[index], height);
+      }
+    });
+    return { width: snapshot.columnWidth, heights };
+  }, [items, itemKey, measurementIndexes]);
   const { measuredHeights, setItemRef } = useItemHeights(
     minItemHeight,
     measurementIndexes,
     columnWidth,
+    initialMeasurements,
   );
-  const normalizedEstimatedItemHeight = normalizePositiveFinite(
-    estimatedItemHeight,
-    DEFAULT_ESTIMATED_HEIGHT,
-  );
+
   const normalizedOverscan = normalizeNonNegativeFinite(
     overscanBy,
     DEFAULT_OVERSCAN,
@@ -294,76 +312,19 @@ function MasonryVirtualInner<T = unknown>(
     scrollSeek !== undefined,
   );
 
-  // Build positioner + interval tree from current layout inputs
-  const { positionedItems, positioner, intervalTree, containerHeight } =
-    useMemo(() => {
-      if (columnCount === 0) {
-        return {
-          positionedItems: [] as Array<PositionedItem & { measured: boolean }>,
-          positioner: createPositioner({
-            columnCount: 1,
-            columnWidth: 0,
-            columnGap: 0,
-            rowGap: 0,
-          }),
-          intervalTree: createIntervalTree(),
-          containerHeight: 0,
-        };
-      }
-
-      const pos = createPositioner({
-        columnCount,
-        columnWidth,
-        columnGap: resolvedGap,
-        rowGap: resolvedGap,
-      });
-
-      const tree = createIntervalTree();
-      let maxBottom = 0;
-
-      const positioned = items.map((data, index) => {
-        let height: number;
-        let measured: boolean;
-
-        if (getItemHeight) {
-          height = normalizeNonNegativeFinite(
-            getItemHeight(data, index, columnWidth),
-            normalizedEstimatedItemHeight,
-          );
-          measured = true;
-        } else {
-          const measuredHeight = measuredHeights.get(measurementIndexes[index]);
-          measured = measuredHeight !== undefined;
-          height = measuredHeight ?? normalizedEstimatedItemHeight;
-        }
-
-        const item = pos.set(index, height);
-        tree.insert(index, item.top, item.top + item.height);
-
-        const bottom = item.top + item.height;
-        if (bottom > maxBottom) {
-          maxBottom = bottom;
-        }
-
-        return { ...item, measured };
-      });
-
-      return {
-        positionedItems: positioned,
-        positioner: pos,
-        intervalTree: tree,
-        containerHeight: maxBottom,
-      };
-    }, [
+  const { positionedItems, positioner, rangeIndex, containerHeight } =
+    useMasonryLayout({
       items,
+      measurementIndexes,
+      measuredHeights,
       columnCount,
       columnWidth,
-      resolvedGap,
+      columnGap: resolvedGap,
+      rowGap: resolvedRowGap,
+      estimatedItemHeight,
       getItemHeight,
-      measuredHeights,
-      measurementIndexes,
-      normalizedEstimatedItemHeight,
-    ]);
+      layoutUpdates,
+    });
 
   const getContainerOffset = useCallback(() => {
     const el = containerElRef.current;
@@ -383,6 +344,17 @@ function MasonryVirtualInner<T = unknown>(
 
   // Determine visible range using interval tree
   const { visibleItems, startIndex, stopIndex } = useMemo(() => {
+    if (viewportHeight === 0 && initialItemCount > 0) {
+      const count = Math.min(
+        items.length,
+        Math.floor(normalizeNonNegativeFinite(initialItemCount)),
+      );
+      return {
+        visibleItems: positionedItems.slice(0, count),
+        startIndex: 0,
+        stopIndex: Math.max(0, count - 1),
+      };
+    }
     if (positionedItems.length === 0 || viewportHeight === 0) {
       return {
         visibleItems: [] as Array<PositionedItem & { measured: boolean }>,
@@ -401,7 +373,7 @@ function MasonryVirtualInner<T = unknown>(
     let start = Number.POSITIVE_INFINITY;
     let stop = 0;
 
-    intervalTree.search(viewTop, viewBottom, (index) => {
+    rangeIndex.search(viewTop, viewBottom, (index) => {
       indices.push(index);
       if (index < start) {
         start = index;
@@ -425,12 +397,70 @@ function MasonryVirtualInner<T = unknown>(
     };
   }, [
     positionedItems,
-    intervalTree,
+    rangeIndex,
     scrollTop,
     getContainerOffset,
     viewportHeight,
     normalizedOverscan,
+    initialItemCount,
+    items.length,
   ]);
+
+  const focusedIndex =
+    focusedKey === null
+      ? -1
+      : items.findIndex(
+          (data, index) =>
+            (itemKey ? itemKey(data, index) : index) === focusedKey,
+        );
+  const renderedItems = useMemo(() => {
+    const visibleIndices = visibleItems.map((item) => item.index);
+    const indices = new Set(
+      rangeExtractor
+        ? rangeExtractor(visibleIndices, items.length)
+        : visibleIndices,
+    );
+    for (const index of pinnedIndices ?? []) {
+      indices.add(index);
+    }
+    if (focusedIndex >= 0) {
+      indices.add(focusedIndex);
+    }
+    const validIndices = [...indices].filter(
+      (index) => Number.isInteger(index) && index >= 0 && index < items.length,
+    );
+    validIndices.sort((first, second) => first - second);
+    return validIndices.map((index) => positionedItems[index]);
+  }, [
+    visibleItems,
+    rangeExtractor,
+    items.length,
+    pinnedIndices,
+    focusedIndex,
+    positionedItems,
+  ]);
+
+  function handleFocus(event: React.FocusEvent<HTMLElement>) {
+    let wrapper = event.target as HTMLElement;
+    while (
+      wrapper.parentElement &&
+      wrapper.parentElement !== event.currentTarget
+    ) {
+      wrapper = wrapper.parentElement;
+    }
+    const index = Number(wrapper.dataset.masonixIndex);
+    if (Number.isInteger(index) && index >= 0 && index < items.length) {
+      setFocusedKey(itemKey ? itemKey(items[index], index) : index);
+    }
+    containerProps.onFocusCapture?.(event);
+  }
+
+  function handleBlur(event: React.FocusEvent<HTMLElement>) {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setFocusedKey(null);
+    }
+    containerProps.onBlurCapture?.(event);
+  }
 
   // Notify range changes
   const prevRangeRef = useRef<[number, number] | null>(null);
@@ -536,6 +566,18 @@ function MasonryVirtualInner<T = unknown>(
   } | null>(null);
   const handleRef = useRef(handle);
   handleRef.current = handle;
+  const { captureAnchor } = useMasonryScrollAnchor({
+    enabled: preserveScrollPosition || snapshotRef.current !== undefined,
+    initialAnchor: snapshotRef.current?.anchor,
+    restoring: restoringSnapshotRef,
+    search: positioner.search,
+    items,
+    positionedItems,
+    itemKey,
+    containerRef: containerElRef,
+    scrollContainer,
+    suspended: pendingReScrollRef,
+  });
 
   useEffect(() => {
     const pending = pendingReScrollRef.current;
@@ -584,6 +626,7 @@ function MasonryVirtualInner<T = unknown>(
       return;
     }
     function cancelPendingScroll() {
+      restoringSnapshotRef.current = false;
       pendingReScrollRef.current = null;
     }
     const events = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
@@ -597,11 +640,27 @@ function MasonryVirtualInner<T = unknown>(
     };
   }, [getScrollContainer]);
 
+  useEffect(() => {
+    if (
+      !restoringSnapshotRef.current ||
+      viewportHeight === 0 ||
+      visibleItems.length === 0 ||
+      !visibleItems.every((item) => item.measured)
+    ) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      restoringSnapshotRef.current = false;
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [positionedItems, visibleItems, viewportHeight]);
+
   const scrollToIndex = useCallback(
     (
       index: number,
       options?: Parameters<MasonryVirtualHandle['scrollToIndex']>[1],
     ) => {
+      restoringSnapshotRef.current = false;
       const item = positioner.get(index);
       pendingReScrollRef.current = {
         index,
@@ -617,17 +676,41 @@ function MasonryVirtualInner<T = unknown>(
   useImperativeHandle(
     scrollRef,
     () => ({
+      getSnapshot() {
+        return {
+          version: 1,
+          columnWidth,
+          measurements: items.flatMap((data, index) => {
+            const height = measuredHeights.get(measurementIndexes[index]);
+            return height === undefined
+              ? []
+              : [{ key: itemKey ? itemKey(data, index) : index, height }];
+          }),
+          anchor: captureAnchor(),
+        };
+      },
       scrollToIndex,
       scrollToOffset(offset, options) {
+        restoringSnapshotRef.current = false;
         pendingReScrollRef.current = null;
         handle.scrollToOffset(offset, options);
       },
       scrollBy(delta, options) {
+        restoringSnapshotRef.current = false;
         pendingReScrollRef.current = null;
         handle.scrollBy(delta, options);
       },
     }),
-    [handle, scrollToIndex],
+    [
+      handle,
+      scrollToIndex,
+      columnWidth,
+      items,
+      itemKey,
+      measuredHeights,
+      measurementIndexes,
+      captureAnchor,
+    ],
   );
 
   const initialScrollIndexRef = useRef(initialScrollIndex);
@@ -684,6 +767,8 @@ function MasonryVirtualInner<T = unknown>(
   const containerStyle: CSSProperties = {
     position: 'relative',
     height: containerHeight,
+    overflowAnchor:
+      preserveScrollPosition || snapshotRef.current ? 'none' : undefined,
     contain: 'layout',
     ...style,
   };
@@ -693,12 +778,18 @@ function MasonryVirtualInner<T = unknown>(
       <Container
         {...containerProps}
         ref={mergedRef}
+        onFocusCapture={handleFocus}
+        onBlurCapture={handleBlur}
         className={className}
         style={containerStyle}
         role={containerRole}
         aria-label={ariaLabel}
       >
-        {visibleItems.map(({ index, top, left, width, height, measured }) => {
+        {renderedItems.map(({ index, top, left, width, height, measured }) => {
+          const isPlaceholder =
+            isScrollSeekActive &&
+            index !== focusedIndex &&
+            !pinnedIndices?.includes(index);
           const data = items[index];
           const key = itemKey ? itemKey(data as T, index) : index;
 
@@ -719,15 +810,15 @@ function MasonryVirtualInner<T = unknown>(
               Placeholder={scrollSeek?.placeholder}
               height={height}
               visibility={
-                getItemHeight || isScrollSeekActive
+                getItemHeight || isPlaceholder
                   ? undefined
                   : measured
                     ? 'visible'
                     : 'hidden'
               }
-              isPlaceholder={isScrollSeekActive}
+              isPlaceholder={isPlaceholder}
               setItemRef={
-                getItemHeight || isScrollSeekActive ? undefined : setItemRef
+                getItemHeight || isPlaceholder ? undefined : setItemRef
               }
               itemRole={itemRole}
               ariaSetSize={ariaSetSize}

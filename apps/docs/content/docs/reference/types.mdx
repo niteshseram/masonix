@@ -25,6 +25,8 @@ import type {
 ```ts
 import type {
   MasonryInitialScrollPosition,
+  MasonryVirtualSnapshot,
+  MasonryScrollAnchor,
   MasonryScrollAlign,
   MasonryScrollOptions,
   MasonryScrollToIndexOptions,
@@ -54,8 +56,12 @@ type Photo = {
 <MasonryBalanced<Photo>
   items={photos}
   itemKey={(photo) => photo.id}
-  render={({ data }) => <img src={data.src} alt="" />}
+  render={MasonryCard}
 />;
+
+function MasonryCard({ data }: { data: { src: string; alt?: string } }) {
+  return <img src={data.src} alt="" />;
+}
 ```
 
 ## MasonryLayoutMode

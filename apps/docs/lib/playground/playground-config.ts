@@ -7,7 +7,7 @@ export const TABS: { value: ComponentMode; label: string; desc: string }[] = [
   {
     value: 'masonry',
     label: 'Masonry',
-    desc: 'CSS layout · source order preserved',
+    desc: 'CSS columns · round-robin placement',
   },
   {
     value: 'masonry-balanced',

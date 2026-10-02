@@ -60,11 +60,50 @@ preference.
     velocityThreshold: 1200,
     placeholder: FeedSkeleton,
   }}
-  render={({ data }) => <FeedCard item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof FeedCard>['item'];
+}) {
+  return <FeedCard item={data} />;
+}
 ```
 
 When `velocityThreshold` is omitted, Masonix uses `1200` px/s.
 
 Negative and non-finite overscan, threshold, count, and velocity values are
 normalized to safe defaults. `totalItems` is never allowed below `items.length`.
+
+## Initial content and custom ranges
+
+`initialItemCount` defaults to `0`. Set a finite positive count to render an
+initial slice on the server and during hydration. Pair it with `defaultWidth`,
+`defaultColumns`, and `getItemHeight` for visible, predictable server content.
+Once the viewport is available, ordinary virtualization takes over.
+
+`pinnedIndices` is an array of additional item indices to keep mounted.
+`rangeExtractor(visibleIndices, itemCount)` can replace the overscanned range;
+return the supplied indices plus any additions to preserve normal coverage.
+Invalid indices and duplicates are ignored. Focused items are always retained.
+Range/end callbacks describe the normal overscanned range, excluding pinned or
+custom additions. Pins refer to indices, so update them when data is reordered.
+
+## Route restoration
+
+`scrollRef.current?.getSnapshot?.()` returns a serializable
+`MasonryVirtualSnapshot` with keyed measurements, their column width, and the
+visible anchor's key and pixel offset. Pass it as `initialSnapshot` when mounting
+the feed again. Store it in route state or your application's cache; Masonix does
+not persist it automatically.
+
+Use the same `itemKey` function and data identities. Measurements are reused only
+when the initial column width matches the snapshot. Supply a matching
+`defaultWidth` and column configuration to reuse them; otherwise cards are measured
+again while the keyed anchor is restored. A restored feed
+continues preserving its reading anchor. `initialScrollIndex`, when supplied,
+takes priority over the restored anchor. Changing `initialSnapshot` after mount
+does not restore again; remount to apply another snapshot. The optional method in
+the handle type preserves compatibility with existing custom handle adapters.

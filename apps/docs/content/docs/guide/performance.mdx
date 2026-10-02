@@ -18,8 +18,16 @@ Always provide `itemKey` when items can change.
 <MasonryBalanced
   items={items}
   itemKey={(item) => item.id}
-  render={({ data }) => <Card item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof Card>['item'];
+}) {
+  return <Card item={data} />;
+}
 ```
 
 Stable keys keep React identity, measured heights, and reorder/filter behavior
@@ -35,8 +43,16 @@ Known heights avoid a measure-update cycle.
   getItemHeight={(photo, _index, columnWidth) =>
     Math.round(columnWidth * (photo.height / photo.width))
   }
-  render={({ data }) => <PhotoCard photo={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof PhotoCard>['photo'];
+}) {
+  return <PhotoCard photo={data} />;
+}
 ```
 
 Use this for media grids, generated cards, or any data model that already knows
@@ -56,8 +72,16 @@ Use `MasonryVirtual` when DOM size becomes expensive.
     velocityThreshold: 900,
     placeholder: FeedSkeleton,
   }}
-  render={({ data }) => <FeedCard item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof FeedCard>['item'];
+}) {
+  return <FeedCard item={data} />;
+}
 ```
 
 ## Practical notes
@@ -66,3 +90,40 @@ Use `MasonryVirtual` when DOM size becomes expensive.
 - Avoid recreating large item arrays unless data actually changed.
 - Use `scrollSeek` for fast feeds with expensive cards.
 - Use the playground diagnostics to compare visible count, velocity, and range.
+
+## Keep render components stable
+
+`render` is a React component type. Declare it at module scope and pass
+`render={Card}`. An inline function creates a new component type on every parent
+render and resets card state even when `itemKey` is stable.
+
+## Incremental layout and stable columns
+
+Appending items reuses existing positions. Virtual viewport queries use binary
+search in each ordered column instead of rebuilding an interval tree on every
+measurement. Height changes normally rebalance the affected suffix. Set
+`layoutUpdates="stable"` on `MasonryBalanced` or `MasonryVirtual` to retain column
+assignments and update only affected columns. This can leave columns less evenly
+balanced after large height changes.
+
+`estimatedItemHeight` also accepts `(data, index, columnWidth) => number`, so
+unmeasured cards can use aspect ratios or content-specific estimates. Returning a
+non-positive or non-finite estimate falls back to 150 px.
+
+## Preserve reader and card state
+
+With stable `itemKey` values, `preserveScrollPosition` retains a visible card's
+pixel offset when data, heights, or columns change. Set `scrollContainer` for a
+scrolling panel. Explicit virtual scroll commands take priority; user input
+cancels a pending scroll-to-index correction.
+
+Focused virtual cards stay mounted until focus leaves the grid or moves to
+another card. Other offscreen cards still unmount, so keep durable form state in
+your data model. `pinnedIndices` and `rangeExtractor` let applications retain
+additional cards; pinning many items reduces the benefit of virtualization.
+
+For `Masonry`, `preserveItemState` selects the measured flat layout and preserves
+keyed card state across responsive column changes. Choose this mode when mounting
+the grid. It uses measurement, ignores `enableNative` and `columnClassName`, and
+keeps source order in the DOM. The default lightweight column layout keeps its
+existing markup and may remount cards when their column changes.

@@ -12,19 +12,8 @@ import { useContainerWidth } from '../hooks/use-container-width';
 import { useMasonryItemCountAnnouncement } from '../hooks/use-masonry-item-count-announcement';
 import { useNativeMasonry } from '../hooks/use-native-masonry';
 import type { MasonryProps } from '../types';
-
-// Visually hidden — present in DOM for screen readers but invisible to sighted users
-const VISUALLY_HIDDEN_STYLE: CSSProperties = {
-  position: 'absolute',
-  width: 1,
-  height: 1,
-  margin: -1,
-  padding: 0,
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
-  border: 0,
-};
+import { VISUALLY_HIDDEN_STYLE } from '../utils/masonry-styles';
+import { MasonryBalanced } from './masonry-balanced';
 
 // ---------------------------------------------------------------------------
 // Internal memoized item wrapper — prevents re-renders when only the parent
@@ -84,6 +73,8 @@ function MasonryInner<T = unknown>(
     columnWidth: columnWidthProp,
     maxColumns,
     gap,
+    rowGap,
+    columnGap,
     defaultColumns = 3,
     defaultWidth,
     enableNative,
@@ -125,6 +116,7 @@ function MasonryInner<T = unknown>(
     columnCount,
     columnWidth,
     gap: resolvedGap,
+    rowGap: resolvedRowGap,
   } = useColumns({
     containerWidth,
     columns,
@@ -132,6 +124,8 @@ function MasonryInner<T = unknown>(
     maxColumns,
     defaultColumns,
     gap,
+    rowGap,
+    columnGap,
     itemCount: items.length,
   });
 
@@ -171,7 +165,8 @@ function MasonryInner<T = unknown>(
     const nativeStyle: CSSProperties = {
       display: 'grid-lanes',
       gridTemplateColumns: `repeat(${columnCount}, ${columnWidth}px)`,
-      ...(resolvedGap > 0 ? { gap: resolvedGap } : {}),
+      columnGap: resolvedGap || undefined,
+      rowGap: resolvedRowGap || undefined,
       ...style,
     };
 
@@ -247,7 +242,7 @@ function MasonryInner<T = unknown>(
               minWidth: 0,
               display: 'flex',
               flexDirection: 'column',
-              ...(resolvedGap > 0 ? { rowGap: resolvedGap } : {}),
+              rowGap: resolvedRowGap || undefined,
             }}
           >
             {indices.map((itemIndex) => {
@@ -284,6 +279,42 @@ function MasonryInner<T = unknown>(
   );
 }
 
-export const Masonry = React.forwardRef(MasonryInner) as <T = unknown>(
+const MasonryColumns = React.forwardRef(MasonryInner) as <T>(
+  props: MasonryProps<T>,
+) => ReactElement | null;
+
+function MasonryDispatch<T>(
+  props: Omit<MasonryProps<T>, 'ref'>,
+  ref: React.ForwardedRef<HTMLElement>,
+) {
+  const {
+    preserveItemState,
+    enableNative,
+    columnClassName,
+    onLayoutModeChange,
+    ...shared
+  } = props;
+  useEffect(() => {
+    if (preserveItemState) {
+      onLayoutModeChange?.('fallback');
+    }
+  }, [preserveItemState, onLayoutModeChange]);
+  if (preserveItemState) {
+    return (
+      <MasonryBalanced {...shared} ref={ref} data-masonix-layout="fallback" />
+    );
+  }
+  return (
+    <MasonryColumns
+      {...shared}
+      enableNative={enableNative}
+      columnClassName={columnClassName}
+      onLayoutModeChange={onLayoutModeChange}
+      ref={ref}
+    />
+  );
+}
+
+export const Masonry = React.forwardRef(MasonryDispatch) as <T = unknown>(
   props: MasonryProps<T>,
 ) => ReactElement | null;

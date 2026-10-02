@@ -29,7 +29,11 @@ export function Feed({ items }: { items: FeedItem[] }) {
   return (
     <div
       ref={scrollContainerRef}
-      className="h-96 min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain rounded-lg border p-3"
+      className={cn(
+        'h-96 min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain',
+        'p-3',
+        'rounded-lg border',
+      )}
     >
       <MasonryVirtual
         items={items}
@@ -38,10 +42,22 @@ export function Feed({ items }: { items: FeedItem[] }) {
         gap={12}
         estimatedItemHeight={220}
         itemKey={(item) => item.id}
-        render={({ data }) => <FeedCard item={data} />}
+        render={MasonryCard}
       />
     </div>
   );
+}
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof FeedCard>['item'];
+}) {
+  return <FeedCard item={data} />;
+}
+
+function cn(...groups: string[]) {
+  return groups.join(' ');
 }
 ```
 
@@ -56,8 +72,16 @@ export function Feed({ items }: { items: FeedItem[] }) {
   estimatedItemHeight={220}
   endReachedThreshold={4}
   onEndReached={() => loadMore()}
-  render={({ data }) => <FeedCard item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof FeedCard>['item'];
+}) {
+  return <FeedCard item={data} />;
+}
 ```
 
 `onEndReached` fires when the rendered range reaches the threshold, and it does
@@ -90,8 +114,16 @@ scroll.
 <MasonryVirtual
   items={items}
   initialScrollIndex={{ index: 42, align: 'center' }}
-  render={({ data }) => <FeedCard item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof FeedCard>['item'];
+}) {
+  return <FeedCard item={data} />;
+}
 ```
 
 `initialScrollIndex` accepts an index or an index-and-alignment object. It is

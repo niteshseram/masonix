@@ -24,8 +24,16 @@ Use `onEndReached` when the rendered range reaches the loaded end.
   estimatedItemHeight={280}
   endReachedThreshold={4}
   onEndReached={() => loadMore()}
-  render={({ data }) => <FeedCard item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof FeedCard>['item'];
+}) {
+  return <FeedCard item={data} />;
+}
 ```
 
 `onEndReached` fires once per loaded item count, so small scroll movements near
@@ -41,8 +49,16 @@ Use `onRangeChange` when you need the current rendered range.
   onRangeChange={(startIndex, stopIndex) => {
     reportVisibleRange({ startIndex, stopIndex });
   }}
-  render={({ data }) => <FeedCard item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof FeedCard>['item'];
+}) {
+  return <FeedCard item={data} />;
+}
 ```
 
 The range includes overscan. It is useful for diagnostics, analytics, or
@@ -62,8 +78,16 @@ Use `initialScrollIndex` to restore a feed without waiting for a ref effect.
 <MasonryVirtual
   items={items}
   initialScrollIndex={{ index: savedIndex, align: 'auto' }}
-  render={({ data }) => <FeedCard item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof FeedCard>['item'];
+}) {
+  return <FeedCard item={data} />;
+}
 ```
 
 The initial jump runs once after the requested item is loaded. Use

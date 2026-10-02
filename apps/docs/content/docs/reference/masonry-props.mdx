@@ -20,8 +20,16 @@ props.
   items={items}
   columns={3}
   gap={16}
-  render={({ data }) => <Card item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof Card>['item'];
+}) {
+  return <Card item={data} />;
+}
 ```
 
 `enableNative` is progressive and opt-in. Masonix detects the standardized
@@ -38,8 +46,16 @@ active. The container also exposes the active mode through
   enableNative
   onLayoutModeChange={(mode) => setLayoutMode(mode)}
   items={items}
-  render={({ data }) => <Card item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof Card>['item'];
+}) {
+  return <Card item={data} />;
+}
 ```
 
 Because browser support is still limited, do not depend on native mode for
@@ -53,9 +69,25 @@ you support.
   items={items}
   columns={3}
   columnClassName="space-y-4"
-  render={({ data }) => <Card item={data} />}
-/>
+  render={MasonryCard}
+/>;
+
+function MasonryCard({
+  data,
+}: {
+  data: React.ComponentProps<typeof Card>['item'];
+}) {
+  return <Card item={data} />;
+}
 ```
 
 Use `columnClassName` for column-level styling only. Use `itemClassName` or the
 card component for item styling.
+
+## Stateful cards
+
+Set `preserveItemState` to use the flat measured layout. Keyed cards retain their
+React state when columns change. This mode ignores `columnClassName` and
+`enableNative`; `onLayoutModeChange` reports `"fallback"`. Keep the mode unchanged
+for the lifetime of a mounted grid. The default column-wrapper layout is retained
+for compatibility.
