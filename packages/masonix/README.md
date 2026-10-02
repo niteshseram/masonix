@@ -1,57 +1,51 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/niteshseram/masonix/main/public/logo-dark.svg" />
-    <img src="https://raw.githubusercontent.com/niteshseram/masonix/main/public/logo.svg" alt="masonix" height="52" />
-  </picture>
-</p>
+# Masonix
 
-<p align="center"><strong>React masonry components for responsive grids, measured layouts, and virtualized feeds.</strong></p>
+Build React grids where photos, products, and stories can each have their own
+height. Masonix arranges your cards into responsive columns and offers measured
+balancing and virtualization as your collection grows.
 
-<p align="center">
-  <a href="https://masonix.vercel.app">Website</a>
-  ·
-  <a href="https://masonix.vercel.app/docs/guide/getting-started">Docs</a>
-  ·
-  <a href="https://masonix.vercel.app/playground">Playground</a>
-</p>
+You own the card markup and styling. Masonix handles column sizing, spacing, and
+placement, with optional controls to keep the reader's place as content changes.
+It supports React 18 and 19, includes TypeScript types, and needs no CSS import.
 
----
+[Try the playground](https://masonix.vercel.app/playground) ·
+[Read the guides](https://masonix.vercel.app/docs/guide/getting-started) ·
+[Browse the API](https://masonix.vercel.app/docs/reference/common-props)
 
-## Install
+## Add Masonix to your app
 
-```bash
+```sh
 npm install masonix
 ```
 
-```bash
-pnpm add masonix
-```
+Or use `pnpm add masonix` or `yarn add masonix`. Your application must also have
+`react` and `react-dom` installed.
 
-```bash
-yarn add masonix
-```
+## Your first gallery
 
-Masonix supports React 18 and React 19. It does not require a stylesheet.
-Standard HTML, ARIA, data, and event attributes are forwarded to each
-component's outer container.
-
-## Quick start
+Pass an array of items, a stable key, and a React component that renders a card.
+The render component receives `data`, `index`, and the available `width`.
 
 ```tsx
-import { Masonry } from 'masonix';
+import { Masonry, type MasonryRenderProps } from 'masonix';
 
 type Photo = {
   id: string;
   src: string;
   alt: string;
+  width: number;
+  height: number;
 };
 
-function PhotoCard({ data }: { data: Photo }) {
+function PhotoCard({ data }: MasonryRenderProps<Photo>) {
   return (
     <img
       src={data.src}
       alt={data.alt}
-      style={{ width: '100%', borderRadius: 8 }}
+      width={data.width}
+      height={data.height}
+      loading="lazy"
+      style={{ display: 'block', width: '100%', height: 'auto' }}
     />
   );
 }
@@ -60,101 +54,187 @@ export function Gallery({ photos }: { photos: Photo[] }) {
   return (
     <Masonry
       items={photos}
-      columns={{ 0: 1, 640: 2, 1024: 3, 1280: 4 }}
+      columns={{ 0: 1, 640: 2, 1024: 3 }}
       gap={16}
       itemKey={(photo) => photo.id}
       render={PhotoCard}
+      aria-label="Photo gallery"
     />
   );
 }
 ```
 
-## Choose a component
+Breakpoint keys are minimum **container widths in pixels**. At 640 px, this grid
+uses two columns; at 1024 px, it uses three.
 
-| Use case                                           | Component         | Import            |
-| -------------------------------------------------- | ----------------- | ----------------- |
-| Simple responsive grids                            | `Masonry`         | `masonix`         |
-| Variable-height cards that should visually balance | `MasonryBalanced` | `masonix`         |
-| Long feeds and infinite lists                      | `MasonryVirtual`  | `masonix/virtual` |
+Declare `PhotoCard` outside `Gallery`. The `render` prop takes a component type;
+creating it inline can remount cards and reset their local state on parent renders.
 
-Start with `Masonry`. Move to `MasonryBalanced` when rendered card heights matter.
-Use `MasonryVirtual` when DOM size or scroll performance matters.
+## Choose how your grid lays out cards
 
-## Virtual feeds
+| Component         | How it works                                                                     | Use it for                                        |
+| ----------------- | -------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `Masonry`         | Distributes items across column wrappers without measuring each card by default. | Simple galleries and lightweight grids.           |
+| `MasonryBalanced` | Measures cards and places each in the shortest column. Renders every item.       | Uneven card heights where visual balance matters. |
+| `MasonryVirtual`  | Uses measured placement and mounts a window of items around the viewport.        | Large collections and scrolling feeds.            |
+
+Import `Masonry` and `MasonryBalanced` from `masonix`. Import `MasonryVirtual`
+from `masonix/virtual` so non-virtual grids do not pull in virtualization code.
+
+[More about choosing a component](https://masonix.vercel.app/docs/guide/choosing-a-component)
+
+## Fit the space available
+
+Using `photos` and `PhotoCard` from above, let Masonix choose how many columns fit:
+
+```tsx
+<Masonry
+  items={photos}
+  columnWidth={260}
+  maxColumns={5}
+  rowGap={20}
+  columnGap={{ 0: 12, 768: 24 }}
+  itemKey={(photo) => photo.id}
+  render={PhotoCard}
+/>
+```
+
+`columnWidth` guides the column count; cards stretch to fill the available space.
+`gap` sets both axes, while `rowGap` and `columnGap` override their respective axes.
+
+## Balance cards with different heights
+
+For uneven images, use `MasonryBalanced`. With known image dimensions, calculate
+card height from the column width to skip the initial measurement wait:
+
+```tsx
+import { MasonryBalanced } from 'masonix';
+
+<MasonryBalanced
+  items={photos}
+  columns={{ 0: 1, 640: 2, 1024: 3 }}
+  gap={16}
+  itemKey={(photo) => photo.id}
+  getItemHeight={(photo, _index, columnWidth) =>
+    columnWidth * (photo.height / photo.width)
+  }
+  render={PhotoCard}
+/>;
+```
+
+This example reuses the image-only `PhotoCard` above. `getItemHeight` must account
+for the entire rendered card, including any captions or padding you add.
+For content with unknown heights, omit it and let Masonix measure the cards.
+
+## Grow into a scrolling feed
+
+`MasonryVirtual` scrolls with the window by default. This example accepts loaded
+items and an application-owned loading callback:
 
 ```tsx
 import { MasonryVirtual } from 'masonix/virtual';
 
-type FeedItem = {
+type Post = {
   id: string;
   title: string;
+  body: string;
 };
 
-export function Feed({
-  items,
-  loadMore,
-}: {
-  items: FeedItem[];
-  loadMore: () => void;
-}) {
+function PostCard({ data }: { data: Post }) {
   return (
-    <MasonryVirtual
-      items={items}
-      columns={{ 0: 1, 720: 2, 1080: 3 }}
-      gap={16}
-      estimatedItemHeight={280}
-      endReachedThreshold={8}
-      onEndReached={loadMore}
-      itemKey={(item) => item.id}
-      render={MasonryCard}
-    />
+    <article>
+      <h2>{data.title}</h2>
+      <p>{data.body}</p>
+    </article>
   );
 }
 
-function MasonryCard({ data }: { data: { title: string } }) {
-  return <article>{data.title}</article>;
+export function Feed({
+  posts,
+  loadMore,
+  hasMore,
+  isLoading,
+}: {
+  posts: Post[];
+  loadMore: () => void;
+  hasMore: boolean;
+  isLoading: boolean;
+}) {
+  function handleEndReached() {
+    if (hasMore && !isLoading) {
+      loadMore();
+    }
+  }
+
+  return (
+    <MasonryVirtual
+      items={posts}
+      columns={{ 0: 1, 720: 2, 1080: 3 }}
+      gap={16}
+      estimatedItemHeight={280}
+      itemKey={(post) => post.id}
+      render={PostCard}
+      onEndReached={handleEndReached}
+      endReachedThreshold={8}
+      preserveScrollPosition
+      aria-label="Latest posts"
+    />
+  );
 }
 ```
 
-## Documentation
+Masonix handles layout and range detection; your application handles fetching,
+loading state, and deduplicating requests. Choose an estimate close to typical
+card height, or pass an `estimatedItemHeight` callback for per-item estimates.
+For a scrolling panel, pass its element ref through `scrollContainer`.
 
-- Website: https://masonix.vercel.app
-- Getting started: https://masonix.vercel.app/docs/guide/getting-started
-- API reference: https://masonix.vercel.app/docs/reference/common-props
-- Playground: https://masonix.vercel.app/playground
+[Virtual feed guide](https://masonix.vercel.app/docs/guide/virtual-feeds) ·
+[Programmatic scrolling](https://masonix.vercel.app/docs/examples/programmatic-scroll)
 
-## TypeScript
+## Keep changing feeds predictable
 
-Components are generic over your item type, and common prop/handle types are
-exported from the package entry points.
+Use stable, unique `itemKey` values and update items immutably.
 
-```ts
-import type {
-  MasonryRenderProps,
-  MasonryBalancedProps,
-  UseItemHeightsResult,
-  UsePositionerOptions,
-} from 'masonix';
+| Goal                                                            | Option                                                     | What to know                                                                                                  |
+| --------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Keep the reader's place when items are prepended or resized     | `preserveScrollPosition` on balanced or virtual layouts    | Requires stable item keys. Disabled by default.                                                               |
+| Keep cards in their columns as heights change                   | `layoutUpdates="stable"` on balanced or virtual layouts    | May leave columns less evenly balanced. Width changes still rebuild the layout.                               |
+| Retain card state across responsive column changes in `Masonry` | `preserveItemState`                                        | Uses a measured flat layout and ignores `columnClassName` and `enableNative`. Choose this mode when mounting. |
+| Keep selected virtual cards mounted                             | `pinnedIndices` or `rangeExtractor`                        | Keeping many cards mounted reduces virtualization's benefit.                                                  |
+| Restore a virtual feed                                          | `scrollRef.current?.getSnapshot?.()` and `initialSnapshot` | Measurement reuse depends on matching column width; see the virtual API reference.                            |
 
-import type {
-  MasonryVirtualHandle,
-  MasonryVirtualRange,
-  ScrollerState,
-  UseScrollToIndexOptions,
-} from 'masonix/virtual';
-```
+Virtual cards normally unmount when they leave the rendered range. Keep durable
+form or selection state outside the card component. A focused card stays mounted
+while focus remains within it.
 
-## Stateful and changing feeds
+## Server rendering and Next.js
 
-Declare render components at module scope and pass `render={Card}`. Inline render
-functions create new component types and reset local card state on parent renders.
+Use Masonix inside a Client Component in Next.js; place `'use client'` at the top
+of the file that defines your gallery and render component.
 
-- `rowGap` / `columnGap` override the corresponding axis of `gap`.
-- Balanced and virtual layouts accept per-item `estimatedItemHeight` callbacks,
-  `layoutUpdates="stable"`, and `preserveScrollPosition` with stable item keys.
-- `Masonry` supports `preserveItemState` for a flat measured layout that retains
-  card state across column changes. This mode ignores column-wrapper styling.
-- Virtual feeds support `initialItemCount` for SSR, `pinnedIndices`,
-  `rangeExtractor`, and `initialSnapshot` from `scrollRef.current?.getSnapshot?.()`.
+- `defaultColumns` and `defaultWidth` describe the initial layout before the browser
+  can measure the container. The layout can change after hydration.
+- `MasonryVirtual` renders no cards on the server by default. Set `initialItemCount`
+  to include a first slice; provide known heights for visible server-rendered cards.
+- Known image dimensions help reserve space and reduce layout movement.
 
-See the API reference for defaults, restoration, and measurement tradeoffs.
+[SSR and Next.js guide](https://masonix.vercel.app/docs/guide/ssr-and-nextjs)
+
+## Explore further
+
+- [Common props](https://masonix.vercel.app/docs/reference/common-props): items,
+  rendering, responsive sizing, spacing, and styling
+- [Virtual props](https://masonix.vercel.app/docs/reference/virtual-props): scrolling,
+  range callbacks, placeholders, and snapshots
+- [Performance](https://masonix.vercel.app/docs/guide/performance): estimates,
+  measurement, incremental updates, and virtualization tradeoffs
+- [Accessibility](https://masonix.vercel.app/docs/guide/accessibility): semantics,
+  reading order, focus, and item-count announcements
+- [Playground](https://masonix.vercel.app/playground): try layouts with different
+  column counts, spacing, and data
+- [Changelog](https://github.com/niteshseram/masonix/blob/main/packages/masonix/CHANGELOG.md):
+  release notes and version history
+
+## License
+
+[MIT](https://github.com/niteshseram/masonix/blob/main/LICENSE)
