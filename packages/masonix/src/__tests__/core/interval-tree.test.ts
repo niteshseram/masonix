@@ -1,8 +1,22 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import { createIntervalTree } from '../../core/interval-tree';
 
 describe('createIntervalTree', () => {
+  it('prunes intervals beyond the viewport without dropping boundary matches', () => {
+    const tree = createIntervalTree();
+    for (let index = 0; index < 10000; index++) {
+      tree.insert(index, index * 50, index * 50 + 100);
+    }
+    const matches: number[] = [];
+    const popSpy = vi.spyOn(Array.prototype, 'pop');
+    tree.search(0, 100, (index) => matches.push(index));
+    const visitedNodes = popSpy.mock.calls.length;
+    popSpy.mockRestore();
+    expect(matches.sort((first, second) => first - second)).toEqual([0, 1, 2]);
+    expect(visitedNodes).toBeLessThan(50);
+  });
+
   describe('empty tree', () => {
     it('starts with size 0', () => {
       const tree = createIntervalTree();

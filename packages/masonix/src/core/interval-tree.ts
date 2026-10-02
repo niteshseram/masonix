@@ -68,14 +68,20 @@ export function createIntervalTree(): IntervalTree {
 
   function updateMax(node: Node): void {
     node.max = node.high;
-    if (node.left) node.max = Math.max(node.max, node.left.max);
-    if (node.right) node.max = Math.max(node.max, node.right.max);
+    if (node.left) {
+      node.max = Math.max(node.max, node.left.max);
+    }
+    if (node.right) {
+      node.max = Math.max(node.max, node.right.max);
+    }
   }
 
   function rotateLeft(pivot: Node): void {
     const rightChild = pivot.right!;
     pivot.right = rightChild.left;
-    if (rightChild.left) rightChild.left.parent = pivot;
+    if (rightChild.left) {
+      rightChild.left.parent = pivot;
+    }
     rightChild.parent = pivot.parent;
     if (!pivot.parent) {
       root = rightChild;
@@ -93,7 +99,9 @@ export function createIntervalTree(): IntervalTree {
   function rotateRight(pivot: Node): void {
     const leftChild = pivot.left!;
     pivot.left = leftChild.right;
-    if (leftChild.right) leftChild.right.parent = pivot;
+    if (leftChild.right) {
+      leftChild.right.parent = pivot;
+    }
     leftChild.parent = pivot.parent;
     if (!pivot.parent) {
       root = leftChild;
@@ -187,7 +195,9 @@ export function createIntervalTree(): IntervalTree {
 
   function minimum(node: Node): Node {
     let current = node;
-    while (current.left) current = current.left;
+    while (current.left) {
+      current = current.left;
+    }
     return current;
   }
 
@@ -199,7 +209,9 @@ export function createIntervalTree(): IntervalTree {
     } else {
       target.parent.right = replacement;
     }
-    if (replacement) replacement.parent = target.parent;
+    if (replacement) {
+      replacement.parent = target.parent;
+    }
   }
 
   function propagateMax(node: Node | null): void {
@@ -224,19 +236,31 @@ export function createIntervalTree(): IntervalTree {
           (!sibling?.left || sibling.left.color === BLACK) &&
           (!sibling?.right || sibling.right.color === BLACK)
         ) {
-          if (sibling) sibling.color = RED;
+          if (sibling) {
+            sibling.color = RED;
+          }
           fixNode = fixNodeParent;
           fixNodeParent = fixNode?.parent ?? null;
         } else {
           if (!sibling?.right || sibling.right.color === BLACK) {
-            if (sibling?.left) sibling.left.color = BLACK;
-            if (sibling) sibling.color = RED;
-            if (sibling) rotateRight(sibling);
+            if (sibling?.left) {
+              sibling.left.color = BLACK;
+            }
+            if (sibling) {
+              sibling.color = RED;
+            }
+            if (sibling) {
+              rotateRight(sibling);
+            }
             sibling = fixNodeParent!.right;
           }
-          if (sibling) sibling.color = fixNodeParent!.color;
+          if (sibling) {
+            sibling.color = fixNodeParent!.color;
+          }
           fixNodeParent!.color = BLACK;
-          if (sibling?.right) sibling.right.color = BLACK;
+          if (sibling?.right) {
+            sibling.right.color = BLACK;
+          }
           rotateLeft(fixNodeParent!);
           fixNode = root;
           fixNodeParent = null;
@@ -253,31 +277,47 @@ export function createIntervalTree(): IntervalTree {
           (!sibling?.right || sibling.right.color === BLACK) &&
           (!sibling?.left || sibling.left.color === BLACK)
         ) {
-          if (sibling) sibling.color = RED;
+          if (sibling) {
+            sibling.color = RED;
+          }
           fixNode = fixNodeParent;
           fixNodeParent = fixNode?.parent ?? null;
         } else {
           if (!sibling?.left || sibling.left.color === BLACK) {
-            if (sibling?.right) sibling.right.color = BLACK;
-            if (sibling) sibling.color = RED;
-            if (sibling) rotateLeft(sibling);
+            if (sibling?.right) {
+              sibling.right.color = BLACK;
+            }
+            if (sibling) {
+              sibling.color = RED;
+            }
+            if (sibling) {
+              rotateLeft(sibling);
+            }
             sibling = fixNodeParent!.left ?? null;
           }
-          if (sibling) sibling.color = fixNodeParent!.color;
+          if (sibling) {
+            sibling.color = fixNodeParent!.color;
+          }
           fixNodeParent!.color = BLACK;
-          if (sibling?.left) sibling.left.color = BLACK;
+          if (sibling?.left) {
+            sibling.left.color = BLACK;
+          }
           rotateRight(fixNodeParent!);
           fixNode = root;
           fixNodeParent = null;
         }
       }
     }
-    if (fixNode) fixNode.color = BLACK;
+    if (fixNode) {
+      fixNode.color = BLACK;
+    }
   }
 
   function remove(index: number): void {
     const nodeToRemove = nodeMap.get(index);
-    if (!nodeToRemove) return;
+    if (!nodeToRemove) {
+      return;
+    }
     nodeMap.delete(index);
     count--;
 
@@ -331,17 +371,23 @@ export function createIntervalTree(): IntervalTree {
     queryHigh: number,
     callback: (index: number, low: number, high: number) => void,
   ): void {
-    if (!root) return;
+    if (!root) {
+      return;
+    }
 
     searchStack.length = 0;
     searchStack.push(root);
 
     while (searchStack.length > 0) {
       const node = searchStack.pop();
-      if (!node) continue;
+      if (!node) {
+        continue;
+      }
 
       // Prune: if subtree max < queryLow, no intervals in here overlap
-      if (node.max < queryLow) continue;
+      if (node.max < queryLow) {
+        continue;
+      }
 
       // Check this node
       if (node.low <= queryHigh && node.high >= queryLow) {
@@ -349,9 +395,12 @@ export function createIntervalTree(): IntervalTree {
       }
 
       // Push children (right first so left is processed first)
-      if (node.right && node.right.max >= queryLow)
+      if (node.low <= queryHigh && node.right && node.right.max >= queryLow) {
         searchStack.push(node.right);
-      if (node.left && node.left.max >= queryLow) searchStack.push(node.left);
+      }
+      if (node.left && node.left.max >= queryLow) {
+        searchStack.push(node.left);
+      }
     }
   }
 
