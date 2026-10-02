@@ -1,5 +1,20 @@
 # masonix
 
+## 1.2.0
+
+### Minor Changes
+
+- 40145f4: Reuse unchanged layout prefixes and query ordered columns without rebuilding a virtual interval tree. Add opt-in stable column assignments for efficient measured-height updates, per-item height estimates, and independent responsive row and column gaps.
+
+  Add keyed scroll anchoring, measurement/anchor snapshots for route restoration, an initial virtual SSR item count, pinned indices, and custom range extraction. Keep focused virtual cards mounted and render their real content during scroll seek.
+
+  Add a state-preserving measured mode for Masonry while retaining existing column-wrapper markup by default. Update documentation examples to use stable render components and explain the new controls and tradeoffs.
+
+### Patch Changes
+
+- 3616951: Invalidate measured heights when column widths change. Keep scroll-to-index corrections active while visible measurements settle, render real content during programmatic jumps with scroll seek enabled, and cancel corrections on user input or explicit offset scrolling.
+- bfebd29: Prune interval-tree branches beyond the viewport so queries near the start of large feeds no longer scan every item.
+
 ## 1.1.0
 
 ### Minor Changes
@@ -80,6 +95,7 @@
 - 9d26529: Add edge case test coverage and improve dev tooling.
 
   **Edge case tests** (6 new assertions across 4 test files):
+
   - `positioner.update()` with unchanged heights returns `[]` — verifies no spurious re-layouts when measurements stabilise
   - `computeColumns(0, …)` never returns a negative `columnWidth` — the gap arithmetic produces a negative intermediate value that must be clamped to zero
   - `columns: 0` clamps to 1 column — defensive guard against invalid prop values
@@ -88,6 +104,7 @@
   - `useContainerWidth` handles an empty `ResizeObserver` entries array without throwing
 
   **Docs updates**:
+
   - Update README file
 
 ## 0.3.0
@@ -162,6 +179,7 @@
   Previously, every call to `resolveResponsiveValue` with an object value re-parsed and re-sorted breakpoints — including on every container resize, which is the hot path.
 
   `resolveResponsiveValue` is now split into two primitives:
+
   - `parseBreakpoints(value)` — parses and sorts breakpoints once, O(n log n)
   - `applyBreakpoints(breakpoints, containerWidth)` — linear scan against a pre-sorted array, O(n)
 
@@ -190,7 +208,7 @@
   // After — stable callback inside BalancedItem
   const refCallback = useCallback(
     (node: HTMLElement | null) => setItemRef?.(node, index),
-    [setItemRef, index],
+    [setItemRef, index]
   );
   ```
 
