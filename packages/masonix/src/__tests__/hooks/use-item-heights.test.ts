@@ -200,6 +200,24 @@ describe('useItemHeights', () => {
     expect(result.current.measuredHeights.get(1)).toBe(200);
   });
 
+  it('invalidates width-dependent heights and reobserves mounted items', () => {
+    const { result, rerender } = renderHook(
+      ({ width }) => useItemHeights(undefined, undefined, width),
+      { initialProps: { width: 240 } },
+    );
+    const node = document.createElement('div');
+    act(() => {
+      result.current.setItemRef(node, 0);
+      notifyResize!([makeEntry(node, 200)]);
+    });
+    expect(result.current.measuredHeights.get(0)).toBe(200);
+    rerender({ width: 120 });
+    expect(result.current.measuredHeights.size).toBe(0);
+    expect(mockUnobserve).toHaveBeenCalledWith(node);
+    act(() => notifyResize!([makeEntry(node, 100)]));
+    expect(result.current.measuredHeights.get(0)).toBe(100);
+  });
+
   it('disconnects observer on unmount', () => {
     const { unmount, result } = renderHook(() => useItemHeights());
     const node = document.createElement('div');

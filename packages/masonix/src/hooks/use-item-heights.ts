@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { normalizeNonNegativeFinite } from '../core/utils';
 
@@ -36,10 +36,29 @@ export interface UseItemHeightsResult {
 export function useItemHeights(
   minItemHeight?: number,
   activeMeasurementIndexes?: number[],
+  measurementWidth?: number,
 ): UseItemHeightsResult {
   const [measuredHeights, setMeasuredHeights] = useState<Map<number, number>>(
     () => new Map(),
   );
+
+  const widthRef = useRef(measurementWidth);
+  const emptyHeights = useMemo(
+    () => new Map<number, number>(),
+    [measurementWidth],
+  );
+  const widthChanged = widthRef.current !== measurementWidth;
+  useEffect(() => {
+    if (widthRef.current === measurementWidth) {
+      return;
+    }
+    widthRef.current = measurementWidth;
+    setMeasuredHeights(new Map());
+    for (const element of indexToElement.current.values()) {
+      observerRef.current?.unobserve(element);
+      observerRef.current?.observe(element);
+    }
+  }, [measurementWidth]);
 
   const observerRef = useRef<ResizeObserver | null>(null);
   const elementToIndex = useRef(new WeakMap<Element, number>());
@@ -132,5 +151,8 @@ export function useItemHeights(
     observerRef.current.observe(node);
   }, []);
 
-  return { measuredHeights, setItemRef };
+  return {
+    measuredHeights: widthChanged ? emptyHeights : measuredHeights,
+    setItemRef,
+  };
 }

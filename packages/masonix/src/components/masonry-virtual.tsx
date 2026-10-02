@@ -269,6 +269,7 @@ function MasonryVirtualInner<T = unknown>(
   const { measuredHeights, setItemRef } = useItemHeights(
     minItemHeight,
     measurementIndexes,
+    columnWidth,
   );
   const normalizedEstimatedItemHeight = normalizePositiveFinite(
     estimatedItemHeight,
@@ -547,20 +548,54 @@ function MasonryVirtualInner<T = unknown>(
       return;
     }
 
-    if (item.top === pending.prevTop && item.height === pending.prevHeight) {
-      if (isItemAtScrollTarget(item, pending.options)) {
-        pendingReScrollRef.current = null;
-      }
-      return;
+    if (item.top !== pending.prevTop || item.height !== pending.prevHeight) {
+      pending.prevTop = item.top;
+      pending.prevHeight = item.height;
+      handleRef.current.scrollToIndex(pending.index, {
+        ...pending.options,
+        smooth: false,
+      });
     }
 
-    pending.prevTop = item.top;
-    pending.prevHeight = item.height;
-    handleRef.current.scrollToIndex(pending.index, {
-      ...pending.options,
-      smooth: false,
-    });
-  }, [isItemAtScrollTarget, positionedItems, positioner]);
+    if (
+      scrollVelocity === 0 &&
+      visibleItems.some((visibleItem) => visibleItem.index === pending.index) &&
+      visibleItems.every((visibleItem) => visibleItem.measured) &&
+      isItemAtScrollTarget(item, pending.options)
+    ) {
+      const timeout = setTimeout(() => {
+        if (pendingReScrollRef.current === pending) {
+          pendingReScrollRef.current = null;
+        }
+      }, 250);
+      return () => clearTimeout(timeout);
+    }
+  }, [
+    isItemAtScrollTarget,
+    positionedItems,
+    positioner,
+    visibleItems,
+    scrollVelocity,
+  ]);
+
+  useEffect(() => {
+    const container = getScrollContainer();
+    if (!container) {
+      return;
+    }
+    function cancelPendingScroll() {
+      pendingReScrollRef.current = null;
+    }
+    const events = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
+    for (const event of events) {
+      container.addEventListener(event, cancelPendingScroll, { passive: true });
+    }
+    return () => {
+      for (const event of events) {
+        container.removeEventListener(event, cancelPendingScroll);
+      }
+    };
+  }, [getScrollContainer]);
 
   const scrollToIndex = useCallback(
     (
@@ -582,8 +617,15 @@ function MasonryVirtualInner<T = unknown>(
   useImperativeHandle(
     scrollRef,
     () => ({
-      ...handle,
       scrollToIndex,
+      scrollToOffset(offset, options) {
+        pendingReScrollRef.current = null;
+        handle.scrollToOffset(offset, options);
+      },
+      scrollBy(delta, options) {
+        pendingReScrollRef.current = null;
+        handle.scrollBy(delta, options);
+      },
     }),
     [handle, scrollToIndex],
   );
@@ -636,6 +678,7 @@ function MasonryVirtualInner<T = unknown>(
   const ariaSetSize = totalItemCount;
   const isScrollSeekActive =
     scrollSeek !== undefined &&
+    pendingReScrollRef.current === null &&
     Math.abs(scrollVelocity) >= normalizedScrollSeekVelocity;
 
   const containerStyle: CSSProperties = {

@@ -182,6 +182,7 @@ function MasonryBalancedInner<T = unknown>(
   const { measuredHeights, setItemRef } = useItemHeights(
     minItemHeight,
     measurementIndexes,
+    columnWidth,
   );
 
   // Build positioned items from a fresh positioner every time layout inputs change.

@@ -12,9 +12,10 @@ import type { MasonryRenderProps, MasonryVirtualHandle } from '../../types';
 type RoCallback = (entries: ResizeObserverEntry[]) => void;
 
 let roCallbacks: RoCallback[] = [];
-let mockObserve: ReturnType<typeof vi.fn>;
-let mockUnobserve: ReturnType<typeof vi.fn>;
-let mockDisconnect: ReturnType<typeof vi.fn>;
+let observedTargets = new Map<RoCallback, Set<Element>>();
+let mockObserve: ReturnType<typeof vi.fn<(target: Element) => void>>;
+let mockUnobserve: ReturnType<typeof vi.fn<(target: Element) => void>>;
+let mockDisconnect: ReturnType<typeof vi.fn<() => void>>;
 
 function makeEntry(target: Element, height: number): ResizeObserverEntry {
   return {
@@ -27,7 +28,11 @@ function makeEntry(target: Element, height: number): ResizeObserverEntry {
 }
 
 function fireResize(target: Element, height: number) {
-  roCallbacks.forEach((cb) => cb([makeEntry(target, height)]));
+  roCallbacks.forEach((callback) => {
+    if (observedTargets.get(callback)?.has(target)) {
+      callback([makeEntry(target, height)]);
+    }
+  });
 }
 
 const originalScrollTo = window.scrollTo;
@@ -42,6 +47,7 @@ const originalInnerHeightDescriptor = Object.getOwnPropertyDescriptor(
 
 beforeEach(() => {
   roCallbacks = [];
+  observedTargets = new Map();
   mockObserve = vi.fn();
   mockUnobserve = vi.fn();
   mockDisconnect = vi.fn();
@@ -50,10 +56,21 @@ beforeEach(() => {
     cb: RoCallback,
   ) {
     roCallbacks.push(cb);
+    const targets = new Set<Element>();
+    observedTargets.set(cb, targets);
     return {
-      observe: mockObserve,
-      unobserve: mockUnobserve,
-      disconnect: mockDisconnect,
+      observe(target: Element) {
+        targets.add(target);
+        mockObserve(target);
+      },
+      unobserve(target: Element) {
+        targets.delete(target);
+        mockUnobserve(target);
+      },
+      disconnect() {
+        targets.clear();
+        mockDisconnect();
+      },
     };
   });
 
